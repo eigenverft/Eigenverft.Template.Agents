@@ -199,3 +199,4 @@ The module source code should be organized as:
   - the required very short `AGENTS.md` checklist summary,
   - and that single proposed user prompt.
 - Do not include the actual deviation analysis, migration plan, implementation details, or other non-required commentary.
+
