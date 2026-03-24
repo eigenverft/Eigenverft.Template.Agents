@@ -135,3 +135,6 @@ $whitelist = @( 'AGENTS.md', '.agents/**')
 
 Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.Template.Agents" -Whitelist $whitelist
 Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.Manifested.Sandbox" -Whitelist $whitelist
+Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.Manifested.Agent" -Whitelist $whitelist
+Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.Manifested.Drydock" -Whitelist $whitelist
+Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.Routed.RequestFilters" -Whitelist $whitelist
