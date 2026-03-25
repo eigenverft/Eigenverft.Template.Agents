@@ -1,0 +1,4 @@
+interface:
+  display_name: "Duplication Reduction Refactor"
+  short_description: "Source-first guidance for reducing duplication."
+  default_prompt: "Use $duplication-reduction-refactor-softskill to review the source and provide concrete refactoring directions that reduce duplication, consolidate repeated logic, introduce the right shared helpers or core functions, and simplify the codebase without over-abstracting."
