@@ -150,7 +150,7 @@ For a workspace named `MyApp`:
   - and that single proposed user prompt.
 - Do not include the actual deviation analysis, migration plan, implementation details, or other non-required commentary.
 
-## PowerShell specific
+## PowerShell specific source directoy structure
 - Apply this section only if the repository or workspace is a dedicated PowerShell project. Otherwise, skip this section.
 - PowerShell does not require a dedicated workspace or solution file.
 - Therefore, for dedicated PowerShell projects, no workspace file is required in `/src`.
@@ -200,3 +200,39 @@ The module source code should be organized as:
   - and that single proposed user prompt.
 - Do not include the actual deviation analysis, migration plan, implementation details, or other non-required commentary.
 
+## Powershell source files, pick a random source file review and documentation requirement
+- Select one random file from the source folder that contains source code.
+- Verify that the file is documented appropriately for its language and role.
+- You are allowed to fix one functions comment-based help.
+- If the file defines functions, commands, classes, or other callable units, ensure they include suitable inline or structured documentation.
+- For PowerShell functions, use comment-based help in this general form:
+```
+function <FunctionName> {
+<#
+.SYNOPSIS
+Brief summary of the function.
+
+.DESCRIPTION
+Longer description of the purpose and behavior.
+
+.PARAMETER <ParameterName>
+Description of the parameter.
+
+.PARAMETER <ParameterName>
+Description of the parameter.
+
+.EXAMPLE
+Example usage.
+
+.EXAMPLE
+Another example usage.
+
+.NOTES
+Optional additional notes.
+#>
+    [CmdletBinding(PositionalBinding = $false)]
+    param(
+        ...
+    )
+}
+```
