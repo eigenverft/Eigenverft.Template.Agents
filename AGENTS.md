@@ -97,12 +97,14 @@ Example:
 - If either check fails, skip the rest of this section.
 - Do not modify remotes or authentication automatically.
 - Read open issues to get current project context and known problem areas.
+- Update with gh the issue labels if not present add priority:critical, priority:high, priority:medium, priority:low, feature, improvement, refactor, performance, design
 - Treat issues as hints, not as verified facts.
 - Do not investigate or fix issues unless the current task explicitly requires it.
 - Use issue context only to inform decisions and avoid redundant or conflicting actions.
 - Check the repository description and topic tags.
 - If they are missing, incomplete, outdated, or clearly inaccurate, update them.
 - If the existing description and topic tags are already present and sufficiently accurate, leave them unchanged.
+
 
 ## GitHub repositories
 - Read `.git/config` in read-only mode to determine whether the repository is hosted on GitHub.
