@@ -74,6 +74,7 @@ Example:
   - `*[Kk][Ee][Yy]*`
   - `AGENTS.md`
   - `.agents/**/*`
+  - `.gemini/**/*`
 - If these files is both tracked and ignored, remove it from Git tracking (`git rm --cached`) while keeping the file in the working tree.
 - Do not untrack files that are not ignored.
 - If any of these patterns are missing, add them.
