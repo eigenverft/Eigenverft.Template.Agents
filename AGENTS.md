@@ -203,7 +203,8 @@ The module source code should be organized as:
 ## Powershell source files, pick a random source file review and documentation requirement
 - Select one random file from the source folder that contains source code.
 - Verify that the file is documented appropriately for its language and role.
-- You are allowed to fix one functions comment-based help.
+- You are allowed to fix up to three functions comment-based help if there completly missing.
+- You are allowed to update one functions comment-based help if it seems outdated or false.
 - If the file defines functions, commands, classes, or other callable units, ensure they include suitable inline or structured documentation.
 - For PowerShell functions, use comment-based help in this general form:
 ```
