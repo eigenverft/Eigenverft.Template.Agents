@@ -6,7 +6,7 @@
 - On the first read for a task or session, review all applicable sections below before proceeding.
 
 ## Checked steps summary
-- After the confirmation, provide a very short status summary of all applicable `AGENTS.md` checks and actions for the current task.
+- After the confirmation, provide a status summary of all applicable `AGENTS.md` checks and actions for the current task. (only description should be short, the list should be exesive and should cover sections and subtasks in this section)
 - Do not omit any applicable section that was reviewed, executed, skipped, blocked, or deferred.
 - Use short checklist items only.
 - Use these status markers:
@@ -169,9 +169,6 @@ The following files must exist in:
 - `<main-module-name>.psm1`
 - `<main-module-name>.psd1`
 - `<main-module-name>.ps1`
-
-Optional:
-- `<main-module-name>.ps1` only if the project intentionally uses a bootstrap or entry script
 
 ### Source layout
 The module source code should be organized as:
