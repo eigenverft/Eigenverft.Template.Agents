@@ -113,6 +113,19 @@ Prefer a structure where:
 - adding a new case usually extends an existing shared path instead of copying a nearby file
 - the total code surface shrinks without hiding behavior behind vague abstractions
 
+## Consolidation Preference Order
+
+When multiple reduction options are possible, generally prefer this order:
+
+1. delete a useless wrapper or redundant layer
+2. merge overlapping existing helpers
+3. extend one existing helper in a narrow, coherent way
+4. extract a new shared helper or core path
+5. keep the code local for now if sharing would make ownership less clear
+
+This is a preference order, not a rigid rule.
+Use judgment based on clarity, ownership, and change safety.
+
 ## Extraction Decision Rule
 
 This is mandatory.
@@ -123,18 +136,10 @@ Only recommend extracting a shared helper or core function when:
 - the duplicated code has the same purpose and the same reason to change
 - the shared abstraction would be easier to understand than the duplicates
 - the resulting interface can stay narrow and explicit
-- no existing helper already covers the behavior well enough with a small safe merge or extension
 
-Before recommending a new helper, explicitly check whether existing helpers should be merged.
+Also take into account whether an existing helper could be extended or safely merged when helpers overlap heavily in purpose and behavior.
 
-Recommend merging existing helpers when:
-
-- they serve the same real purpose
-- they change for the same reasons
-- their differences are minor and can be unified safely
-- one clear merged interface would be simpler than keeping parallel helpers
-
-Prefer merging or extending an existing helper over creating a new sibling helper when that keeps ownership and behavior clear.
+Keep code local when duplication is small, still evolving, or specific to one feature boundary and sharing would blur ownership more than it would help.
 
 Do not recommend extraction when:
 
@@ -152,8 +157,6 @@ It should answer:
 
 - where the codebase is repeating itself
 - which duplicates should become shared helpers or core functions
-- which existing helpers should be merged instead of adding another helper
-- why any proposed new helper is better than merging or extending an existing one
 - which similar-looking code should stay local
 - what should be merged, extracted, collapsed, or deleted first
 
@@ -170,13 +173,6 @@ For each cluster, say whether it is:
 - repeated orchestration
 - redundant abstraction
 
-Also say whether the best next move is:
-
-- merge existing helpers
-- extend one existing helper
-- extract a new shared helper
-- keep the code local
-
 ### 2. Reduction directions
 
 Provide 2 or 3 realistic refactoring directions.
@@ -185,8 +181,6 @@ Each direction should say:
 
 - what duplication it reduces
 - what shared unit would be introduced, merged, or deleted
-- whether it reuses, merges, or replaces existing helpers
-- if it adds a new helper, why existing helpers should not be merged instead
 - why it fits the current source
 - what tradeoff it has
 
@@ -222,6 +216,7 @@ Each task should say:
 - why it should happen now
 - what duplicate surface area it removes
 - what clarity or maintainability benefit it creates
+- what old duplicate path or wrapper should be removed afterward when relevant
 
 ### 6. Watchouts
 
@@ -232,6 +227,8 @@ Mention only relevant risks, such as:
 - merging code that looks similar but changes for different reasons
 - keeping a useless abstraction after introducing a shared core path
 - introducing flags instead of making the shared unit truly coherent
+- moving feature-owned code into shared space without a clear long-term owner
+- extracting a shared path but leaving the old duplicate code in place beside it
 - reducing line count while making behavior harder to follow
 
 ## Minimum Concreteness Rule
@@ -280,26 +277,29 @@ Prefer refactors that improve:
 - create helpers only when they have a narrow responsibility
 - prefer responsibility-based names over vague names like `utils`, `common`, or `manager`
 - keep inputs and outputs explicit so the helper remains understandable
-- check for overlapping existing helpers before introducing a new one
-- merge similar helpers when they have the same purpose and can be unified safely without turning into a catch-all
+- take overlapping existing helpers into account before introducing a new one
+- where it stays coherent and safe, merging similar helpers can be better than adding another sibling helper
 
 ### Shared core quality
 
 - introduce a small shared core when multiple consumers need the same behavior
 - centralize the stable part of the behavior and keep unstable feature-specific rules outside
 - prefer one obvious source of truth over synchronized duplicate implementations
+- keep the shared unit owned by a clear responsibility, not by a vague cross-cutting bucket
 
 ### Layer reduction
 
 - delete pass-through wrappers that add indirection without behavior
 - merge tiny layers when they split one responsibility across several files for no benefit
 - inline abstractions that make navigation harder but do not reduce duplication
+- after consolidating, remove obsolete wrappers, aliases, and dead call paths instead of keeping both versions around
 
 ### Safe reduction
 
 - prefer deleting or merging before inventing a new framework
 - prefer the smallest shared unit that removes meaningful duplication
 - keep feature ownership visible after deduplication
+- prefer proven reuse over speculative reuse
 
 ## Strong Rules
 
@@ -315,10 +315,6 @@ If duplication can be removed by merging or deleting something, prefer that befo
 
 Do not create shared helpers for hypothetical future reuse.
 
-### Check for helper merges before helper creation
-
-If two or more helpers already serve the same purpose, prefer a safe merge or clear replacement before introducing another helper beside them.
-
 ### Prefer maintainability over cleverness
 
 One clear shared function is better than a configurable abstraction maze.
@@ -326,6 +322,10 @@ One clear shared function is better than a configurable abstraction maze.
 ### Keep ownership clear
 
 Do not reduce duplication by hiding feature behavior inside a generic dumping ground.
+
+### Finish the reduction
+
+When recommending a consolidation, also identify what should be deleted, replaced, or rerouted so the old duplicate implementation does not linger.
 
 ## Good Task Examples
 
