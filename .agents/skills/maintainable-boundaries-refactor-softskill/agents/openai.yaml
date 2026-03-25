@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maintainable Boundaries Refactor"
+  short_description: "Source-first refactoring guidance for clearer structure, ownership, naming, and maintainable extension boundaries."
+  default_prompt: "Use $maintainable-boundaries-refactor-softskill to review the source and provide concrete refactoring directions that improve developer-friendliness, clear separation, naming, ordering, ownership, and maintainable extension points."

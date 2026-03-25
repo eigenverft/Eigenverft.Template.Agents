@@ -1,0 +1,4 @@
+interface:
+  display_name: "High-Level Software Architecture"
+  short_description: "Stub for high-level architecture guidance work"
+  default_prompt: "Use $software-high-level-architecture-softskill to provide high-level software architecture guidance, review, and planning."
