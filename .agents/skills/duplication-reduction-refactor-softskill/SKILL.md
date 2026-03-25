@@ -1,6 +1,6 @@
 ---
 name: duplication-reduction-refactor-softskill
-description: Source-first refactoring guidance for reducing duplication through careful consolidation, shared helpers, and reusable core flows.
+description: Source-first refactoring guidance for reducing duplication through careful consolidation, shared helpers, reusable core flows, and removal of redundant layers.
 ---
 
 # duplication-reduction-refactor-softskill
@@ -75,8 +75,10 @@ Useful sources include:
 - repo structure
 - imports and dependencies
 - build files
+- package manifests
 - project references
 - entrypoints
+- scripts and workflow definitions
 - repeated call paths
 - tests
 - docs that describe system behavior
@@ -93,12 +95,12 @@ Examples:
 - multiple helpers with nearly identical behavior and different names
 - existing helpers that overlap heavily in inputs, outputs, and responsibility
 - repeated path, config, manifest, or environment resolution
-- controllers, commands, or services repeating the same orchestration steps
+- controllers, commands, services, scripts, or jobs repeating the same orchestration steps
 - duplicated error handling, retry, logging, or result wrapping
 - repeated mapping logic between the same conceptual shapes
 - multiple modules branching on the same cases in the same way
 - pass-through abstractions that add files and indirection without reducing duplication
-- copy-paste setup blocks for tools, loaders, clients, or pipelines
+- copy-paste setup blocks for tools, loaders, clients, pipelines, or package scripts
 - large utility folders that exist because the same code keeps being copied around
 
 ## What Good Looks Like
@@ -268,7 +270,7 @@ Prefer refactors that improve:
 
 ### Repeated orchestration reduction
 
-- collapse command, controller, or service flows that repeat the same sequence with small variations
+- collapse command, controller, service, or script flows that repeat the same sequence with small variations
 - extract stable shared flow steps and keep the varying behavior explicit
 - prefer one small shared execution path over many near-duplicate handlers
 
@@ -336,14 +338,14 @@ When recommending a consolidation, also identify what should be deleted, replace
 - `Collapse duplicated command setup code into one shared execution helper and inject the operation-specific action as a parameter.`
 - `Centralize repeated path resolution into one small shared core function and remove the copied path-building blocks.`
 - `Merge the duplicated mapping tables into one source of truth and update call sites to use it directly.`
-- Merge helper functions like `ResolveWorkspaceRoot`, `FindWorkspaceRoot`, and `GetWorkspaceRoot` into one helper if they resolve the same concept with only minor call-shape differences.
+- `Merge helper functions like ResolveWorkspaceRoot, FindWorkspaceRoot, and GetWorkspaceRoot into one helper if they resolve the same concept with only minor call-shape differences.`
 
 ## Bad Advice Examples
 
 Do not produce advice like:
 
 - `Create more abstractions.`
-- `Use shared helpers.` 
+- `Use shared helpers.`
 - `Clean up the duplicate code.`
 - `Make the architecture more reusable.`
 - `Introduce a generic framework for this area.`
