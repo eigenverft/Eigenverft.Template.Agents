@@ -1,15 +1,15 @@
 ---
 name: duplication-reduction-refactor-softskill
-description: Source-first refactoring guidance for reducing duplication through careful consolidation, shared helpers, reusable core flows, and removal of redundant layers.
+description: Source-first refactoring guidance for reducing duplication through careful consolidation, shared helpers, reusable core flows, data-structure harmonization when sensible, and removal of redundant wrappers, layers, and unnecessary call chains.
 ---
 
 # duplication-reduction-refactor-softskill
 
 ## Purpose
 
-Use this softskill to review a real codebase and recommend concrete refactoring steps that reduce duplication, collapse repeated patterns, and introduce the right shared helpers or core modules.
+Use this softskill to review a real codebase and recommend concrete refactoring steps that reduce duplication through careful consolidation, shared helpers, reusable core flows, light data-structure harmonization where it is actually useful, and removal of redundant layers or call chains.
 
-This softskill is about making the codebase smaller, clearer, easier to maintain, and easier to extend by removing repeated code and repeated structural patterns.
+This softskill is about making the codebase smaller, clearer, easier to maintain, and easier to extend by removing repeated code, repeated structural patterns, unnecessary function-to-function chains, and needless shape fragmentation.
 
 Focus on:
 
@@ -22,6 +22,10 @@ Focus on:
 - reusable shared core functions
 - deleting redundant wrappers or layers
 - reducing total code surface without reducing clarity
+- analyzing common data structures in the app and harmonizing them when that is sensible
+- reducing unnecessary function call chains, pass-through layers, and long internal forwarding paths
+- deleting duplicated wrappers after repeated forwarding layers fail to add real meaning
+- making minimal changes that align with the rest of the codebase instead of introducing a new style
 
 The output should not be abstract architecture talk.
 It should read like practical reduction-oriented refactoring guidance a developer can act on.
@@ -40,6 +44,8 @@ That usually means improving:
 - discoverability
 - change speed
 - code volume to understand per feature
+- shape consistency for common application data where the source shows meaningful overlap
+- navigation simplicity by shortening unnecessary call paths
 
 ## Use This Softskill When
 
@@ -54,6 +60,8 @@ Use this softskill when the user wants help with:
 - shrinking boilerplate
 - making a system easier to extend without copying more code
 - finding what is written multiple times and simplifying it
+- harmonizing repeated data structures across modules when that reduces friction
+- removing needless function call chains or forwarding wrappers
 
 ## Do Not Use This Softskill When
 
@@ -64,6 +72,8 @@ Do not use this softskill for:
 - performance tuning only
 - purely cosmetic renaming
 - framework migration planning without duplication or consolidation relevance
+- forcing one universal data structure onto domains that clearly need different shapes
+- flattening call paths when the extra layer carries real ownership, policy, validation, or boundary meaning
 
 ## Source First
 
@@ -82,6 +92,8 @@ Useful sources include:
 - repeated call paths
 - tests
 - docs that describe system behavior
+- repeated DTOs, view models, payloads, adapters, mappers, and serialized shapes
+- function stacks that repeatedly hop through thin wrappers before reaching the real implementation
 
 Do not give generic advice unless it clearly maps back to repeated patterns seen in the source.
 
@@ -102,6 +114,10 @@ Examples:
 - pass-through abstractions that add files and indirection without reducing duplication
 - copy-paste setup blocks for tools, loaders, clients, pipelines, or package scripts
 - large utility folders that exist because the same code keeps being copied around
+- multiple modules representing the same conceptual entity with mostly overlapping fields but slightly different names or omissions
+- repeated shape padding logic where missing fields are added ad hoc instead of through one clear normalization path
+- long call chains where functions mostly rename, forward, rewrap, or lightly translate the same inputs without adding clear responsibility
+- repeated wrapper-on-wrapper call stacks where several thin functions only pass through arguments before the first function that actually owns behavior
 
 ## What Good Looks Like
 
@@ -114,6 +130,10 @@ Prefer a structure where:
 - the same rule or transformation is implemented once
 - adding a new case usually extends an existing shared path instead of copying a nearby file
 - the total code surface shrinks without hiding behavior behind vague abstractions
+- common data shapes are harmonized only where the source shows they are the same concept for the same reason
+- optional or absent values are represented consistently when a shared structure exists, including using `null` where the surrounding system already treats that as the normal explicit empty value
+- call paths are short enough that the real behavior is easy to find without jumping through many thin layers
+- changes remain minimal and align with the surrounding code style and architecture
 
 ## Consolidation Preference Order
 
@@ -122,8 +142,9 @@ When multiple reduction options are possible, generally prefer this order:
 1. delete a useless wrapper or redundant layer
 2. merge overlapping existing helpers
 3. extend one existing helper in a narrow, coherent way
-4. extract a new shared helper or core path
-5. keep the code local for now if sharing would make ownership less clear
+4. harmonize repeated data shapes where the conceptual model is clearly shared
+5. extract a new shared helper or core path
+6. keep the code local for now if sharing would make ownership less clear
 
 This is a preference order, not a rigid rule.
 Use judgment based on clarity, ownership, and change safety.
@@ -132,7 +153,7 @@ Use judgment based on clarity, ownership, and change safety.
 
 This is mandatory.
 
-Only recommend extracting a shared helper or core function when:
+Only recommend extracting a shared helper, shared shape normalizer, or core function when:
 
 - the same behavior appears in two or more places
 - the duplicated code has the same purpose and the same reason to change
@@ -141,15 +162,45 @@ Only recommend extracting a shared helper or core function when:
 
 Also take into account whether an existing helper could be extended or safely merged when helpers overlap heavily in purpose and behavior.
 
+Only recommend harmonizing data structures when:
+
+- two or more places represent the same conceptual entity or payload
+- the fields substantially overlap
+- the differences are incidental, historical, or adapter-level rather than domain-level
+- one shared shape or normalization step would reduce repeated mapping or conditionals
+- missing fields can be filled consistently and safely, including `null` where that is the clearest explicit empty value in the current codebase
+
 Keep code local when duplication is small, still evolving, or specific to one feature boundary and sharing would blur ownership more than it would help.
 
-Do not recommend extraction when:
+Do not recommend extraction or harmonization when:
 
 - the similarity is only superficial
 - callers need meaningfully different behavior
 - the abstraction would become a dumping ground
 - local ownership would become less clear
 - the shared version would need many flags, modes, or special cases
+- the only way to unify shapes would be to create a fake one-size-fits-all model
+
+Do not recommend shortening a call chain when:
+
+- each layer owns a real responsibility boundary
+- the intermediate function enforces policy, validation, tracing, security, or transaction behavior
+- removing the layer would make ownership or boundaries less clear
+
+## Minimal-Change Rule
+
+This is mandatory.
+
+Prefer the smallest coherent refactor that removes meaningful duplication or indirection.
+
+That means:
+
+- align with the current code style and module layout
+- reuse existing helpers before inventing new categories
+- prefer local merges and deletions over broad reorganizations
+- avoid introducing a new abstraction family when a wrapper can simply be deleted
+- avoid large type-system redesigns when a small shared normalizer or shape alias is enough
+- keep the resulting code easy for current maintainers to recognize
 
 ## Required Output Style
 
@@ -158,15 +209,17 @@ The output must be concrete and task-oriented.
 It should answer:
 
 - where the codebase is repeating itself
-- which duplicates should become shared helpers or core functions
+- which duplicates should become shared helpers, shared normalizers, or core functions
 - which similar-looking code should stay local
-- what should be merged, extracted, collapsed, or deleted first
+- what should be merged, extracted, harmonized, collapsed, shortened, or deleted first
+- where function call chains should be reduced
+- where data structures should stay different because there is no real one-size-fits-all model
 
 ## Required Output Shape
 
 ### 1. Highest-value duplication clusters
 
-List the main repeated logic or repeated structure patterns seen in the source.
+List the main repeated logic, repeated structure patterns, repeated data-shape variants, or repeated call-chain patterns seen in the source.
 
 For each cluster, say whether it is:
 
@@ -174,6 +227,9 @@ For each cluster, say whether it is:
 - near-duplicate logic
 - repeated orchestration
 - redundant abstraction
+- duplicated shape normalization
+- fragmented representation of the same conceptual data
+- unnecessary function chain
 
 ### 2. Reduction directions
 
@@ -181,8 +237,8 @@ Provide 2 or 3 realistic refactoring directions.
 
 Each direction should say:
 
-- what duplication it reduces
-- what shared unit would be introduced, merged, or deleted
+- what duplication or indirection it reduces
+- what shared unit would be introduced, merged, harmonized, shortened, or deleted
 - why it fits the current source
 - what tradeoff it has
 
@@ -199,12 +255,16 @@ Examples:
 - `Delete the wrapper service that only renames calls to the real implementation.`
 - `Move repeated normalization code into one shared module owned by the same responsibility.`
 - `Collapse the duplicated command execution flow into one small orchestration function and keep feature-specific steps injected explicitly.`
+- `Harmonize repeated entity payload shapes behind one narrow normalizer and fill absent optional fields with null where that is already the project convention.`
+- `Inline the thin forwarding function and remove the extra call hop from the request flow.`
 
 ### 4. Recommended direction
 
 Pick one direction.
 
 Choose the one with the best maintainability gain for the least abstraction risk.
+
+Prefer the direction that removes duplicate logic or useless call depth with minimal structural churn.
 
 ### 5. Ordered reduction task list
 
@@ -214,11 +274,11 @@ Provide at least 5 ordered tasks.
 
 Each task should say:
 
-- what to extract, merge, delete, or collapse
+- what to extract, merge, harmonize, delete, shorten, or collapse
 - why it should happen now
-- what duplicate surface area it removes
+- what duplicate or indirect surface area it removes
 - what clarity or maintainability benefit it creates
-- what old duplicate path or wrapper should be removed afterward when relevant
+- what old duplicate path, wrapper, or fragmented shape should be removed afterward when relevant
 
 ### 6. Watchouts
 
@@ -232,6 +292,10 @@ Mention only relevant risks, such as:
 - moving feature-owned code into shared space without a clear long-term owner
 - extracting a shared path but leaving the old duplicate code in place beside it
 - reducing line count while making behavior harder to follow
+- forcing unrelated data into one common structure
+- filling missing values with `null` where the codebase actually distinguishes absence from explicit empty state
+- shortening a call chain that was actually carrying a useful boundary
+- mechanically flattening every call chain instead of only removing the repeated wrappers that add no real behavior
 
 ## Minimum Concreteness Rule
 
@@ -251,6 +315,10 @@ This is mandatory.
   - deduplicate
   - inline
   - simplify
+  - harmonize
+  - normalize
+  - reroute
+  - shorten
 - Avoid vague advice like:
   - improve maintainability
   - clean up duplication
@@ -289,11 +357,22 @@ Prefer refactors that improve:
 - prefer one obvious source of truth over synchronized duplicate implementations
 - keep the shared unit owned by a clear responsibility, not by a vague cross-cutting bucket
 
+### Data-structure harmonization quality
+
+- harmonize only proven common structures, not everything that looks similar
+- prefer one shared source shape or one small normalization step over many ad hoc field-mapping blocks
+- keep domain-specific variants local when they genuinely differ in meaning
+- when a common shape is adopted, make optional empties explicit in one consistent way, including `null` only where the surrounding codebase already uses it coherently
+- remove duplicate mapping code after the harmonized structure is introduced instead of leaving both shape paths active
+
 ### Layer reduction
 
 - delete pass-through wrappers that add indirection without behavior
+- delete duplicated wrappers when several layers keep forwarding to the same real implementation
 - merge tiny layers when they split one responsibility across several files for no benefit
 - inline abstractions that make navigation harder but do not reduce duplication
+- shorten function chains when intermediate calls only forward, rename, or rewrap values
+- do not force-collapse layers that still carry meaningful ownership, policy, or boundary behavior
 - after consolidating, remove obsolete wrappers, aliases, and dead call paths instead of keeping both versions around
 
 ### Safe reduction
@@ -302,6 +381,7 @@ Prefer refactors that improve:
 - prefer the smallest shared unit that removes meaningful duplication
 - keep feature ownership visible after deduplication
 - prefer proven reuse over speculative reuse
+- prefer a local, minimal change that fits the existing code over a broad theoretical cleanup
 
 ## Strong Rules
 
@@ -327,7 +407,19 @@ Do not reduce duplication by hiding feature behavior inside a generic dumping gr
 
 ### Finish the reduction
 
-When recommending a consolidation, also identify what should be deleted, replaced, or rerouted so the old duplicate implementation does not linger.
+When recommending a consolidation, also identify what should be deleted, replaced, rerouted, or normalized so the old duplicate implementation does not linger.
+
+### Do not force uniformity
+
+Do not force one common data structure or one shared path onto different concepts just because they look related.
+
+### Reduce call depth when it is cheap and real
+
+Prefer shorter, clearer call paths when intermediate layers do not justify their existence.
+
+### Prefer the first real owner
+
+When a call chain looks like function -> function -> function -> real function, prefer rerouting callers closer to the first function that actually owns behavior, then delete the duplicated forwarding wrappers if they add no meaningful boundary.
 
 ## Good Task Examples
 
@@ -339,6 +431,8 @@ When recommending a consolidation, also identify what should be deleted, replace
 - `Centralize repeated path resolution into one small shared core function and remove the copied path-building blocks.`
 - `Merge the duplicated mapping tables into one source of truth and update call sites to use it directly.`
 - `Merge helper functions like ResolveWorkspaceRoot, FindWorkspaceRoot, and GetWorkspaceRoot into one helper if they resolve the same concept with only minor call-shape differences.`
+- `Harmonize repeated API response shapes behind one normalizer and set absent optional fields to null only where that matches the existing contract.`
+- `Inline the three-step forwarding chain between controller, facade, and thin service wrapper where only one layer contains real behavior.`
 
 ## Bad Advice Examples
 
@@ -349,6 +443,9 @@ Do not produce advice like:
 - `Clean up the duplicate code.`
 - `Make the architecture more reusable.`
 - `Introduce a generic framework for this area.`
+- `Standardize all data structures.`
+- `Add a common base model for everything.`
+- `Split this into more layers.`
 
 Those are incomplete until translated into concrete source changes.
 
@@ -360,6 +457,8 @@ The response should feel like:
 
 - here is what is repeated
 - here is what should be shared and what should stay local
+- here is where common data structures make sense and where they do not
+- here is which call chains should be shortened or deleted
 - here is the simplest useful consolidation direction
 - here are the first refactoring tickets to create
 
@@ -370,4 +469,6 @@ The response should feel like:
 - `look at this repo and tell me what repeated code should become shared helpers`
 - `show me how to simplify this codebase by merging repeated logic`
 - `give me concrete refactoring tasks to reduce duplication and create the right shared core functions`
-- `review this project and suggest what to extract, merge, and delete first`
+- `review this project and suggest what to extract, merge, harmonize, shorten, and delete first`
+- `analyze the app data structures and tell me which ones should be harmonized and which ones should stay local`
+- `find thin wrappers and long function chains that can be collapsed with minimal changes`
