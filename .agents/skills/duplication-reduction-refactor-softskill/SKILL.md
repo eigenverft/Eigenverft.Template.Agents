@@ -1,6 +1,6 @@
 ---
 name: duplication-reduction-refactor-softskill
-description: Source-first refactoring guidance for reducing duplication through careful consolidation, shared helpers, reusable core flows, data-structure harmonization when sensible, and removal of redundant wrappers, layers, unnecessary call chains, repeated late-bound selection, responsibility relocation disguised as abstraction, and wide-signature thin implementations that should collapse into a more unified path.
+description: Source-first refactoring guidance for reducing duplication through careful consolidation, shared helpers, reusable core flows, data-structure harmonization when sensible, and removal of redundant wrappers, layers, unnecessary call chains, repeated late-bound selection, responsibility relocation disguised as abstraction, wide-signature thin implementations, over-specialized micro-functions that should often be inlined, and incomplete deduplication passes that leave new shared paths unused or old fragments lingering beside them.
 ---
 
 # duplication-reduction-refactor-softskill
@@ -9,7 +9,7 @@ description: Source-first refactoring guidance for reducing duplication through 
 
 Use this softskill to review a real codebase and recommend concrete refactoring steps that reduce duplication through careful consolidation, shared helpers, reusable core flows, light data-structure harmonization where it is actually useful, and removal of redundant layers or call chains.
 
-This softskill is about making the codebase smaller, clearer, easier to maintain, and easier to extend by removing repeated code, repeated structural patterns, unnecessary function-to-function chains, needless shape fragmentation, repeated late-bound decision points, shared wrappers that merely relocate old responsibilities instead of deleting them, and functions with large headers but very small implementations when they are mostly ceremony around a thinner shared core.
+This softskill is about making the codebase smaller, clearer, easier to maintain, and easier to extend by removing repeated code, repeated structural patterns, unnecessary function-to-function chains, needless shape fragmentation, repeated late-bound decision points, shared wrappers that merely relocate old responsibilities instead of deleting them, functions with large headers but very small implementations when they are mostly ceremony around a thinner shared core, tiny over-specialized functions that fragment logic without creating meaningful reuse, and incomplete refactors that introduce a new shared path without fully adopting it or deleting the old one.
 
 Focus on:
 
@@ -28,6 +28,9 @@ Focus on:
 - moving behavior selection earlier when the source shows the choice can be resolved once up front
 - avoiding “generic shared code” that only absorbs old seams without shrinking them
 - targeting functions with large parameter lists, long generic/type headers, or bulky signatures when the implementation body is tiny and mostly forwards, reshapes, or lightly selects
+- targeting tiny highly specialized functions as inline candidates when they mainly split one local thought into another named hop without creating real reuse or boundary value
+- preferring one focused, completed deduplication slice over a broad pass that leaves migrations half-finished
+- treating unused new shared paths, partially migrated callers, and obsolete leftover fragments as strong reduction targets
 - making minimal changes that align with the rest of the codebase instead of introducing a new style
 
 The output should not be abstract architecture talk.
@@ -50,6 +53,7 @@ That usually means improving:
 - shape consistency for common application data where the source shows meaningful overlap
 - navigation simplicity by shortening unnecessary call paths
 - simplicity of execution seams by resolving behavior-driving choices once instead of repeatedly
+- completion quality by finishing a reduction slice instead of leaving old and new paths active together
 
 ## Use This Softskill When
 
@@ -69,6 +73,8 @@ Use this softskill when the user wants help with:
 - identifying shared code that became broader without making the touched seam smaller
 - moving repeated behavior selection or repeated lookup out of inner layers when that can be done safely
 - identifying wide-signature thin-body functions that should be removed, inlined, merged, or replaced by a more unified shared path
+- identifying tiny over-specialized functions that should likely be inlined back into their real owner
+- finishing incomplete deduplication work where a new central path exists but callers or fragments still linger on the old path
 
 ## Do Not Use This Softskill When
 
@@ -102,6 +108,8 @@ Useful sources include:
 - repeated DTOs, view models, payloads, adapters, mappers, and serialized shapes
 - function stacks that repeatedly hop through thin wrappers before reaching the real implementation
 - functions whose declarations are much larger than their bodies because they mostly forward, repackage, or lightly branch before calling the real implementation
+- tiny named functions whose bodies are so narrow and specialized that they mainly create an extra navigation hop around code that could be understood inline
+- partially migrated seams where a new shared function exists but only some callers use it and old fragments still remain beside it
 
 Do not give generic advice unless it clearly maps back to repeated patterns seen in the source.
 
@@ -131,6 +139,10 @@ Examples:
 - helper chains where each step performs a tiny transform or wraps values into another intermediate shape without adding meaningful ownership
 - wide-signature thin-body functions whose parameters, type/header ceremony, or return shaping are much larger than the logic they contain
 - several wide-header functions that differ mostly in wiring, forwarding, or light preparation and should instead converge on one narrower shared core
+- tiny highly specialized functions, especially single-call-site functions, whose bodies add little beyond spelling out a small local step that would be clearer inline
+- partially adopted shared helpers, half-migrated flows, or duplicate fragments left behind after a central function was introduced
+- obsolete old-path fragments that still prevent the new shared path from becoming the only real implementation
+- too many valid findings at once, where the better move is to finish one cohesive duplication cluster instead of scattering effort across many seams
 - refactors-in-progress where shared code has absorbed old responsibilities but the old wrapper seam still remains beside it
 
 ## What Good Looks Like
@@ -152,6 +164,9 @@ Prefer a structure where:
 - inner shared code receives prepared inputs rather than re-deriving execution choices
 - shared code becomes flatter, with fewer transform hops and fewer intermediate objects
 - wide signatures are justified by real ownership rather than by thin forwarding or repeated shape-padding
+- tiny over-specialized functions are inlined when they do not provide real reuse, boundary meaning, or clearer ownership
+- when many findings exist, one cohesive seam or duplication cluster is completed first instead of leaving several areas half-refactored
+- a new shared helper counts as success only after the touched callers are actually rerouted through it and the old fragments in that slice are removed
 - consolidation deletes the old path instead of preserving both the old seam and the new shared helper
 
 ## Consolidation Preference Order
@@ -159,11 +174,13 @@ Prefer a structure where:
 When multiple reduction options are possible, generally prefer this order:
 
 1. delete a useless wrapper or redundant layer
-2. merge overlapping existing helpers
-3. extend one existing helper in a narrow, coherent way
-4. harmonize repeated data shapes where the conceptual model is clearly shared
-5. extract a new shared helper or core path
-6. keep the code local for now if sharing would make ownership less clear
+2. inline a tiny over-specialized function that adds no meaningful reuse or boundary
+3. finish an incomplete migration around an already introduced shared path
+4. merge overlapping existing helpers
+5. extend one existing helper in a narrow, coherent way
+6. harmonize repeated data shapes where the conceptual model is clearly shared
+7. extract a new shared helper or core path
+8. keep the code local for now if sharing would make ownership less clear
 
 This is a preference order, not a rigid rule.
 Use judgment based on clarity, ownership, and change safety.
@@ -200,10 +217,11 @@ Do not recommend extraction or harmonization when:
 - the shared version would need many flags, modes, or special cases
 - the only way to unify shapes would be to create a fake one-size-fits-all model
 
-Do not recommend shortening a call chain when:
+Do not recommend shortening a call chain or inlining a small specialized function when:
 
 - each layer owns a real responsibility boundary
 - the intermediate function enforces policy, validation, tracing, security, or transaction behavior
+- the tiny function is the clearest ownership point for a rule likely to evolve independently
 - removing the layer would make ownership or boundaries less clear
 
 ## Minimal-Change Rule
@@ -216,7 +234,8 @@ That means:
 
 - align with the current code style and module layout
 - reuse existing helpers before inventing new categories
-- prefer local merges and deletions over broad reorganizations
+- prefer local merges, inlining, and deletions over broad reorganizations
+- prefer one completed reduction slice over several partial migrations
 - avoid introducing a new abstraction family when a wrapper can simply be deleted
 - avoid large type-system redesigns when a small shared normalizer or shape alias is enough
 - keep the resulting code easy for current maintainers to recognize
@@ -234,6 +253,8 @@ When reviewing a seam, check whether the code is:
 - wrapping already-known values into intermediate objects only to pass them onward
 - preserving an old boundary as a forwarding abstraction after consolidation
 - carrying a large signature through a thin layer whose body adds little beyond forwarding, tiny branching, or light reshaping
+- splitting a tiny specialized step into its own function even though it adds no meaningful reuse, policy, or ownership boundary
+- introducing a new central function without fully rerouting the touched callers or deleting the old fragments that still shadow it
 
 Prefer a structure where:
 
@@ -242,9 +263,11 @@ Prefer a structure where:
 - inner shared functions work from already-resolved inputs
 - inner shared functions do not repeat registry lookup, definition lookup, config lookup, type-based dispatch, string-key selection, or equivalent late-bound selection
 - narrow shared cores replace wide-header thin-body layers when the surrounding functions mostly differ in argument plumbing or small preparation steps
+- tiny over-specialized functions are inlined back into the real owner when that removes an unnecessary hop without losing clarity
+- one narrow seam or duplication cluster is finished end-to-end before moving to the next hotspot
 - old forwarding seams are deleted after the real shared path exists
 
-Do not recommend a refactor that reduces copy-paste locally but increases the number of helper layers, intermediate transform objects, repeated decision points across the seam, or wide signatures that mostly exist to feed thin wrappers.
+Do not recommend a refactor that reduces copy-paste locally but increases the number of helper layers, intermediate transform objects, repeated decision points across the seam, wide signatures that mostly exist to feed thin wrappers, needless micro-functions that fragment one local operation, or partially migrated shared paths that still cannot act as the one obvious implementation.
 
 Success is not “more generic code.”
 Success is:
@@ -254,7 +277,35 @@ Success is:
 - fewer intermediate custom shapes where plain inputs would do
 - fewer repeated lookups of the same behavior-driving data
 - fewer wide-signature thin-body functions that exist mainly to route work elsewhere
+- fewer tiny over-specialized functions that exist mainly to name one local step
+- fewer old fragments left beside a newly introduced shared path
 - net code surface reduction after obsolete paths are removed
+
+## Scoped-completion rule
+
+This is mandatory.
+
+When the source contains many valid findings, do not try to solve everything in one pass.
+
+Prefer selecting one coherent duplication cluster, seam, caller family, or helper group that can be reduced in a completed way.
+
+A good reduction slice usually means:
+
+- the touched callers can actually be rerouted
+- the new or improved shared function can actually become used in that slice
+- obsolete old-path fragments in that slice can actually be deleted
+- the result leaves one smaller, cleaner seam rather than several half-migrated seams
+
+Treat incomplete deduplication as its own smell.
+
+Strong signs include:
+
+- a new central helper exists but only one caller uses it while similar callers still use the old path
+- old wrappers or fragments remain beside the new shared path
+- a shared normalizer or core exists but call sites still perform duplicate preparation outside it
+- the codebase contains “in progress” dedup where the migration stopped before the old path could be removed
+
+If you recommend a bounded reduction slice, make sure it is still a meaningful finished change, not just setup for a future cleanup.
 
 ## Required Output Style
 
@@ -265,11 +316,12 @@ It should answer:
 - where the codebase is repeating itself
 - which duplicates should become shared helpers, shared normalizers, or core functions
 - which similar-looking code should stay local
-- what should be merged, extracted, harmonized, collapsed, shortened, or deleted first
+- what should be merged, extracted, harmonized, collapsed, shortened, inlined, or deleted first
 - where function call chains should be reduced
 - where data structures should stay different because there is no real one-size-fits-all model
 - where behavior selection should move upward instead of being re-done in inner helpers
-- which old wrappers, forwarding seams, repeated lookups, intermediate shapes, or wide-header thin-body functions should disappear after consolidation
+- which old wrappers, forwarding seams, repeated lookups, intermediate shapes, wide-header thin-body functions, or tiny over-specialized functions should disappear after consolidation
+- which bounded reduction slice should be finished first when there are too many findings to tackle at once
 
 ## Required Output Shape
 
@@ -289,6 +341,8 @@ For each cluster, say whether it is:
 - repeated late-bound selection
 - responsibility relocation disguised as sharing
 - wide-header thin-body indirection
+- tiny over-specialized indirection
+- incomplete migration or unfinished shared-path adoption
 
 ### 2. Reduction directions
 
@@ -297,9 +351,11 @@ Provide 2 or 3 realistic refactoring directions.
 Each direction should say:
 
 - what duplication or indirection it reduces
-- what shared unit would be introduced, merged, harmonized, shortened, rerouted, or deleted
+- what shared unit would be introduced, merged, harmonized, shortened, rerouted, inlined, or deleted
 - why it fits the current source
 - what tradeoff it has
+
+If the source has many findings, at least one direction should be a bounded completed slice rather than a broad multi-area cleanup.
 
 ### 3. First concrete steps for each direction
 
@@ -319,6 +375,8 @@ Examples:
 - `Resolve the operation variant once at the boundary and pass the prepared inputs into the shared execution path.`
 - `Delete the intermediate helper that only re-selects the same handler or definition already known by the caller.`
 - `Replace the wide-signature thin-body wrapper with one narrower shared core and move the tiny preparation logic to the real ownership point.`
+- `Inline the tiny specialized helper back into its only real owner and delete the extra named hop.`
+- `Finish the partial migration to the shared helper for one caller group and delete the obsolete old-path fragments in the same change.`
 
 ### 4. Recommended direction
 
@@ -332,6 +390,10 @@ Prefer the direction that deletes repeated decision points or forwarding seams i
 
 Prefer the direction that removes wide-signature thin-body layers when they are mostly plumbing around a more coherent shared path.
 
+Prefer the direction that inlines tiny over-specialized functions when they do not carry a real boundary or reusable rule.
+
+When many hotspots exist, prefer the direction that finishes one meaningful reduction slice completely rather than scattering partial changes across several areas.
+
 ### 5. Ordered reduction task list
 
 This is the most important part.
@@ -344,7 +406,9 @@ Each task should say:
 - why it should happen now
 - what duplicate or indirect surface area it removes
 - what clarity or maintainability benefit it creates
-- what old duplicate path, wrapper, repeated lookup step, intermediate transform helper, fragmented shape, or wide-header thin-body function should be removed afterward when relevant
+- what old duplicate path, wrapper, repeated lookup step, intermediate transform helper, fragmented shape, wide-header thin-body function, tiny over-specialized function, or obsolete fragment should be removed afterward when relevant
+
+When there are many findings, make the ordered task list focus on one completed reduction slice unless the source clearly supports more.
 
 ### 6. Watchouts
 
@@ -365,6 +429,8 @@ Mention only relevant risks, such as:
 - moving late-bound selection into a new generic helper instead of resolving it once and deleting the old seam
 - introducing prepared objects that are broader than the operation actually needs
 - collapsing a wide-header function whose large signature actually reflects a meaningful boundary rather than thin plumbing
+- inlining a tiny specialized function that actually exists to preserve an important ownership point or policy boundary
+- touching too many duplication clusters at once and ending with several incomplete migrations instead of one finished reduction slice
 
 ## Minimum Concreteness Rule
 
@@ -390,6 +456,7 @@ This is mandatory.
   - shorten
   - resolve
   - prepare
+  - finish
 - Avoid vague advice like:
   - improve maintainability
   - clean up duplication
@@ -424,6 +491,7 @@ Prefer refactors that improve:
 - where it stays coherent and safe, merging similar helpers can be better than adding another sibling helper
 - do not introduce a helper that only selects behavior by name, id, type string, command string, family string, registry key, or equivalent discriminator if the caller already has enough context to resolve that choice earlier
 - prefer a narrower shared core over repeated wide-signature wrappers when most of the apparent complexity lives in the header rather than in the body
+- prefer finishing adoption of an already good shared helper in one caller group over introducing another parallel shared path elsewhere
 
 ### Shared core quality
 
@@ -432,6 +500,7 @@ Prefer refactors that improve:
 - prefer one obvious source of truth over synchronized duplicate implementations
 - keep the shared unit owned by a clear responsibility, not by a vague cross-cutting bucket
 - prefer a flatter shared core that works on prepared inputs over a broader shared core that keeps re-querying definitions or selectors
+- once a shared core exists in the touched seam, prefer completing its adoption and deleting the old fragments before expanding into another seam
 
 ### Data-structure harmonization quality
 
@@ -452,17 +521,20 @@ Prefer refactors that improve:
 - prefer rerouting callers to the first layer that performs real work instead of keeping thin pre-work wrappers alive
 - do not replace three thin wrappers with one shared wrapper if the real simplification is to remove the wrapper seam entirely
 - treat a large signature with a tiny body as a possible layer smell when the function mainly forwards, adapts, or lightly prepares values for another function
+- treat a tiny highly specialized function as a possible inline smell when it mainly names one local step without adding reuse, policy, or ownership value
+- treat partially migrated old/new path pairs as a strong reduction target, especially when the old fragment still prevents the new core from being the one obvious implementation
 - do not force-collapse layers that still carry meaningful ownership, policy, or boundary behavior
-- after consolidating, remove obsolete wrappers, aliases, and dead call paths instead of keeping both versions around
+- after consolidating, remove obsolete wrappers, aliases, dead call paths, and old-path fragments instead of keeping both versions around
 
 ### Safe reduction
 
-- prefer deleting or merging before inventing a new framework
+- prefer deleting, inlining, merging, or finishing an existing migration before inventing a new framework
 - prefer the smallest shared unit that removes meaningful duplication
 - keep feature ownership visible after deduplication
 - prefer proven reuse over speculative reuse
 - prefer a local, minimal change that fits the existing code over a broad theoretical cleanup
 - work on one narrow seam at a time when a larger cleanup would blur ownership or mix unrelated concerns
+- if there are many findings, prioritize a slice that can be completed end-to-end
 
 ## Strong Rules
 
@@ -472,7 +544,7 @@ Recommendations must visibly map to the code or structure reviewed.
 
 ### Prefer reduction over expansion
 
-If duplication can be removed by merging or deleting something, prefer that before suggesting a new layer.
+If duplication can be removed by merging, inlining, deleting, or finishing an incomplete migration, prefer that before suggesting a new layer.
 
 ### Extract only proven common behavior
 
@@ -506,9 +578,13 @@ When a call chain looks like function -> function -> function -> real function, 
 
 When the same behavior-driving decision can be resolved once at the outer boundary of an operation, prefer doing that and passing prepared inputs downward rather than re-selecting behavior in inner helpers.
 
+### Prefer completed slices over scattered progress
+
+When many valid findings exist, prefer one finished reduction slice that fully adopts the shared path and removes the old fragments over several partial cleanups that leave multiple seams half-migrated.
+
 ### Measure success by seam collapse
 
-Treat a refactor as successful only when the touched seam becomes smaller or flatter after obsolete wrappers, duplicate transforms, repeated lookups, old forwarding paths, or wide-header thin-body layers are removed.
+Treat a refactor as successful only when the touched seam becomes smaller or flatter after obsolete wrappers, duplicate transforms, repeated lookups, old forwarding paths, wide-header thin-body layers, tiny over-specialized hops, or incomplete old-path fragments are removed.
 
 ## Good Task Examples
 
@@ -525,6 +601,8 @@ Treat a refactor as successful only when the touched seam becomes smaller or fla
 - `Resolve the handler or execution variant at the boundary and pass the prepared spec into the shared inner flow.`
 - `Delete the helper that only re-reads config already resolved by the caller and route the plain value directly into the core function.`
 - `Collapse the wide-signature thin-body adapter into the narrower shared core and remove the duplicate argument-plumbing layer afterward.`
+- `Inline the tiny specialized helper into its only real owner and remove the extra function hop after confirming it carries no distinct policy or boundary meaning.`
+- `Finish the migration of one caller family to the new shared helper and delete the obsolete old-path fragments in the same pass so the central path becomes the only real implementation for that slice.`
 
 ## Bad Advice Examples
 
@@ -540,6 +618,7 @@ Do not produce advice like:
 - `Split this into more layers.`
 - `Create a generic selector helper for all operation types.`
 - `Introduce a reusable wrapper that centralizes dispatch by key.`
+- `Start a shared migration here and clean up the old callers later.`
 
 Those are incomplete until translated into concrete source changes.
 
@@ -555,6 +634,7 @@ The response should feel like:
 - here is which call chains should be shortened or deleted
 - here is where repeated late-bound selection should move upward
 - here is the simplest useful consolidation direction
+- here is the bounded slice to finish first when there are many findings
 - here are the first refactoring tickets to create
 - here is what should disappear afterward so the seam is truly smaller
 
@@ -571,3 +651,5 @@ The response should feel like:
 - `show me where the code is moving responsibilities into shared helpers instead of actually shrinking the seam`
 - `find places where behavior should be resolved once up front instead of re-selected in inner helpers`
 - `find functions with large signatures but tiny bodies that should be collapsed into a more unified shared path`
+- `find tiny highly specialized functions that should probably be inlined back into their real owner`
+- `show me which deduplication slice should be finished first when there are too many findings at once`
