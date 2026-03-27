@@ -113,11 +113,12 @@ Examples:
 - multiple modules branching on the same cases in the same way
 - pass-through abstractions that add files and indirection without reducing duplication
 - copy-paste setup blocks for tools, loaders, clients, pipelines, or package scripts
-- large utility folders that exist because the same code keeps being copied around
 - multiple modules representing the same conceptual entity with mostly overlapping fields but slightly different names or omissions
 - repeated shape padding logic where missing fields are added ad hoc instead of through one clear normalization path
 - long call chains where functions mostly rename, forward, rewrap, or lightly translate the same inputs without adding clear responsibility
 - repeated wrapper-on-wrapper call stacks where several thin functions only pass through arguments before the first function that actually owns behavior
+- repeated behavior selection, repeated lookup, or repeated tiny data-shaping around the same shared helper
+- an existing helper that is already close to the real shared core, but callers and child helpers still duplicate setup, normalization, or follow-on work around it
 
 ## What Good Looks Like
 
@@ -134,6 +135,8 @@ Prefer a structure where:
 - optional or absent values are represented consistently when a shared structure exists, including using `null` where the surrounding system already treats that as the normal explicit empty value
 - call paths are short enough that the real behavior is easy to find without jumping through many thin layers
 - changes remain minimal and align with the surrounding code style and architecture
+- one existing helper is strengthened when that collapses duplication both above and below it better than adding another shared layer
+- consolidation deletes the old path instead of preserving both the old seam and the new shared helper
 
 ## Consolidation Preference Order
 
@@ -202,6 +205,37 @@ That means:
 - avoid large type-system redesigns when a small shared normalizer or shape alias is enough
 - keep the resulting code easy for current maintainers to recognize
 
+## Collapse Rule
+
+This is mandatory.
+
+Prefer real seam collapse over responsibility relocation.
+
+Do not treat a refactor as successful if it only moves repeated logic, repeated selection, or repeated tiny transforms into a new wrapper or generic-by-name helper.
+
+Also do not analyze duplication only from the top-down caller perspective.
+Inspect existing shared helpers as potential collapse points.
+
+Ask whether:
+
+- one existing helper already owns most of the real behavior
+- callers repeat setup, normalization, branching, or parameter shaping around it
+- child helpers mainly perform narrow follow-on work that belongs with that same responsibility
+- strengthening that helper would remove more total code than introducing a new abstraction above it
+
+Prefer enhancing an existing helper when that safely collapses duplication both above and below it.
+
+Prefer incremental convergence over upfront universal design.
+Route one concrete caller through the helper first, then expand the helper only as the next real caller requires.
+Let the shared shape emerge from repeated adoption when that keeps the helper coherent and allows the old caller-specific path to be deleted after each step.
+
+Success means:
+
+- fewer total functions in the touched seam
+- fewer call hops in the touched seam
+- fewer repeated lookups, transforms, or wrapper objects in the touched seam
+- old forwarding paths, duplicate prep code, or fragmented helper chains are removed afterward
+
 ## Required Output Style
 
 The output must be concrete and task-oriented.
@@ -238,7 +272,7 @@ Provide 2 or 3 realistic refactoring directions.
 Each direction should say:
 
 - what duplication or indirection it reduces
-- what shared unit would be introduced, merged, harmonized, shortened, or deleted
+- what shared unit would be introduced, merged, harmonized, collapsed, shortened, or deleted
 - why it fits the current source
 - what tradeoff it has
 
@@ -257,6 +291,7 @@ Examples:
 - `Collapse the duplicated command execution flow into one small orchestration function and keep feature-specific steps injected explicitly.`
 - `Harmonize repeated entity payload shapes behind one narrow normalizer and fill absent optional fields with null where that is already the project convention.`
 - `Inline the thin forwarding function and remove the extra call hop from the request flow.`
+- `Strengthen the existing shared helper so callers stop duplicating setup around it and remove the child transform helpers that become redundant.`
 
 ### 4. Recommended direction
 
@@ -278,7 +313,7 @@ Each task should say:
 - why it should happen now
 - what duplicate or indirect surface area it removes
 - what clarity or maintainability benefit it creates
-- what old duplicate path, wrapper, or fragmented shape should be removed afterward when relevant
+- what old duplicate path, wrapper, helper fragment, or fragmented shape should be removed afterward when relevant
 
 ### 6. Watchouts
 
@@ -296,6 +331,7 @@ Mention only relevant risks, such as:
 - filling missing values with `null` where the codebase actually distinguishes absence from explicit empty state
 - shortening a call chain that was actually carrying a useful boundary
 - mechanically flattening every call chain instead of only removing the repeated wrappers that add no real behavior
+- adding a new shared wrapper when improving one existing helper would have collapsed more code
 
 ## Minimum Concreteness Rule
 
@@ -349,6 +385,8 @@ Prefer refactors that improve:
 - keep inputs and outputs explicit so the helper remains understandable
 - take overlapping existing helpers into account before introducing a new one
 - where it stays coherent and safe, merging similar helpers can be better than adding another sibling helper
+- where one helper already owns most of the behavior, prefer strengthening it over adding a new wrapper above it
+- prefer a helper shape proven by successive real caller adoption over an upfront design meant to fit every case immediately
 
 ### Shared core quality
 
@@ -421,6 +459,14 @@ Prefer shorter, clearer call paths when intermediate layers do not justify their
 
 When a call chain looks like function -> function -> function -> real function, prefer rerouting callers closer to the first function that actually owns behavior, then delete the duplicated forwarding wrappers if they add no meaningful boundary.
 
+### Prefer the best existing collapse point
+
+When one helper is already close to the real shared core, prefer improving that helper over introducing another abstraction beside it, above it, or below it.
+
+### Prefer progressive adoption
+
+Prefer shared helpers that become the real core through repeated caller migration and deletion of old paths, rather than through an upfront attempt to design one abstraction that fits everything at once.
+
 ## Good Task Examples
 
 - `Merge the duplicated workspace-discovery routines into one shared function and keep only the variant-specific filter logic at call sites.`
@@ -433,6 +479,7 @@ When a call chain looks like function -> function -> function -> real function, 
 - `Merge helper functions like ResolveWorkspaceRoot, FindWorkspaceRoot, and GetWorkspaceRoot into one helper if they resolve the same concept with only minor call-shape differences.`
 - `Harmonize repeated API response shapes behind one normalizer and set absent optional fields to null only where that matches the existing contract.`
 - `Inline the three-step forwarding chain between controller, facade, and thin service wrapper where only one layer contains real behavior.`
+- `Extend the existing shared helper to absorb repeated caller setup, reroute one concrete caller through it, and delete the child helpers that only perform fragmented follow-on transforms.`
 
 ## Bad Advice Examples
 
