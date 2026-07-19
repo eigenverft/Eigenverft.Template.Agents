@@ -1,0 +1,3 @@
+interface:
+  display_name: "Preparatory Change"
+  short_description: "Prepare the codebase for a later task without implementing it"
