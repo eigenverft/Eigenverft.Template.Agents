@@ -101,9 +101,10 @@ function Copy-GitTemplateSnapshot {
         New-Item -ItemType Directory -Path $DestinationPath -Force | Out-Null
 
         $cloneRootPrefix = $clonePath.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+        $gitDirPrefix = (Join-Path $clonePath '.git') + [System.IO.Path]::DirectorySeparatorChar
 
         Get-ChildItem -LiteralPath $clonePath -Recurse -File -Force |
-            Where-Object { $_.FullName -notlike (Join-Path $clonePath '.git*') } |
+            Where-Object { -not $_.FullName.StartsWith($gitDirPrefix, [System.StringComparison]::OrdinalIgnoreCase) } |
             ForEach-Object {
                 $relativePath = $_.FullName.Substring($cloneRootPrefix.Length).Replace('\', '/')
 
