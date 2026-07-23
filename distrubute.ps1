@@ -131,7 +131,7 @@ function Copy-GitTemplateSnapshot {
     }
 }
 
-$whitelist = @( 'AGENTS.md', '.agents/**', 'AGENTS/**' )
+$whitelist = @( '.gitattributes', 'AGENTS.md', '.agents/**', 'AGENTS/**' )
 
 # Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.Template.Agents" -Whitelist $whitelist
 Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.Manifested.Sandbox" -Whitelist $whitelist
