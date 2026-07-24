@@ -1,3 +1,8 @@
+# Overlays agent instruction files from Eigenverft.Template.Agents into sibling repos.
+# Copy-only (no deletes): project-specific files under AGENTS/RUNBOOK/ etc. stay unless
+# the template ships the same relative path (then it overwrites).
+# You run this script; it does not commit.
+
 function Copy-GitTemplateSnapshot {
     [CmdletBinding()]
     param(
@@ -6,7 +11,7 @@ function Copy-GitTemplateSnapshot {
         [string]$RepositoryUrl,
 
         [Parameter(Mandatory)]
-        [string]$DestinationPath,
+        [string[]]$DestinationPaths,
 
         [string[]]$Whitelist = @('*')
     )
@@ -82,48 +87,79 @@ function Copy-GitTemplateSnapshot {
         return $false
     }
 
-    if (-not [System.IO.Path]::IsPathRooted($DestinationPath)) {
-        throw "DestinationPath must be an absolute path."
+    $destinations = @(
+        $DestinationPaths |
+            ForEach-Object { $_.Trim() } |
+            Where-Object { $_ } |
+            Select-Object -Unique
+    )
+
+    foreach ($destinationPath in $destinations) {
+        if (-not [System.IO.Path]::IsPathRooted($destinationPath)) {
+            throw "DestinationPath must be an absolute path: $destinationPath"
+        }
     }
 
     $tempRoot  = Join-Path ([System.IO.Path]::GetTempPath()) ("git-template-" + [guid]::NewGuid().ToString("N"))
     $clonePath = Join-Path $tempRoot "repo"
-    $copied    = [System.Collections.Generic.List[string]]::new()
+    $results   = [System.Collections.Generic.List[object]]::new()
 
     try {
         New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
 
+        Write-Host "Cloning $RepositoryUrl ..."
         git clone --depth 1 $RepositoryUrl $clonePath
         if ($LASTEXITCODE -ne 0) {
             throw "git clone failed."
         }
 
-        New-Item -ItemType Directory -Path $DestinationPath -Force | Out-Null
-
         $cloneRootPrefix = $clonePath.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
         $gitDirPrefix = (Join-Path $clonePath '.git') + [System.IO.Path]::DirectorySeparatorChar
 
-        Get-ChildItem -LiteralPath $clonePath -Recurse -File -Force |
-            Where-Object { -not $_.FullName.StartsWith($gitDirPrefix, [System.StringComparison]::OrdinalIgnoreCase) } |
-            ForEach-Object {
-                $relativePath = $_.FullName.Substring($cloneRootPrefix.Length).Replace('\', '/')
+        $sourceFiles = @(
+            Get-ChildItem -LiteralPath $clonePath -Recurse -File -Force |
+                Where-Object { -not $_.FullName.StartsWith($gitDirPrefix, [System.StringComparison]::OrdinalIgnoreCase) } |
+                ForEach-Object {
+                    [pscustomobject]@{
+                        FullName     = $_.FullName
+                        RelativePath = $_.FullName.Substring($cloneRootPrefix.Length).Replace('\', '/')
+                    }
+                } |
+                Where-Object { Test-WhitelistMatch -RelativePath $_.RelativePath -Patterns $Whitelist }
+        )
 
-                if (-not (Test-WhitelistMatch -RelativePath $relativePath -Patterns $Whitelist)) {
-                    return
-                }
+        Write-Host ("Whitelisted files: {0}" -f $sourceFiles.Count)
 
-                $destinationFile = Join-Path $DestinationPath $relativePath
+        foreach ($destinationPath in $destinations) {
+            if (-not (Test-Path -LiteralPath $destinationPath)) {
+                Write-Warning "Skip missing destination: $destinationPath"
+                continue
+            }
+
+            $copied = [System.Collections.Generic.List[string]]::new()
+            New-Item -ItemType Directory -Path $destinationPath -Force | Out-Null
+
+            foreach ($source in $sourceFiles) {
+                $destinationFile = Join-Path $destinationPath $source.RelativePath
                 $destinationDir  = Split-Path -Path $destinationFile -Parent
 
                 if (-not (Test-Path -LiteralPath $destinationDir)) {
                     New-Item -ItemType Directory -Path $destinationDir -Force | Out-Null
                 }
 
-                Copy-Item -LiteralPath $_.FullName -Destination $destinationFile -Force
-                [void]$copied.Add($relativePath)
+                Copy-Item -LiteralPath $source.FullName -Destination $destinationFile -Force
+                [void]$copied.Add($source.RelativePath)
             }
 
-        return $copied
+            Write-Host ("Copied {0} files -> {1}" -f $copied.Count, $destinationPath)
+            [void]$results.Add([pscustomobject]@{
+                Destination = $destinationPath
+                CopiedCount = $copied.Count
+                Files       = $copied
+            })
+        }
+
+        return $results
     }
     finally {
         if (Test-Path -LiteralPath $tempRoot) {
@@ -132,12 +168,38 @@ function Copy-GitTemplateSnapshot {
     }
 }
 
-$whitelist = @( '.gitattributes', 'AGENTS.md', '.agents/**', 'AGENTS/**' )
+$workspaceRoot = 'C:\dev\github.com\eigenverft'
+$templateUrl   = 'https://github.com/eigenverft/Eigenverft.Template.Agents.git'
+$whitelist     = @( '.gitattributes', 'AGENTS.md', '.agents/**', 'AGENTS/**' )
 
-# Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.Template.Agents" -Whitelist $whitelist
-Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.Manifested.Sandbox" -Whitelist $whitelist
-Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.Manifested.Agent" -Whitelist $whitelist
-Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.Manifested.Drydock" -Whitelist $whitelist
-Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.App.McpServer" -Whitelist $whitelist
-Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.Routed.RequestFilters" -Whitelist $whitelist
-Copy-GitTemplateSnapshot -RepositoryUrl "https://github.com/eigenverft/Eigenverft.Template.Agents.git" -DestinationPath "C:\dev\github.com\eigenverft\Eigenverft.App.AutomationWorkbench" -Whitelist $whitelist
+# All active Eigenverft sibling repos that should share the agent overlay.
+# Excluded: Template.Agents (source), Archive.All (cold archive).
+$destinationNames = @(
+    'Eigenverft.App.AutomationWorkbench'
+    'Eigenverft.App.BlazorMultihost'
+    'Eigenverft.App.BlazorWebAssemblyStandalone'
+    'Eigenverft.App.GlobalServerPwaHost'
+    'Eigenverft.App.Lattice'
+    'Eigenverft.App.LlamaRunner'
+    'Eigenverft.App.McpServer'
+    'Eigenverft.App.ReverseProxy'
+    'Eigenverft.App.StackForge'
+    'Eigenverft.Distributed.Drydock'
+    'Eigenverft.Manifested.Agent'
+    'Eigenverft.Manifested.Drydock'
+    'Eigenverft.Manifested.Package'
+    'Eigenverft.Manifested.Sandbox'
+    'Eigenverft.Routed.RequestFilters'
+    'Eigenverft.Windows.ProcessIsolationRestricted'
+    'Eigenverft.Windows.ProcessIsolationSandbox'
+)
+
+$destinations = @(
+    $destinationNames |
+        ForEach-Object { Join-Path $workspaceRoot $_ }
+)
+
+Copy-GitTemplateSnapshot `
+    -RepositoryUrl $templateUrl `
+    -DestinationPaths $destinations `
+    -Whitelist $whitelist
