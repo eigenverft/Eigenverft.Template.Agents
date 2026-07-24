@@ -156,12 +156,14 @@ During a task:
 
 Before finishing a task:
 
-1. Update the relevant runbook files when reusable operational knowledge changed.
-2. Remove or correct stale guidance that would mislead the next agent.
-3. Keep updates concise, factual, and based on the repository state.
-4. Do not add speculative documentation.
+1. Review every changed source, configuration, project, build, deployment, workflow, interface, storage, authentication, infrastructure, and operational script file against the relevant runbook topics.
+2. Update the relevant runbook files in the same change whenever the implementation change adds, removes, invalidates, or clarifies reusable operational knowledge. This review and any required update are part of completing the code change, not optional follow-up documentation.
+3. Remove or correct stale guidance that would mislead the next agent.
+4. If the review finds no reusable operational knowledge change, leave the runbook untouched. Do not edit files merely to record that they were reviewed.
+5. Keep updates concise, factual, and based on the repository state.
+6. Do not add speculative documentation or claims that were not established by source, configuration, authoritative documentation, or actual execution.
 
-The runbook should become more accurate after every meaningful agent session.
+The runbook should become more accurate after every meaningful agent session. A code change that leaves affected runbook guidance stale is incomplete.
 
 ## When to update the runbook
 
