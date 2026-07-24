@@ -1,6 +1,6 @@
 ---
 name: subagent-implementation-handoff-softskill
-description: Use this orchestration softskill when the main agent should delegate source-based investigation or implementation preparation to one or more subagents without flooding or biasing the main context. It tells the main agent how to brief each subagent with minimal sufficient context, assign a unique short filename-safe hash token, require complete implementation-near findings in ordered repository-local Markdown handoffs, and accept only the created file paths as the subagent response.
+description: Use this orchestration softskill when the main agent should delegate source-based investigation or implementation preparation to one or more subagents without flooding or biasing the main context. It tells the main agent how to brief each subagent with minimal sufficient context, assign a unique short filename-safe hash token, create ordered repository-local Markdown handoffs only for concrete and worthwhile implementation concerns, and accept either created file paths or an explicit no-handoff result.
 ---
 
 # Subagent Implementation Handoff Softskill
@@ -11,7 +11,9 @@ Use this softskill as the **main agent or orchestrator**.
 
 Its purpose is to help the main agent delegate detailed repository investigation to subagents while keeping the main context small and preserving each subagent's complete useful result.
 
-The main agent must not ask subagents to paste long reports back into the parent conversation. Instead, it must instruct each subagent to write its complete result into repository-local Markdown files called **Subagent Implementation Handoffs** and return only the created file paths.
+The main agent must not ask subagents to paste long reports back into the parent conversation. It must instruct each subagent to write every concrete, worthwhile implementation concern into repository-local Markdown files called **Subagent Implementation Handoffs** and return only the created file paths.
+
+A subagent is not required to find a handoff. When the investigation does not support a meaningful later implementation task, it must create no file and return only `NO_HANDOFFS_CREATED`.
 
 A Subagent Implementation Handoff is:
 
@@ -22,7 +24,7 @@ A Subagent Implementation Handoff is:
 - explicit about likely code areas, contracts, dependencies, constraints, and unresolved decisions
 - not itself a coding-agent implementation plan
 
-The workflow is complete when the delegated findings are safely written to local handoff files and the main agent has received only their paths.
+The workflow is complete when every justified finding is safely written to local handoff files and the main agent has received only their paths, or when the subagent has correctly returned `NO_HANDOFFS_CREATED` because no justified handoff exists.
 
 ## Main-Agent Responsibility
 
@@ -33,15 +35,18 @@ The main agent must:
 1. Decide whether delegation is useful.
 2. Define a bounded objective for each subagent.
 3. Brief each subagent with the minimum sufficient context.
-4. Generate and assign each subagent run a unique short filename-safe hash token.
-5. Include the required file-writing and return contract in every subagent prompt.
-6. Require the subagent to inspect the repository and derive its own findings.
-7. Require the subagent to explain technically how the change could be realized, compare credible options, and recommend a direction without implementing it.
-8. Require the subagent to write in simple, direct, easy-to-understand language without unnecessary meta terminology.
-9. Require the subagent to split broad findings into coherent, ordered handoffs.
-10. Require the subagent to write complete findings into local Markdown files.
-11. Require the subagent to return only the created file paths.
-12. Avoid copying the complete handoff contents back into the main conversation.
+4. Determine whether this delegation launches more than one subagent for the work set.
+5. When more than one subagent runs, explicitly instruct every subagent to ignore repository-local `AGENTS.md` instructions for this assignment.
+6. Generate and assign each subagent run a unique short filename-safe hash token.
+7. Include the required eligibility, file-writing, no-handoff, and return contracts in every subagent prompt.
+8. Require the subagent to inspect the repository and derive its own findings.
+9. Require the subagent not to manufacture a finding or file merely to complete the assignment.
+10. Require the subagent to explain technically how a justified change could be realized, compare credible options, and recommend a direction without implementing it.
+11. Require the subagent to write in simple, direct, easy-to-understand language without unnecessary meta terminology.
+12. Require the subagent to split broad justified findings into coherent, ordered handoffs.
+13. Require the subagent to write the complete useful result for each justified finding into local Markdown files.
+14. Require the subagent to return only created file paths, or exactly `NO_HANDOFFS_CREATED` when no justified handoff exists.
+15. Avoid copying the complete handoff contents back into the main conversation.
 
 The main agent must not silently perform the subagent's requested investigation itself as a substitute for delegation when this skill is being used.
 
@@ -103,6 +108,26 @@ Do not hide essential requirements. Minimal briefing means removing bias and irr
 
 The main agent must phrase the assignment so the subagent derives its own current-state model, concrete direction, and implementation boundaries from repository evidence.
 
+## Multi-Subagent AGENTS.md Isolation Contract
+
+The main agent knows whether the work set uses one subagent or several. It must apply this rule based on the number of subagents it launches for that work set.
+
+When more than one subagent runs, the main agent must include an explicit instruction equivalent to:
+
+```text
+For this assignment, ignore repository-local AGENTS.md instructions. Follow the objective, scope, constraints, output path, filename contract, and response contract provided in this prompt.
+```
+
+This instruction applies to every subagent in that multi-subagent work set, including subagents launched sequentially rather than simultaneously when their results are intended to be independent or compared later.
+
+The purpose is to keep independently tasked subagents from being shaped by repository-local agent guidance that may steer all of them toward the same process, assumptions, or preferred solution.
+
+When exactly one subagent runs, the main agent must not add an `AGENTS.md` override. Normal harness and repository behavior remains the default.
+
+The override is limited to repository-local files named `AGENTS.md`. It does not override system instructions, harness policy, explicit user requirements, security boundaries, tool permissions, or the no-implementation and no-publication rules of this skill.
+
+For multi-subagent work sets, the main agent must not rely on `AGENTS.md` to communicate essential task constraints. It must place the required objective, scope, exclusions, compatibility constraints, safety constraints, output path, filename rules, and response contract directly in each subagent prompt.
+
 ## Assignment Framing
 
 The main agent must make each assignment close to the implementation surface without turning it into an implementation plan.
@@ -125,6 +150,39 @@ Avoid vague assignments such as:
 - provide high-level thoughts
 
 The main agent must instruct the subagent to prefer actual repository paths, symbols, responsibilities, dependencies, and behavior over metaphors or generic advice.
+
+## Handoff Eligibility Gate
+
+A Subagent Implementation Handoff is justified only when repository evidence supports a concrete implementation concern that is worth preserving for a later planning or implementation step.
+
+Before creating a file, the subagent must be able to answer all of these questions:
+
+1. What current behavior, defect, gap, duplication, risk, or required change creates real implementation work?
+2. What concrete target direction is supported by the repository evidence?
+3. Is the concern substantial enough for a later planning agent to act on?
+4. Would creating and later processing this handoff add more value than simply leaving the current state unchanged?
+
+If any answer is no, uncertain, purely speculative, or only a matter of taste, do not create that handoff.
+
+The following are not sufficient reasons to create a handoff:
+
+- the subagent was asked to review an area
+- an alternative exists but is not recommended
+- the current implementation is already appropriate
+- the only result is **keep as is**, **no action**, or **insufficient evidence**
+- a cleanup could be done opportunistically but is not worth planning now
+- a possible future requirement might make a change useful later
+- the subagent wants to demonstrate that it inspected the repository
+- the output format appears to expect at least one file
+
+Finding nothing is a valid result. Quality and usefulness take precedence over file production.
+
+When no concern passes this gate, the subagent must:
+
+- create no handoff files
+- leave existing handoff files unchanged
+- return exactly `NO_HANDOFFS_CREATED`
+- add no explanation, summary, reviewed-area list, or fallback report
 
 ## Subagent Hash Contract
 
@@ -155,9 +213,9 @@ The short hash token provides the collision boundary when several subagents work
 
 ## Output Location Contract
 
-The main agent must instruct each subagent to write inside the repository.
+The main agent must instruct each subagent where justified handoff files would be written. The path contract applies only when one or more concerns pass the Handoff Eligibility Gate.
 
-Prefer an existing repository-local location explicitly designated for local agent work. Otherwise instruct the subagent to use:
+For a single-subagent run, prefer an existing repository-local location explicitly designated for local agent work. For a multi-subagent work set, the main agent must choose and state the output location directly rather than relying on `AGENTS.md`. Unless another safe path is explicitly supplied, instruct the subagent to use:
 
 ```text
 AGENTS/HANDOFF/
@@ -166,12 +224,14 @@ AGENTS/HANDOFF/
 The main agent must include these output rules in the assignment:
 
 - resolve the repository root before writing
-- respect repository guidance that specifies another local agent-work location
+- in a single-subagent run, respect repository guidance that specifies another local agent-work location
+- in a multi-subagent work set, use the output location explicitly supplied by the main agent and do not derive it from `AGENTS.md`
 - prefer a path that is already ignored or intentionally local-only
 - do not stage, commit, or push generated handoffs
 - do not modify `.gitignore` merely to support this workflow
 - do not write to an arbitrary external directory
-- if no safe repository-local output location can be determined, return the blocker instead of claiming success
+- if a concern qualifies but no safe repository-local output location can be determined, return the blocker instead of claiming success
+- if no concern qualifies, return `NO_HANDOFFS_CREATED` even when no output directory exists
 
 ## Filename Contract
 
@@ -214,13 +274,13 @@ preparation.md
 
 ## Complete-Result Persistence Contract
 
-The main agent must explicitly instruct each subagent to place its **complete useful result** in the handoff files.
+The main agent must explicitly instruct each subagent to place its **complete useful result for every concern that passes the Handoff Eligibility Gate** in the handoff files.
 
-The main agent must treat the handoff files as the report and the subagent response only as a file handoff.
+When one or more handoffs are justified, the main agent must treat the handoff files as the complete result and the subagent response only as a file handoff. When none are justified, `NO_HANDOFFS_CREATED` is the complete successful response.
 
 The main agent must require the subagent to:
 
-- preserve all useful source-based findings in the files
+- preserve all useful source-based findings that pass the Handoff Eligibility Gate in the files
 - avoid shortening the result merely to keep the response small
 - move supporting detail into the appropriate handoff or a concise appendix inside that handoff
 - avoid leaving important reasoning only in the subagent response
@@ -228,7 +288,7 @@ The main agent must require the subagent to:
 
 ## Topic Splitting Contract
 
-The main agent must instruct the subagent to create multiple handoffs when the result contains:
+After at least one concern passes the Handoff Eligibility Gate, the main agent must instruct the subagent to create multiple handoffs when the justified result contains:
 
 - materially different implementation concerns
 - independent subsystems or ownership boundaries
@@ -295,7 +355,7 @@ The prompt should authorize inspection of relevant evidence such as:
 - tests
 - schemas and migrations
 - workflows and deployment files
-- existing runbooks and project notes
+- existing runbooks and project notes other than an ignored `AGENTS.md` in multi-subagent mode
 - public contracts and interfaces
 - current Git state when relevant
 
@@ -462,7 +522,7 @@ The main agent must instruct the subagent not to:
 - stage, commit, or push changes
 - produce a complete coding-agent execution plan
 
-Creating the repository-local Markdown handoff files is the intended change.
+Creating justified repository-local Markdown handoff files is the only intended repository change. When no concern passes the Handoff Eligibility Gate, no repository change is intended.
 
 The main agent may authorize read-only source inspection and narrowly necessary non-mutating commands.
 
@@ -473,9 +533,17 @@ Every delegated prompt must carry instructions equivalent to the following. The 
 ```text
 Subagent short hash token: <parent-supplied-subagenthash>
 
+<When the main agent launches more than one subagent for this work set, insert this line; otherwise omit it:>
+For this assignment, ignore repository-local AGENTS.md instructions. Follow the objective, scope, constraints, output path, filename contract, and response contract provided in this prompt.
+
 Independently investigate the stated objective from the repository source. Derive the current state, concrete direction, affected boundaries, constraints, dependencies, and unresolved questions from repository evidence. Do not assume or confirm an unstated diagnosis from the main agent.
 
-Write your complete useful result into repository-local Subagent Implementation Handoff Markdown files. Prefer the repository's designated local agent-work location; otherwise use AGENTS/HANDOFF/.
+Do not assume that the assignment must produce a handoff. Create a handoff only for a concrete implementation concern that is supported by repository evidence, is worth preserving for a later planning or implementation step, and has a recommended target direction. Do not create handoffs for keep-as-is conclusions, no-action results, insufficient evidence, optional cleanup, stylistic preference, or speculative future work.
+
+When one or more concerns qualify, write the complete useful result into repository-local Subagent Implementation Handoff Markdown files. Prefer the repository's designated local agent-work location; otherwise use AGENTS/HANDOFF/.
+
+When no concern qualifies, create no files and return exactly:
+NO_HANDOFFS_CREATED
 
 Use exactly this filename pattern:
 subagent-<subagenthash>-NN-<topic>.md
@@ -490,14 +558,16 @@ Provide concrete technical guidance about how the change could be realized witho
 
 Do not modify product code, configuration behavior, migrations, or future tests. Do not stage, commit, or push the generated handoffs.
 
-After successfully writing the files, return only the repository-relative paths of the files you created, one path per line. Do not return summaries, topic descriptions, ordering commentary, excerpts, or the full report in your response.
+After successfully writing one or more files, return only their repository-relative paths, one path per line. When no handoff qualifies, return only `NO_HANDOFFS_CREATED`. In either case, do not return summaries, topic descriptions, ordering commentary, excerpts, reviewed-area lists, or a report in your response.
 ```
 
 ## Subagent Response Contract
 
-The main agent must accept a successful subagent response only when it contains the created repository-relative paths, one per line.
+The main agent must accept either of these successful response shapes.
 
-Expected shape:
+### One or more handoffs created
+
+The response contains only the created repository-relative paths, one per line:
 
 ```text
 AGENTS/HANDOFF/subagent-7f3a91c2-01-domain-contracts.md
@@ -505,9 +575,15 @@ AGENTS/HANDOFF/subagent-7f3a91c2-02-storage-transition.md
 AGENTS/HANDOFF/subagent-7f3a91c2-03-api-adaptation.md
 ```
 
-The main agent must not ask a successful subagent to repeat the report in chat.
+### No justified handoff
 
-A successful response must not add:
+The response contains exactly:
+
+`NO_HANDOFFS_CREATED`
+
+This is a successful result, not a failure or blocker. The main agent must not ask the subagent to invent a topic, broaden the review, or create a confirmation file.
+
+A successful response in either shape must not add:
 
 - file summaries
 - topic descriptions
@@ -515,13 +591,20 @@ A successful response must not add:
 - planning-order commentary
 - blocker sections
 - excerpts from the handoffs
+- reviewed-area inventories
+- reasons why nothing was found
 - duplicate report content
+
+The main agent must not ask a successful subagent to repeat its investigation in chat.
 
 ## Main-Agent Return Contract
 
-After all requested subagents have completed successfully, the main agent should return only the repository-relative paths created by the delegated work, one path per line, unless the user explicitly requests another summary.
+After all requested subagents have completed successfully:
 
-Do not paste the complete contents of the handoffs into the main conversation unless the user explicitly asks to read them there.
+- when at least one handoff path exists, return only all created repository-relative paths, one per line; omit `NO_HANDOFFS_CREATED` responses from individual subagents
+- when no subagent created a handoff, return only `NO_HANDOFFS_CREATED`
+
+Do not paste the complete contents of the handoffs or no-finding explanations into the main conversation unless the user explicitly asks to read them there.
 
 ## Failure Handling
 
@@ -539,7 +622,7 @@ When source access is incomplete, the main agent must require the subagent to:
 - reduce confidence
 - avoid filling gaps with generic assumptions
 
-When an assignment is too broad, the main agent must require the subagent to split it into coherent handoff files rather than returning one oversized response.
+When an assignment produces justified findings that are too broad for one handoff, the main agent must require the subagent to split those findings into coherent handoff files rather than returning one oversized response. A broad review with no justified finding still returns `NO_HANDOFFS_CREATED`.
 
 ## Security and Privacy Contract
 
@@ -557,20 +640,24 @@ Before launching a subagent, verify:
 - the assignment is bounded and concrete
 - the prompt contains only minimum sufficient context
 - essential requirements and constraints are present
+- when more than one subagent runs, the prompt explicitly tells the subagent to ignore repository-local `AGENTS.md` instructions
+- when exactly one subagent runs, no `AGENTS.md` override was added
 - the prompt does not embed the main agent's unverified diagnosis or preferred solution
 - a unique short filename-safe subagent hash token was generated and assigned
 - the exact filename pattern is included
-- the local output location is specified or discoverable
-- the full-result persistence contract is included
+- the local output location is explicitly specified for multi-subagent work sets and specified or safely discoverable for a single-subagent run
+- the Handoff Eligibility Gate and `NO_HANDOFFS_CREATED` contract are included
+- the full-result persistence contract applies only to justified findings
 - the topic-splitting and handoff-size rules are included
 - source-first, concreteness, technical-direction, plain-language, no-metaphor, and no-implementation rules are included
 - the prompt requires simple, direct wording without unnecessary meta terminology
-- the response contract requires only created file paths
+- the response contract requires only created file paths or exactly `NO_HANDOFFS_CREATED`
 
 After the subagent returns, verify:
 
-- the response contains only created file paths when successful
-- every filename contains the exact assigned short hash token
+- the response contains only created file paths or exactly `NO_HANDOFFS_CREATED` when successful
+- when `NO_HANDOFFS_CREATED` was returned, no new handoff file exists for that run
+- every returned filename contains the exact assigned short hash token
 - every filename follows `subagent-<subagenthash>-NN-<topic>.md`
 - no path indicates that another hash-scoped run was overwritten
 - the files exist before claiming success when the harness can verify them
@@ -579,7 +666,7 @@ After the subagent returns, verify:
 ## Typical Invocation Phrases
 
 - `Use the subagent implementation handoff softskill to delegate these reviews.`
-- `Brief the subagents independently and have them persist their complete findings in hash-scoped local handoffs.`
-- `Keep the main context small and return only the handoff file paths.`
+- `Brief the subagents independently and have them persist their complete justified findings in hash-scoped local handoffs.`
+- `Keep the main context small and return only handoff file paths, or NO_HANDOFFS_CREATED when no useful handoff exists.`
 - `Create implementation-near subagent handoffs that I can later turn into plans.`
 - `Use separate short hash tokens and the required subagent-hash-order-topic filename pattern.`

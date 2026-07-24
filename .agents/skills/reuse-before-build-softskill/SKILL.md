@@ -1,6 +1,6 @@
 ---
 name: reuse-before-build-softskill
-description: Review a repository for custom mechanisms that may duplicate existing project, platform, framework, standard-library, or established ecosystem solutions. Verify realistic reuse options, project health, maintenance status, and package-manager availability, then report source-based findings in chat without modifying the repository.
+description: Review a repository for custom mechanisms that should be replaced or materially reduced now by an existing project, platform, framework, standard-library, current-dependency, or established ecosystem solution. Emit only current-state actionable recommendations; no finding is a valid result. Verify realistic reuse options, project health, maintenance status, compatibility, and package-manager availability without modifying product code or dependencies.
 ---
 
 # Reuse Before Build Softskill
@@ -17,7 +17,11 @@ The core question is:
 
 This is a review-only softskill.
 
-Produce findings and recommendations in chat. Do not change code, dependencies, manifests, configuration, documentation, lock files, generated files, or repository state.
+Its job is not to produce a repository report. Its job is to identify only those cases where replacing or materially reducing the current mechanism is recommended for the repository as it exists now.
+
+A review that finds no such case is successful. Do not manufacture output to prove that the review happened.
+
+Do not change product code, dependencies, manifests, configuration, documentation, lock files, generated files, or Git state.
 
 ## Core Principle
 
@@ -34,6 +38,60 @@ Prefer, in order of practical suitability:
 7. a new general-purpose subsystem only when current requirements justify it
 
 This order is a review guide, not an automatic verdict. A poor existing mechanism does not become good merely because it already exists.
+
+## Actionable Finding Gate
+
+A reviewed mechanism becomes an output finding only when all of the following are true:
+
+1. the repository currently owns meaningful custom behavior for a reusable technical concern
+2. a specific existing repository, platform, framework, current-dependency, or established external solution covers the actual required behavior
+3. the replacement or reduction is compatible with current constraints
+4. adoption cost and migration risk are lower than the expected correctness, maintenance, security, or complexity benefit
+5. the reviewer recommends making the change now, not merely considering it later
+6. the recommendation is concrete enough to describe the target mechanism and affected boundary
+
+Apply this practical test:
+
+> Would it be responsible to open an implementation issue or pull request for this change against the current repository?
+
+If the answer is no, do not emit a finding.
+
+The following do **not** qualify as findings:
+
+- a package or API exists, but the local implementation is already proportionate
+- an alternative is technically possible but not preferable
+- the existing code already uses the correct platform or framework primitive
+- a modernization is idiomatic but has no meaningful current benefit
+- a tiny cleanup could be done opportunistically while touching the code for another reason
+- a solution might become useful if the feature grows later
+- the reviewer can only conclude **Keep the local implementation**
+- the reviewer has **Insufficient evidence**
+- the change would mostly reduce line count while adding dependency or migration cost
+
+Do not output keep-as-is confirmations, reviewed-area inventories, rejected-package catalogs, or architecture praise.
+
+## Current-State Recommendation Threshold
+
+Recommendations must be for the current repository state. Avoid conditional output such as:
+
+- adopt this if requirements grow
+- consider this if maintenance becomes painful
+- modernize this when the file is touched
+- this could be cleaner with another abstraction
+
+Such observations may guide private reasoning, but they are not output findings.
+
+A reduction qualifies only when it removes meaningful duplicated or risky mechanism now. Cosmetic extraction, speculative consolidation, and optional helper cleanup do not qualify.
+
+A small change may still qualify when it has a clear present correctness or safety benefit, such as replacing hand-written argument quoting with an official argument-list API.
+
+## Finding Selectivity
+
+Prefer a few high-confidence findings over broad coverage.
+
+Do not split one weak observation into several findings. Do not create one finding per reviewed subsystem. Group only changes that naturally belong to the same implementation decision.
+
+The presence of many reviewed areas does not imply that any output is required.
 
 ## Review Scope
 
@@ -80,7 +138,7 @@ Use this softskill when:
 - a review should check whether the project is reinventing an established solution
 - a proposed implementation adds significant code, abstraction, or maintenance surface
 - a dependency decision needs an evidence-based reuse review
-- the user wants findings and alternatives without changing the repository
+- the user wants only actionable replacement or reduction findings without changing the repository
 
 ## When Not To Use
 
@@ -127,11 +185,13 @@ Check for:
 - a wrapper around an established package that could be reused
 - an existing convention that the new mechanism bypasses
 
-Report duplication inside the repository separately from external-library opportunities.
+When repository-internal duplication produces an actionable consolidation, prefer that finding over an external-library recommendation. Otherwise keep the observation internal.
 
 Do not propose a new dependency when the repository already has a suitable, maintained solution unless there is a concrete reason not to reuse it.
 
 ## External Research Contract
+
+Search externally only after repository inspection identifies a plausible actionable replacement. Do not research packages merely to populate an alternatives section.
 
 When a plausible established solution may exist and current external information would materially affect the recommendation, search the internet.
 
@@ -183,13 +243,14 @@ A small focused package can be valid. An unknown, unmaintained, single-purpose p
 
 ## Project Health Check
 
-Classify each serious external candidate as one of:
+During analysis, classify each external candidate that remains plausible for an actionable recommendation as one of:
 
 1. **Healthy** — maintained, compatible, documented, and practical to adopt.
 2. **Mature and stable** — low release frequency is reasonable because the problem and API are stable; no clear abandonment signs.
 3. **Usable with caution** — useful but has maintenance, compatibility, governance, or adoption concerns.
-4. **Outdated or unsuitable** — stale, incompatible, poorly maintained, risky, or too difficult to consume.
-5. **Unverified** — evidence is insufficient for a responsible recommendation.
+4. **Outdated** — stale, abandoned, insecure, or incompatible because maintenance has not kept pace.
+5. **Healthy but unsuitable** — maintained software that does not fit this repository’s actual requirement, constraints, deployment model, or proportionality threshold.
+6. **Unverified** — evidence is insufficient for a responsible recommendation.
 
 Do not label a project outdated only because its last release is old. Consider whether the domain is stable and whether maintenance activity, issue handling, compatibility, and ecosystem usage remain healthy.
 
@@ -280,7 +341,7 @@ Future extensibility counts only when supported by product requirements, existin
 
 ## Replacement Judgment
 
-For each finding, choose one clear judgment:
+Use these judgments during analysis:
 
 1. **Reuse existing repository mechanism**
 2. **Use standard platform or framework capability**
@@ -290,15 +351,35 @@ For each finding, choose one clear judgment:
 6. **Reduce the local implementation instead of replacing it**
 7. **Insufficient evidence**
 
-Do not force a library recommendation when keeping or reducing the local implementation is better.
+Only judgments 1, 2, 3, 4, and 6 are eligible for output, and only when they pass the Actionable Finding Gate.
+
+Judgments 5 and 7 are internal review outcomes. Do not report them as findings and do not create implementation handoffs for them.
+
+Judgment 6 is eligible only when the reduction is recommended now and has meaningful benefit. An optional cleanup, future possibility, or opportunistic refactor is not eligible.
 
 Do not recommend replacement solely to reduce line count. Account for migration risk, behavior compatibility, dependency policy, and long-term ownership.
+
+## Interaction With Handoff Or Artifact Skills
+
+When this softskill is paired with a skill that creates handoffs, reports, issues, or other artifacts, this softskill acts as the **eligibility filter**:
+
+- create an artifact only for a finding that passes the Actionable Finding Gate
+- every created artifact must prepare a concrete current-state replacement or material reduction
+- do not create artifacts for keep-as-is conclusions, insufficient evidence, rejected alternatives, optional modernization, or future-condition ideas
+- do not create an overview artifact merely to say that no replacement was found
+- if no actionable finding exists, create zero artifacts
+
+For subagent handoff workflows, a subagent with no actionable finding must return only:
+
+`NO_HANDOFFS_CREATED`
+
+It must not create an empty handoff or a handoff that recommends no action.
 
 ## No-Change Contract
 
 This softskill is analysis-only.
 
-Do not:
+When used by itself, do not:
 
 - edit source files
 - add, remove, or update dependencies
@@ -308,57 +389,48 @@ Do not:
 - run automatic upgrade or migration commands
 - stage, commit, or push
 
-Read-only inspection, dependency metadata inspection, and internet research are allowed.
+When explicitly paired with a handoff or artifact-producing skill, only the artifacts permitted by the Interaction With Handoff Or Artifact Skills section may be created. Product code, dependencies, configuration, and Git publication remain unchanged.
 
-Return all findings in chat.
+Read-only inspection, dependency metadata inspection, and internet research are allowed.
 
 ## Required Output Shape
 
-### 1. Review summary
+### No actionable finding
 
-State briefly:
+Do not produce a report, reviewed-area list, keep-as-is section, alternatives table, priority list, or final recommendation.
 
-- what area was reviewed
-- whether significant unnecessary custom construction was found
-- the strongest reuse opportunity
-- whether the current solution is proportionate to the actual requirement
+In direct chat, return only:
 
-### 2. Findings
+`No actionable reuse opportunity found.`
 
-For each meaningful finding include:
+In a subagent handoff workflow, follow the sentinel contract above and create no files.
 
-- **Location** — relevant files, symbols, or subsystem
-- **Current mechanism** — what was built
-- **Actual requirement** — what the repository currently appears to need
-- **Why review is warranted** — duplicated capability, excess scope, correctness risk, maintenance cost, or missed existing mechanism
-- **Reuse candidates** — repository, standard, framework, existing dependency, or external options
-- **Candidate health** — healthy, mature and stable, usable with caution, outdated or unsuitable, or unverified
-- **Consumption path** — normal package manager or official distribution mechanism when external reuse is recommended
-- **Judgment** — one clear replacement judgment
-- **Reasoning** — concise source-based explanation
+### One or more actionable findings
 
-### 3. Keep-as-is findings
+Return only the actionable findings. Omit all reviewed mechanisms that do not warrant a current change.
 
-Mention important reviewed mechanisms that should remain local and explain why.
+For each finding include:
 
-This prevents the review from becoming a one-sided library hunt.
+- **Location** — relevant files and symbols
+- **Replace or reduce** — the current mechanism and the recommended target
+- **Why now** — concrete present-day correctness, maintenance, security, compatibility, or complexity benefit
+- **Evidence** — repository behavior and constraints that support the recommendation
+- **Adoption path** — existing API, framework feature, dependency already present, or normal package-manager path
+- **Migration boundary** — the main callers, contracts, tests, or behavior that must be preserved
+- **Net judgment** — why the benefit exceeds adoption and migration cost
+- **Confidence** — high or medium; do not emit low-confidence findings
 
-### 4. Priority order
+Keep the result narrow. Do not add a summary section unless needed to distinguish several independent actionable changes.
 
-Rank recommended actions as:
+Do not include:
 
-- **High value** — substantial correctness, security, maintenance, or complexity benefit
-- **Useful** — worthwhile but not urgent
-- **No action** — current local solution is proportionate
-- **Needs evidence** — cannot responsibly decide yet
-
-### 5. Final recommendation
-
-End with:
-
-- the most important reuse decision
-- the most important local implementation that should remain
-- any external candidate that must not be adopted because it is outdated, obscure, incompatible, or difficult to maintain
+- keep-as-is findings
+- no-action items
+- speculative future opportunities
+- optional cleanups
+- rejected candidates unless directly necessary to explain the recommended target
+- candidate-health tables for packages that are not being recommended
+- general repository review commentary
 
 ## Output Style
 
@@ -378,18 +450,18 @@ It determines:
 
 - what the project actually needs
 - what it already has
-- what established alternatives exist
+- which established alternatives are plausible for a current actionable replacement
 - whether those alternatives are healthy and compatible
 - whether they can be consumed and updated normally
 - whether reuse is genuinely simpler and safer than local ownership
-- where local code remains the better choice
+- whether any recommendation is strong enough to justify a current change
 
-The best result reduces unnecessary custom infrastructure without replacing it with unnecessary dependency infrastructure.
+The best result may be no output. When output exists, it should describe a change worth making now and reduce unnecessary custom infrastructure without replacing it with unnecessary dependency infrastructure.
 
 ## Typical Invocation Phrases
 
-- `Use $reuse-before-build-softskill to review this repository for mechanisms that should reuse established solutions.`
-- `Check whether this project is reinventing common infrastructure. Return findings only and make no changes.`
-- `Review this subsystem for existing repository, platform, framework, or maintained-library alternatives.`
-- `Find custom mechanisms that should be replaced by established packages, but reject obscure or outdated candidates.`
-- `Check whether normal package-manager dependencies would be simpler than the custom implementation.`
+- `Use $reuse-before-build-softskill to find only custom mechanisms that should be replaced or materially reduced now.`
+- `Check whether this project is reinventing common infrastructure. Return only current-state actionable recommendations; no finding is acceptable.`
+- `Review this subsystem for existing repository, platform, framework, or maintained-library replacements. Do not report keep-as-is results.`
+- `Find custom mechanisms that are worth replacing now, but reject obscure, outdated, disproportionate, or merely optional candidates.`
+- `Check whether normal package-manager dependencies would be simpler than the custom implementation. Produce no report when the answer is no.`
