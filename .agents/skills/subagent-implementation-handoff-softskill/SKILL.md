@@ -159,7 +159,7 @@ The main agent must instruct each subagent to write inside the repository.
 Prefer an existing repository-local location explicitly designated for local agent work. Otherwise instruct the subagent to use:
 
 ```text
-AGENTS/subagent-implementation-handoff/
+AGENTS/HANDOFF/
 ```
 
 The main agent must include these output rules in the assignment:
@@ -177,15 +177,15 @@ The main agent must include these output rules in the assignment:
 The main agent must require this exact filename pattern:
 
 ```text
-handoff-<subagenthash>-NN-<topic>.md
+subagent-<subagenthash>-NN-<topic>.md
 ```
 
 Example using the short hash token `7f3a91c2`:
 
 ```text
-handoff-7f3a91c2-01-domain-contracts.md
-handoff-7f3a91c2-02-storage-transition.md
-handoff-7f3a91c2-03-api-compatibility.md
+subagent-7f3a91c2-01-domain-contracts.md
+subagent-7f3a91c2-02-storage-transition.md
+subagent-7f3a91c2-03-api-compatibility.md
 ```
 
 The main agent must instruct the subagent that:
@@ -438,10 +438,10 @@ Subagent short hash token: <parent-supplied-subagenthash>
 
 Independently investigate the stated objective from the repository source. Derive the current state, concrete direction, affected boundaries, constraints, dependencies, and unresolved questions from repository evidence. Do not assume or confirm an unstated diagnosis from the main agent.
 
-Write your complete useful result into repository-local Subagent Implementation Handoff Markdown files. Prefer the repository's designated local agent-work location; otherwise use AGENTS/subagent-implementation-handoff/.
+Write your complete useful result into repository-local Subagent Implementation Handoff Markdown files. Prefer the repository's designated local agent-work location; otherwise use AGENTS/HANDOFF/.
 
 Use exactly this filename pattern:
-handoff-<subagenthash>-NN-<topic>.md
+subagent-<subagenthash>-NN-<topic>.md
 
 Use the exact short hash token supplied above in every filename. Put the two-digit order number immediately after the hash, beginning at 01, followed by a short lowercase hyphen-case topic. Never overwrite an existing file.
 
@@ -463,9 +463,9 @@ The main agent must accept a successful subagent response only when it contains 
 Expected shape:
 
 ```text
-AGENTS/subagent-implementation-handoff/handoff-7f3a91c2-01-domain-contracts.md
-AGENTS/subagent-implementation-handoff/handoff-7f3a91c2-02-storage-transition.md
-AGENTS/subagent-implementation-handoff/handoff-7f3a91c2-03-api-adaptation.md
+AGENTS/HANDOFF/subagent-7f3a91c2-01-domain-contracts.md
+AGENTS/HANDOFF/subagent-7f3a91c2-02-storage-transition.md
+AGENTS/HANDOFF/subagent-7f3a91c2-03-api-adaptation.md
 ```
 
 The main agent must not ask a successful subagent to repeat the report in chat.
@@ -533,7 +533,7 @@ After the subagent returns, verify:
 
 - the response contains only created file paths when successful
 - every filename contains the exact assigned short hash token
-- every filename follows `handoff-<subagenthash>-NN-<topic>.md`
+- every filename follows `subagent-<subagenthash>-NN-<topic>.md`
 - no path indicates that another hash-scoped run was overwritten
 - the files exist before claiming success when the harness can verify them
 - generated handoffs were not staged, committed, or pushed
@@ -544,4 +544,4 @@ After the subagent returns, verify:
 - `Brief the subagents independently and have them persist their complete findings in hash-scoped local handoffs.`
 - `Keep the main context small and return only the handoff file paths.`
 - `Create implementation-near subagent handoffs that I can later turn into plans.`
-- `Use separate short hash tokens and the required hash-order-topic handoff filename pattern.`
+- `Use separate short hash tokens and the required subagent-hash-order-topic filename pattern.`

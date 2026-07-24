@@ -1,4 +1,4 @@
 interface:
   display_name: "Subagent Implementation Handoff"
   short_description: "Orchestrate concrete technical subagent handoffs"
-  default_prompt: "Use $subagent-implementation-handoff-softskill as the main-agent orchestrator: brief subagents with minimal unbiased context, assign each run a unique short filename-safe hash token, require filesystem-sortable hash-order-topic handoff filenames, request concrete technical approaches and option recommendations without implementation, preserve complete findings in ordered local handoff files, and accept only the created file paths as the subagent response."
+  default_prompt: "Use $subagent-implementation-handoff-softskill as the main-agent orchestrator: brief subagents with minimal unbiased context, assign each run a unique short filename-safe hash token, require filesystem-sortable subagent-hash-order-topic filenames in AGENTS/HANDOFF/, request concrete technical approaches and option recommendations without implementation, preserve complete findings in ordered local handoff files, and accept only the created file paths as the subagent response."
