@@ -1,6 +1,6 @@
 ---
 name: subagent-implementation-handoff-softskill
-description: Use this orchestration softskill when the main agent should delegate source-based investigation or implementation preparation to one or more subagents without flooding or biasing the main context. It tells the main agent how to brief each subagent with minimal sufficient context, assign a unique filename-safe UUID token, require complete implementation-near findings in ordered repository-local Markdown handoffs, and accept only the created file paths as the subagent response.
+description: Use this orchestration softskill when the main agent should delegate source-based investigation or implementation preparation to one or more subagents without flooding or biasing the main context. It tells the main agent how to brief each subagent with minimal sufficient context, assign a unique short filename-safe hash token, require complete implementation-near findings in ordered repository-local Markdown handoffs, and accept only the created file paths as the subagent response.
 ---
 
 # Subagent Implementation Handoff Softskill
@@ -33,13 +33,14 @@ The main agent must:
 1. Decide whether delegation is useful.
 2. Define a bounded objective for each subagent.
 3. Brief each subagent with the minimum sufficient context.
-4. Assign each subagent run a unique filename-safe UUID token.
+4. Generate and assign each subagent run a unique short filename-safe hash token.
 5. Include the required file-writing and return contract in every subagent prompt.
 6. Require the subagent to inspect the repository and derive its own findings.
-7. Require the subagent to split broad findings into coherent, ordered handoffs.
-8. Require the subagent to write complete findings into local Markdown files.
-9. Require the subagent to return only the created file paths.
-10. Avoid copying the complete handoff contents back into the main conversation.
+7. Require the subagent to explain technically how the change could be realized, compare credible options, and recommend a direction without implementing it.
+8. Require the subagent to split broad findings into coherent, ordered handoffs.
+9. Require the subagent to write complete findings into local Markdown files.
+10. Require the subagent to return only the created file paths.
+11. Avoid copying the complete handoff contents back into the main conversation.
 
 The main agent must not silently perform the subagent's requested investigation itself as a substitute for delegation when this skill is being used.
 
@@ -81,7 +82,7 @@ The main agent should normally provide only:
 - explicit exclusions
 - hard compatibility requirements
 - safety, environment, and policy constraints
-- the assigned subagent UUID token
+- the assigned short subagent hash token
 - the output location
 - the filename contract
 - the required handoff characteristics
@@ -124,28 +125,31 @@ Avoid vague assignments such as:
 
 The main agent must instruct the subagent to prefer actual repository paths, symbols, responsibilities, dependencies, and behavior over metaphors or generic advice.
 
-## Subagent UUID Contract
+## Subagent Hash Contract
 
-Before starting a subagent, the main agent must assign it a unique filename-safe UUID token.
+Before starting a subagent, the main agent must generate and assign a unique short filename-safe hash token for that subagent run.
 
-The token may be a full UUID or a sufficiently unique shortened UUID-like token. Prefer lowercase letters, digits, and hyphens.
+Use a lowercase hexadecimal token with 8 to 12 characters. It does not need to be cryptographically derived or globally unique; it only needs enough practical uniqueness to distinguish concurrent and logically separate runs in the local workspace.
 
-Examples:
+Good examples:
 
 ```text
-abababab
-acacacac
-550e8400-e29b-41d4-a716-446655440000
+7f3a91c2
+c84d2e6b
+91af07d4c3e2
 ```
+
+Do not use visibly artificial repeated-character placeholders, sequential tokens, agent numbers, model names, timestamps alone, or long globally unique identifiers when a short hash is sufficient.
 
 The main agent must:
 
+- generate the token before launching the subagent
 - use a different token for every concurrent or logically separate subagent run
 - include the exact token in the subagent prompt
-- instruct the subagent not to invent, replace, or normalize the token
+- instruct the subagent not to invent, replace, shorten, expand, or normalize the token
 - instruct the subagent to use that exact token in every handoff filename created by that run
 
-The UUID token provides the collision boundary when several subagents work on the same or similar topics.
+The short hash token provides the collision boundary when several subagents work on the same or similar topics.
 
 
 ## Output Location Contract
@@ -155,7 +159,7 @@ The main agent must instruct each subagent to write inside the repository.
 Prefer an existing repository-local location explicitly designated for local agent work. Otherwise instruct the subagent to use:
 
 ```text
-AGENTS/PREIMPLEMENTATION/
+AGENTS/subagent-implementation-handoff/
 ```
 
 The main agent must include these output rules in the assignment:
@@ -173,32 +177,34 @@ The main agent must include these output rules in the assignment:
 The main agent must require this exact filename pattern:
 
 ```text
-subagent-implementation-handoff-<subagentuuid>-<topic>-NN.md
+handoff-<subagenthash>-NN-<topic>.md
 ```
 
-Example using the UUID token `abababab`:
+Example using the short hash token `7f3a91c2`:
 
 ```text
-subagent-implementation-handoff-abababab-domain-contracts-01.md
-subagent-implementation-handoff-abababab-storage-transition-02.md
-subagent-implementation-handoff-abababab-api-compatibility-03.md
+handoff-7f3a91c2-01-domain-contracts.md
+handoff-7f3a91c2-02-storage-transition.md
+handoff-7f3a91c2-03-api-compatibility.md
 ```
 
 The main agent must instruct the subagent that:
 
-- `<subagentuuid>` is the exact token supplied by the main agent
-- `<topic>` is a short lowercase hyphen-case name for the actual implementation concern
+- `<subagenthash>` is the exact short hash token supplied by the main agent
 - `NN` is a two-digit order number such as `01`, `02`, or `03`
-- numbering starts at `01` for that UUID-scoped run
+- the order number appears immediately after the hash so normal filesystem sorting preserves the intended sequence within that run
+- `<topic>` is a short lowercase hyphen-case name for the actual implementation concern
+- numbering starts at `01` for that hash-scoped run
 - ordering follows dependency or implementation-preparation order
-- every file from the same run uses the same UUID token
+- every file from the same run uses the same short hash token
 - an existing file must never be overwritten
 - a filename collision must be returned as a blocker
 
 Bad names include:
 
 ```text
-subagent-implementation-handoff-01-domain-contracts.md
+handoff-01-domain-contracts.md
+handoff-agent1-01-domain-contracts.md
 agent-7-answer.md
 research.md
 thoughts-final-final.md
@@ -237,7 +243,7 @@ Each handoff should be:
 - small enough for one planning session to understand and convert into a plan
 - internally coherent
 - independently nameable
-- ordered relative to the other handoffs from the same UUID-scoped run
+- ordered relative to the other handoffs from the same hash-scoped run
 
 The main agent must also instruct the subagent:
 
@@ -305,7 +311,7 @@ The main agent must instruct the subagent:
 The main agent must instruct the subagent to use this structure unless the assignment clearly requires a small variation:
 
 ```markdown
-# Subagent Implementation Handoff <subagentuuid> NN: Topic
+# Subagent Implementation Handoff <subagenthash> NN: Topic
 
 ## Assignment
 What the subagent was asked to determine.
@@ -325,6 +331,12 @@ How the relevant code currently works and where responsibility lives.
 ## Concrete direction
 The recommended target direction, stated in implementation-near terms.
 
+## Technical approach
+How the change could be realized technically: likely responsibility shifts, affected symbols and contracts, data or control flow, configuration or persistence changes, integration seams, error handling, and compatibility mechanics. Describe the implementation shape without writing the implementation or a step-by-step execution plan.
+
+## Alternatives and recommendation
+When more than one credible approach exists, compare the realistic options, explain their repository-specific trade-offs, recommend one, and state when another option would be preferable.
+
 ## Affected boundaries
 Files, modules, APIs, schemas, configuration, tests, integrations, or ownership boundaries likely to matter.
 
@@ -335,7 +347,7 @@ Behavior, contracts, environments, data, or operational properties that must be 
 What must happen before this topic and what it enables afterward.
 
 ## Planning inputs
-Concrete decisions, alternatives, acceptance concerns, and verification surfaces the later planning agent must include.
+Concrete decisions, acceptance concerns, and verification surfaces the later planning agent must include.
 
 ## Risks and unresolved questions
 Only genuine risks or decisions not safely derivable from the source.
@@ -371,6 +383,31 @@ The main agent must tell the subagent to avoid content such as:
 
 The prompt must require actual files, symbols, responsibilities, data flows, contracts, and observed behavior whenever possible.
 
+## Technical Direction Contract
+
+The main agent must require the subagent to go beyond identifying affected areas and provide useful technical guidance about how the change could be realized.
+
+The handoff should describe, when supported by repository evidence:
+
+- where responsibilities should remain, move, split, or consolidate
+- which existing types, interfaces, methods, modules, configuration keys, schemas, or workflows are likely to change
+- which new boundary or contract may be needed and why
+- how request, control, event, state, or data flow should pass through the affected components
+- how compatibility, error handling, migration, rollout, or operational behavior could be preserved
+- which tests or verification surfaces would prove the intended behavior
+
+When multiple credible approaches exist, the main agent must instruct the subagent to:
+
+1. name the realistic options
+2. explain the repository-specific advantages and disadvantages of each
+3. recommend one concrete direction
+4. explain why that direction best fits the observed code and constraints
+5. state the conditions under which another option would be preferable
+
+Prefer decisive guidance such as "use approach X here because the existing boundary already owns Y" over noncommittal language such as "consider X or Y."
+
+This technical guidance must still stop before implementation. The subagent must not write production code, patches, complete method bodies, exact file-by-file edit instructions, shell commands, or a full ordered execution plan.
+
 ## No-Metaphor Contract
 
 The main agent must instruct the subagent not to use metaphor, narrative framing, or motivational language as a substitute for technical specificity.
@@ -397,20 +434,22 @@ The main agent may authorize read-only source inspection and narrowly necessary 
 Every delegated prompt must carry instructions equivalent to the following. The main agent should add the concrete objective, scope, exclusions, and mandatory constraints before this contract without adding its own unverified diagnosis.
 
 ```text
-Subagent UUID token: <parent-supplied-subagentuuid>
+Subagent short hash token: <parent-supplied-subagenthash>
 
 Independently investigate the stated objective from the repository source. Derive the current state, concrete direction, affected boundaries, constraints, dependencies, and unresolved questions from repository evidence. Do not assume or confirm an unstated diagnosis from the main agent.
 
-Write your complete useful result into repository-local Subagent Implementation Handoff Markdown files. Prefer the repository's designated local agent-work location; otherwise use AGENTS/PREIMPLEMENTATION/.
+Write your complete useful result into repository-local Subagent Implementation Handoff Markdown files. Prefer the repository's designated local agent-work location; otherwise use AGENTS/subagent-implementation-handoff/.
 
 Use exactly this filename pattern:
-subagent-implementation-handoff-<subagentuuid>-<topic>-NN.md
+handoff-<subagenthash>-NN-<topic>.md
 
-Use the exact UUID token supplied above in every filename. Use a short lowercase hyphen-case topic and a trailing two-digit order number beginning at 01. Never overwrite an existing file.
+Use the exact short hash token supplied above in every filename. Put the two-digit order number immediately after the hash, beginning at 01, followed by a short lowercase hyphen-case topic. Never overwrite an existing file.
 
 Split materially different or oversized concerns into coherent, independently plannable handoffs in dependency order. Each handoff must be a medium to near-long implementation-preparation work package: not a tiny note, not an unbounded research dump, and not a full implementation plan.
 
 Ground every important conclusion in actual repository evidence. Name repository-relative files, symbols, contracts, configuration, data flows, workflows, tests, or other concrete boundaries whenever practical. Avoid generic advice and metaphors.
+
+Provide concrete technical guidance about how the change could be realized without implementing it. Describe likely responsibility shifts, affected symbols and contracts, data or control flow, integration seams, compatibility mechanics, error handling, and verification surfaces. When credible alternatives exist, compare them, explain their repository-specific trade-offs, recommend one direction, and state when another option would be preferable. Do not write production code, patches, exact edit instructions, shell commands, or a full ordered execution plan.
 
 Do not modify product code, configuration behavior, migrations, or future tests. Do not stage, commit, or push the generated handoffs.
 
@@ -424,9 +463,9 @@ The main agent must accept a successful subagent response only when it contains 
 Expected shape:
 
 ```text
-AGENTS/PREIMPLEMENTATION/subagent-implementation-handoff-abababab-domain-contracts-01.md
-AGENTS/PREIMPLEMENTATION/subagent-implementation-handoff-abababab-storage-transition-02.md
-AGENTS/PREIMPLEMENTATION/subagent-implementation-handoff-abababab-api-adaptation-03.md
+AGENTS/subagent-implementation-handoff/handoff-7f3a91c2-01-domain-contracts.md
+AGENTS/subagent-implementation-handoff/handoff-7f3a91c2-02-storage-transition.md
+AGENTS/subagent-implementation-handoff/handoff-7f3a91c2-03-api-adaptation.md
 ```
 
 The main agent must not ask a successful subagent to repeat the report in chat.
@@ -482,27 +521,27 @@ Before launching a subagent, verify:
 - the prompt contains only minimum sufficient context
 - essential requirements and constraints are present
 - the prompt does not embed the main agent's unverified diagnosis or preferred solution
-- a unique filename-safe subagent UUID token was assigned
+- a unique short filename-safe subagent hash token was generated and assigned
 - the exact filename pattern is included
 - the local output location is specified or discoverable
 - the full-result persistence contract is included
 - the topic-splitting and handoff-size rules are included
-- source-first, concreteness, no-metaphor, and no-implementation rules are included
+- source-first, concreteness, technical-direction, no-metaphor, and no-implementation rules are included
 - the response contract requires only created file paths
 
 After the subagent returns, verify:
 
 - the response contains only created file paths when successful
-- every filename contains the exact assigned UUID token
-- every filename follows `subagent-implementation-handoff-<subagentuuid>-<topic>-NN.md`
-- no path indicates that another UUID-scoped run was overwritten
+- every filename contains the exact assigned short hash token
+- every filename follows `handoff-<subagenthash>-NN-<topic>.md`
+- no path indicates that another hash-scoped run was overwritten
 - the files exist before claiming success when the harness can verify them
 - generated handoffs were not staged, committed, or pushed
 
 ## Typical Invocation Phrases
 
 - `Use the subagent implementation handoff softskill to delegate these reviews.`
-- `Brief the subagents independently and have them persist their complete findings in UUID-scoped local handoffs.`
+- `Brief the subagents independently and have them persist their complete findings in hash-scoped local handoffs.`
 - `Keep the main context small and return only the handoff file paths.`
 - `Create implementation-near subagent handoffs that I can later turn into plans.`
-- `Use separate UUID tokens and the required subagent handoff filename pattern.`
+- `Use separate short hash tokens and the required hash-order-topic handoff filename pattern.`
