@@ -204,7 +204,8 @@ Resolution:
 
 - choose one existing canonical file
 - preserve the best useful content there
-- delete redundant files after useful content is retained
+- prefer replacing each redundant file with a short superseded-handoff redirect after all useful content is retained in the canonical file
+- delete a redundant file only when the user explicitly requests deletion or a redirect cannot be made safely
 
 ### Partial overlap
 
@@ -245,7 +246,8 @@ Several handoffs are individually too small and naturally form one planning and 
 Resolution:
 
 - merge their useful content into one chosen existing canonical file
-- delete redundant fragments
+- prefer replacing redundant fragments with superseded-handoff redirects to the canonical file
+- delete a fragment only when the user explicitly requests deletion or a redirect cannot be made safely
 
 Do not use fragmentation as a reason to merge normal ordered handoffs from one agent-run set under the default no-op rule.
 
@@ -268,7 +270,8 @@ Resolution:
 
 - remove satisfied scope
 - update the remaining delta
-- delete the file when no meaningful future work remains
+- when another existing handoff now carries the remaining or authoritative work, prefer replacing this file with a superseded-handoff redirect
+- when no future work and no canonical destination remain, keep a short completed/no-action marker or delete only when the user explicitly requests deletion
 
 Do not turn this skill into a complete current-state audit when no multi-set reconciliation issue exists.
 
@@ -312,7 +315,8 @@ Allowed transformations:
 - merge several files into one chosen existing canonical file
 - redistribute content across existing files
 - rename an existing file when topic or order is materially misleading
-- delete an existing file after useful content is preserved elsewhere or proven obsolete
+- replace an absorbed existing file with a superseded-handoff redirect
+- delete an existing file only after useful content is preserved elsewhere and deletion is explicitly requested or a redirect cannot be made safely
 
 Disallowed transformations:
 
@@ -321,11 +325,59 @@ Disallowed transformations:
 - create a conflict report beside the handoffs
 - create a replacement set in another directory
 - copy backup handoffs into the repository
-- preserve redundant files only as historical records
+- preserve the old full proposal after its actionable content was absorbed; replace it with a short redirect instead
 
 The final number of handoff files must be less than or equal to the initial number.
 
 Use Git or surrounding workspace history for recovery when available. Do not create backup handoff files.
+
+## Superseded Handoff Redirect Contract
+
+When one existing handoff is fully absorbed into one or more canonical handoffs, prefer rewriting the absorbed file in place instead of deleting it.
+
+Use a short, clear form like:
+
+```markdown
+# Superseded Handoff
+
+Status: superseded
+
+This file is not an implementation task. Its useful proposals were incorporated into:
+
+- `AGENTS/HANDOFF/subagent-<hash>-NN-<topic>.md`
+
+Read and implement the listed canonical handoff instead. Do not plan or implement this file.
+```
+
+A superseded redirect may list more than one canonical destination when its former scope was split across existing files.
+
+The redirect must:
+
+- use the exact line `Status: superseded`
+- name every canonical destination needed to find the absorbed work
+- state that the file is not an implementation task
+- contain no remaining competing recommendation, technical direction, plan, or unresolved option
+- stay short and easy to understand
+- keep the original filename unless a rename is required to prevent a misleading order or collision
+
+Do not use a superseded redirect as a substitute for moving the useful content. The canonical destination files must contain the full useful result before the source file is replaced.
+
+## Standalone Canonical Handoff Contract
+
+Every remaining actionable handoff must be understandable and usable on its own.
+
+After merging or redistributing content, each canonical handoff must include all information needed to plan its own scope, including:
+
+- current-state evidence
+- authoritative technical direction
+- affected files, symbols, contracts, and flows
+- compatibility constraints
+- dependencies and ordering
+- useful risks, decisions, and verification inputs
+
+A canonical handoff may reference neighboring actionable handoffs for real prerequisites, but it must not depend on a superseded redirect for missing explanation, evidence, or decisions.
+
+Before replacing or deleting an absorbed file, reread the canonical destinations without the source file. If they are not complete and clear by themselves, move the missing content first.
 
 ## Canonical File Selection
 
@@ -339,7 +391,7 @@ When several files become one, choose an existing canonical file using:
 
 Keep the canonical file's existing hash. Do not invent a new hash for merged content.
 
-Before deleting another file, ensure each still-useful fact, constraint, source reference, risk, and planning input has been:
+Before replacing another file with a superseded redirect or deleting it, ensure each still-useful fact, constraint, source reference, risk, and planning input has been:
 
 - incorporated into a remaining file
 - assigned to another remaining file
@@ -435,10 +487,11 @@ If a selected handoff has unrelated local edits that cannot be safely preserved,
 7. Decide the authoritative direction and final existing-file allocation.
 8. Plan all rewrites, merges, renames, and deletions before applying them.
 9. Apply the minimal coherent transformation.
-10. Reread every remaining handoff as one collection.
-11. Verify there are no unresolved harmful overlaps or contradictions.
-12. Verify no new handoff was created and final count did not increase.
-13. Report changes or the no-op result accurately.
+10. Reread every actionable canonical handoff both alone and as one collection.
+11. Verify superseded files contain only valid redirects and are not implementation tasks.
+12. Verify there are no unresolved harmful overlaps or contradictions.
+13. Verify no new handoff was created and final count did not increase.
+14. Report changes or the no-op result accurately.
 
 ## Completion Criteria
 
@@ -450,7 +503,8 @@ A reconciliation with changes is complete only when:
 - scopes are coherent and non-duplicative
 - dependencies are consistent
 - useful evidence and constraints were preserved
-- obsolete and redundant files were removed where appropriate
+- absorbed files were preferably replaced with valid superseded redirects, or deleted only under the deletion rule
+- every actionable canonical handoff is complete and understandable without reading superseded files
 - no new handoff file was created
 - no product implementation was performed
 
@@ -474,7 +528,7 @@ When changes were made, report concisely:
 - inspected agent-run set hashes
 - files kept and rewritten
 - files renamed
-- files merged and deleted
+- files merged, replaced with superseded redirects, and deleted
 - major technical conflicts resolved
 - remaining unresolved external decisions, if any
 - confirmation that no new handoff files were created

@@ -37,10 +37,11 @@ The main agent must:
 5. Include the required file-writing and return contract in every subagent prompt.
 6. Require the subagent to inspect the repository and derive its own findings.
 7. Require the subagent to explain technically how the change could be realized, compare credible options, and recommend a direction without implementing it.
-8. Require the subagent to split broad findings into coherent, ordered handoffs.
-9. Require the subagent to write complete findings into local Markdown files.
-10. Require the subagent to return only the created file paths.
-11. Avoid copying the complete handoff contents back into the main conversation.
+8. Require the subagent to write in simple, direct, easy-to-understand language without unnecessary meta terminology.
+9. Require the subagent to split broad findings into coherent, ordered handoffs.
+10. Require the subagent to write complete findings into local Markdown files.
+11. Require the subagent to return only the created file paths.
+12. Avoid copying the complete handoff contents back into the main conversation.
 
 The main agent must not silently perform the subagent's requested investigation itself as a substitute for delegation when this skill is being used.
 
@@ -414,6 +415,42 @@ The main agent must instruct the subagent not to use metaphor, narrative framing
 
 The main agent may allow the subagent to explain why a change matters, but must require that explanation to use behavior, maintainability, dependency direction, operability, compatibility, or implementation cost rather than metaphor.
 
+## Plain-Language Contract
+
+The main agent must instruct the subagent to use simple, direct, easy-to-understand language throughout every handoff.
+
+The handoff should explain technical facts with normal words first. Use a specialist term only when it is the clearest accurate name for a real code concept, protocol, framework feature, or repository symbol.
+
+The main agent must require the subagent to:
+
+- prefer short, concrete sentences over dense abstract prose
+- say what a component does, what should change, and why
+- name real files, symbols, data, requests, events, and behavior instead of describing them through conceptual layers
+- explain an uncommon technical term the first time it matters
+- use headings and lists to make long technical findings easy to scan
+- remove repeated framing, self-commentary, and descriptions of the analysis process
+- keep necessary technical detail even when simplifying the wording
+
+Avoid wording such as:
+
+- capability surface
+- architectural posture
+- conceptual alignment
+- orchestration envelope
+- semantic boundary refinement
+- implementation vector
+- cross-cutting concern landscape
+
+Prefer wording such as:
+
+- this class currently owns the request flow
+- move this validation into `OrderValidator`
+- both methods choose package versions differently
+- option A keeps the current API; option B requires callers to change
+- use option A because existing callers depend on this response format
+
+Simple language does not mean vague, short, or incomplete language. The handoff must remain technically precise and preserve the complete useful result.
+
 ## No-Implementation Contract
 
 The main agent must instruct the subagent not to:
@@ -447,7 +484,7 @@ Use the exact short hash token supplied above in every filename. Put the two-dig
 
 Split materially different or oversized concerns into coherent, independently plannable handoffs in dependency order. Each handoff must be a medium to near-long implementation-preparation work package: not a tiny note, not an unbounded research dump, and not a full implementation plan.
 
-Ground every important conclusion in actual repository evidence. Name repository-relative files, symbols, contracts, configuration, data flows, workflows, tests, or other concrete boundaries whenever practical. Avoid generic advice and metaphors.
+Ground every important conclusion in actual repository evidence. Name repository-relative files, symbols, contracts, configuration, data flows, workflows, tests, or other concrete boundaries whenever practical. Write in simple, direct language. Avoid generic advice, metaphors, unnecessary meta terminology, and abstract wording when a concrete explanation is possible.
 
 Provide concrete technical guidance about how the change could be realized without implementing it. Describe likely responsibility shifts, affected symbols and contracts, data or control flow, integration seams, compatibility mechanics, error handling, and verification surfaces. When credible alternatives exist, compare them, explain their repository-specific trade-offs, recommend one direction, and state when another option would be preferable. Do not write production code, patches, exact edit instructions, shell commands, or a full ordered execution plan.
 
@@ -526,7 +563,8 @@ Before launching a subagent, verify:
 - the local output location is specified or discoverable
 - the full-result persistence contract is included
 - the topic-splitting and handoff-size rules are included
-- source-first, concreteness, technical-direction, no-metaphor, and no-implementation rules are included
+- source-first, concreteness, technical-direction, plain-language, no-metaphor, and no-implementation rules are included
+- the prompt requires simple, direct wording without unnecessary meta terminology
 - the response contract requires only created file paths
 
 After the subagent returns, verify:
