@@ -22,6 +22,30 @@ The normal flow is:
 
 Do not stop after analysis or planning when implementation is possible.
 
+## Direct Execution Contract
+
+This skill controls the agent that performs the loop. The executing agent must plan, decide, implement, verify, and move the handoffs itself.
+
+Do not delegate the queue, an individual handoff, its planning, its technical decisions, or its implementation to subagents. Repository tools, build tools, test runners, and the harness's own planning state may be used, but responsibility for the complete selected queue remains with the executing agent.
+
+## Full-Queue Completion Mandate
+
+The selected active queue is one continuous execution assignment. The agent's job is to process it to its terminal state, not to provide an interim checkpoint after one or several handoffs.
+
+Do not:
+
+- ask whether to continue with the current or next handoff
+- stop after reporting partial queue progress
+- treat a natural file, phase, test, or context boundary as a reason to return control
+- wait for approval of ordinary technical or optional-scope decisions
+- end the run while independently processable selected handoffs remain active
+
+Continue until every selected top-level handoff and resolved redirect has moved to `AGENTS/HANDOFF/DONE/`.
+
+A genuinely unavoidable blocker on one handoff does not end the queue run. Record it, keep that handoff active, and continue with every later handoff that can be processed safely and independently. Return before the active queue is empty only when no remaining selected work can proceed safely.
+
+Produce a work set that is ready for later independent verification. Favor a complete, verifiable queue result with clear final accounting over incremental approval checkpoints. This does not lower implementation or verification quality.
+
 ## Handoff Location and Naming
 
 The default handoff directory is:
@@ -74,7 +98,7 @@ Do not use this skill when:
 - the requested work must remain analysis-only
 - the agent lacks permission to modify the repository
 - the referenced handoff files do not exist and cannot be recovered
-- the work requires an external business, legal, security, or production authorization that the agent cannot safely infer
+- all selected work depends on external business, legal, security, or production authorization and no handoff can proceed safely without it
 
 ## Selection Contract
 
@@ -107,7 +131,7 @@ For a valid redirect:
 - after every canonical destination is completed or already in `DONE/`, move the redirect itself into `DONE/`
 - record the redirect as superseded rather than as implementation work
 
-If a redirect is malformed, points to a missing file, or still contains competing implementation instructions, stop and report the handoff-set problem instead of guessing.
+If a redirect is malformed, points to a missing file, or still contains competing implementation instructions, treat that redirect as a required-work blocker instead of guessing. Keep it active, record the exact problem, and continue with every other selected handoff that can proceed safely and independently. Return early only when this or another blocker prevents all remaining selected work.
 
 Lexical sorting is the default because the filename places the hash and two-digit sequence before the topic. Reorder files only when a handoff or current source proves a dependency that requires a different order. Record that decision in the implementation plan.
 
@@ -123,7 +147,7 @@ Before planning or editing:
 - never discard unrelated local changes
 - never use destructive cleanup, hard reset, history rewrite, or force push as part of this skill
 
-If existing local work overlaps the selected handoff, integrate with it when safe. Stop only when proceeding would overwrite or invalidate work that cannot be preserved.
+If existing local work overlaps the selected handoff, integrate with it when safe. When proceeding would overwrite or invalidate work that cannot be preserved, mark that handoff blocked and continue with independent selected work. Return early only when no remaining selected work can proceed safely.
 
 ## Read the Complete Handoff
 
@@ -197,7 +221,7 @@ When a handoff is already implemented or validly superseded:
 - record the handoff as completed with no implementation changes required
 - continue to the next selected handoff
 
-Overlap is not itself a blocker. Ask for user input only when overlapping work is materially incompatible and the correct resolution depends on an external decision that cannot be inferred safely.
+Overlap is not itself a blocker. When overlapping required work is materially incompatible and resolution depends on an external decision that cannot be inferred safely, mark the affected handoff blocked and continue with independent selected work. Do not interrupt the queue with a confirmation question.
 
 ## Mandatory Planning Behavior
 
@@ -212,7 +236,7 @@ The plan must be an execution plan, not another broad review. It should include:
 - the remaining implementation delta after removing already satisfied scope
 - the chosen technical direction
 - decisions resolved from alternatives in the handoff
-- every optional item and the decision to implement or reject it
+- every optional item and the decision to implement now, not implement, or defer it
 - concrete repository areas to change
 - compatibility and migration handling
 - tests and verification
@@ -220,7 +244,7 @@ The plan must be an execution plan, not another broad review. It should include:
 - dependencies on earlier or later handoffs
 - the final move into `AGENTS/HANDOFF/DONE/` after completion
 
-When processing multiple files, maintain one visible top-level queue with one active handoff at a time. Expand the active handoff into implementation steps, complete and verify it, then advance.
+When processing multiple files, maintain one visible top-level queue with one active handoff at a time. Expand the active handoff into implementation steps, complete and verify it, move it to `DONE/`, and advance immediately. Do not turn queue progress into a user-facing confirmation checkpoint.
 
 If no plan function exists, maintain a concise explicit plan in the current working context and execute it immediately. Do not create a separate plan Markdown file unless the user explicitly requests one.
 
@@ -250,7 +274,7 @@ Do not ask the user to choose between normal technical options merely because mo
 
 Do not defer decisions with vague wording such as “consider X or Y.” Select the best-supported direction and proceed.
 
-Stop for user input only when the missing decision is genuinely external to the repository and cannot be safely inferred, such as:
+Treat a required decision as a blocker only when it is genuinely external to the repository and cannot be safely inferred, such as:
 
 - a product or business policy with materially different user-visible outcomes
 - credentials, secrets, or inaccessible infrastructure
@@ -259,26 +283,27 @@ Stop for user input only when the missing decision is genuinely external to the 
 - mutually incompatible explicit requirements
 - risk of losing existing local work
 
-When a safe reversible default exists, choose it instead of stopping.
+When a safe reversible default exists, choose it instead of blocking the handoff. When a required external decision remains, record the blocker and continue with independent selected work. Request input only in the final response when no remaining selected work can proceed safely.
 
 ## Optional Work Decision Contract
 
 A handoff may contain optional changes, alternatives, follow-up suggestions, nice-to-have cleanup, or recommendations that are useful only under certain conditions.
 
-Do not leave these items undecided and do not automatically implement all of them.
+Do not pause the queue to ask the user about these items, and do not automatically implement all of them. The agent must make a run-local decision for each item.
 
 For every optional item, the agent must decide one of these outcomes:
 
 1. **Implement now** — the item is useful, fits the handoff outcome, follows current repository direction, and can be completed and verified safely in this work set.
 2. **Do not implement** — the item is unnecessary, speculative, already satisfied, outside the coherent scope, lower value than its cost or risk, or conflicts with the chosen direction.
+3. **Defer** — the item may be useful, but is not required for the handoff's coherent outcome or cannot be justified safely within the current work set. Deferral is a completed decision for this loop run, not a reason to pause.
 
 Make ordinary optional-scope decisions without asking the user. Use current source, repository guidance, compatibility, maintenance cost, operational value, testability, and scope coherence as evidence.
 
-Record each decision and a short concrete reason in the plan. For items accepted for implementation, include their work and verification in the active plan. For rejected items, do not create TODOs, placeholders, follow-up files, or incomplete scaffolding merely to preserve the suggestion.
+Record each decision and a short concrete reason in the plan. For items accepted for implementation, include their work and verification in the active plan. For rejected or deferred items, do not create TODOs, placeholders, follow-up files, or incomplete scaffolding merely to preserve the suggestion. Include important deferred items in the final queue report so later review can see the decision.
 
-An optional item blocks completion only when deciding it requires genuinely external product, business, legal, privacy, security, or irreversible production input. In that case, leave the handoff active and report the blocker.
+An optional item never blocks queue continuation by itself. When it depends on external product, business, legal, privacy, security, or production input, defer it rather than stopping the loop, unless the same missing input also blocks required handoff behavior.
 
-A handoff may move to `DONE/` only after every optional item has been decided and every accepted optional item has been implemented and verified.
+A handoff may move to `DONE/` after every optional item has been classified as implement now, do not implement, or defer, and every item accepted for implementation has been implemented and verified. Deferred optional work may remain unimplemented.
 
 ## One-Handoff-at-a-Time Rule
 
@@ -289,8 +314,8 @@ For the active handoff:
 1. Revalidate it against current source and earlier completed work.
 2. Detect overlap and classify how much remains.
 3. Reduce the plan to the remaining delta.
-4. Decide every required and optional item.
-5. Implement the remaining coherent outcome and every accepted optional item, if any.
+4. Resolve every required decision and classify every optional item as implement now, do not implement, or defer.
+5. Implement the remaining coherent required outcome and every optional item accepted for implementation.
 6. Update tests and documentation where required.
 7. Verify the implemented, already-satisfied, or superseded outcome.
 8. Mark all plan and optional-decision steps complete.
@@ -299,7 +324,7 @@ For the active handoff:
 
 Do not mix unrelated changes from later handoffs into the active one unless a shared prerequisite is necessary. If a prerequisite belongs to a later file, reorder the queue deliberately and record why.
 
-Do not run parallel implementation agents against the same working tree unless the harness provides isolated worktrees and the user explicitly requests parallel execution.
+Do not run parallel implementation agents or delegate work under this skill. Process the queue directly, one handoff at a time, in the current execution context.
 
 ## Implementation Contract
 
@@ -387,7 +412,8 @@ Lifecycle rules:
 - create `AGENTS/HANDOFF/DONE/` when the first completed handoff needs it
 - preserve the original filename
 - move each handoff immediately after its own successful completion rather than waiting for the whole queue
-- do not move a handoff while required work, optional decisions, accepted optional work, verification, or documentation remains open
+- do not move a handoff while required work, required decisions, accepted optional work, verification, or required documentation remains open
+- deferred optional work does not prevent the move when the required outcome is complete and verified
 - do not move a blocked or knowingly broken handoff
 - move an already-implemented or validly superseded actionable handoff after the supporting verification succeeds
 - move a superseded redirect only after all canonical destinations are completed or already in `DONE/`
@@ -414,20 +440,18 @@ Keep unrelated existing changes intact and report the final working-tree state a
 
 ## Failure Handling
 
-If an individual handoff cannot be completed:
+If an individual handoff cannot be completed because of a genuine required-work blocker:
 
 - keep completed earlier handoffs in `DONE/`
 - leave the blocked handoff in the active top-level directory
-- stop before starting dependent later handoffs
-- identify the exact blocker
-- identify work already completed
-- identify optional items already decided and those still blocked
-- identify verification performed
-- identify which handoffs remain unprocessed
+- identify the exact blocker in the plan
+- preserve work already completed
+- defer optional items rather than treating them as blockers
+- record verification already performed
+- continue with every later handoff that is demonstrably independent and safe to process
+- postpone only dependent handoffs whose execution would hide, worsen, or rely on the blocker
 
-Continue past a blocked handoff only when later files are demonstrably independent and proceeding cannot hide or worsen the blocker. Record the decision in the plan.
-
-Do not silently skip a handoff.
+Do not return a progress-only response while independent selected work remains. Do not silently skip a handoff. A blocked file remains evidence that the full-queue target has not yet been reached.
 
 ## Completion Criteria
 
@@ -438,15 +462,15 @@ A handoff is complete only when:
 - already satisfied scope was removed instead of reimplemented
 - a concrete remaining-delta plan was created and maintained
 - ordinary technical decisions were resolved by the agent
-- every optional item was explicitly accepted or rejected
-- every accepted optional item was implemented
+- every optional item was classified as implement now, do not implement, or defer
+- every optional item accepted for implementation was implemented and verified
 - the intended behavior was implemented or proven already satisfied or superseded
-- relevant tests and documentation were updated
+- relevant tests and documentation were updated when required
 - meaningful verification passed
 - no known implementation defect remains in scope
 - the original handoff file was moved into `AGENTS/HANDOFF/DONE/`
 
-A queue is complete only when every actionable selected handoff is in `DONE/` or explicitly reported as blocked. Valid superseded redirects are complete only when their canonical destinations were resolved and completed, and the redirect itself was moved into `DONE/`.
+A queue is complete only when every selected actionable handoff is in `DONE/` and every selected superseded redirect has also moved to `DONE/`. Any blocked, active, or unprocessed selected file means the full-queue target was not reached. Do not describe partial progress as queue completion.
 
 ## Final Response
 
@@ -456,13 +480,15 @@ After execution, report concisely:
 - final `AGENTS/HANDOFF/DONE/` paths for completed handoffs
 - superseded redirects and their canonical destinations
 - completion, already-satisfied, superseded, or blocker status for each handoff
-- important optional items accepted or rejected
+- important optional items implemented, rejected, or deferred
 - scope reduced because of overlap or existing implementation
 - major technical decisions made
 - implementation files changed
 - tests and verification run with results
-- active handoffs left unprocessed or blocked
+- any active handoffs that could not reach `DONE/`, with the unavoidable blocker and why no remaining safe work could continue
 - current Git status at a useful summary level
+
+Do not send the final response merely to ask whether the user wants the loop to continue. The normal final response is emitted after the selected active queue is empty; an earlier response is an exception caused by an unavoidable blocker that prevents all remaining safe work.
 
 Do not paste the complete handoff contents or the full internal plan into the response unless the user asks for them.
 
