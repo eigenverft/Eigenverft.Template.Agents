@@ -1,9 +1,9 @@
 ---
-name: handoff-set-fixer-softskill
+name: handoff-reconcile-softskill
 description: Use when multiple subagent handoff sets in AGENTS/HANDOFF/ may overlap, duplicate work, or prescribe incompatible technical directions and must be reconciled before planning or implementation. The fixer reads the complete selected handoff collection, detects agent-run sets by filename hash, performs a strict no-op when only one set exists or when multiple sets are already compatible, rechecks disputed areas against the current repository, makes ordinary technical decisions, and repairs only existing handoff files by keeping, rewriting, redistributing, renaming, merging, or deleting them. It never creates new handoff files and never implements product changes.
 ---
 
-# Handoff Set Fixer Softskill
+# Handoff Reconcile Softskill
 
 ## Purpose
 

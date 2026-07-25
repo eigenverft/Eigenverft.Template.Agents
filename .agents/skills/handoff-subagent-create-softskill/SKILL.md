@@ -1,9 +1,9 @@
 ---
-name: subagent-implementation-handoff-softskill
+name: handoff-subagent-create-softskill
 description: Use this orchestration softskill when the main agent should delegate source-based investigation or implementation preparation to one or more subagents without flooding or biasing the main context. It tells the main agent how to brief each subagent with minimal sufficient context, assign a unique short filename-safe hash token, create ordered repository-local Markdown handoffs only for concrete and worthwhile implementation concerns, and accept either created file paths or an explicit no-handoff result.
 ---
 
-# Subagent Implementation Handoff Softskill
+# Handoff Subagent Create Softskill
 
 ## Purpose
 

@@ -1,9 +1,9 @@
 ---
-name: work-on-handoff-files-softskill
+name: handoff-loop-execute-softskill
 description: Use when an agent should consume one or more implementation handoff files from AGENTS/HANDOFF/, make all remaining technical and optional-scope decisions, plan the work with the harness planning capability when available, implement and verify each handoff completely, move completed handoffs into AGENTS/HANDOFF/DONE/, and continue through the selected queue in order. This is an execution skill, not a review-only or plan-only skill.
 ---
 
-# Work on Handoff Files Softskill
+# Handoff Loop Execute Softskill
 
 ## Purpose
 
