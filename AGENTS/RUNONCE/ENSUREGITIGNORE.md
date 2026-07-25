@@ -9,7 +9,6 @@ Ensure every pattern from this block is present in the root `.gitignore`. If the
 ```gitignore
 # Sensitive file name patterns
 *[Ss][Ee][Cc][Rr][Ee][Tt]*
-*[Kk][Ee][Yy]*
 
 # Local agent instruction files
 AGENTS.md
