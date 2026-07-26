@@ -9,7 +9,8 @@ param(
     [string]$Description,
     [string]$Title,
     [string]$BodyFile,
-    [switch]$PruneResources
+    [switch]$PruneResources,
+    [switch]$ConfirmDestructive
 )
 
 Set-StrictMode -Version Latest
@@ -213,6 +214,11 @@ function Get-ShortDescription {
     return $description
 }
 
+function Get-DefaultPrompt {
+    param([string]$SkillNameValue)
+    return 'Use $' + $SkillNameValue + ' to help with the requested task.'
+}
+
 function Get-InterfaceOverrides {
     param([string]$RawInterface)
 
@@ -259,7 +265,7 @@ function Get-InterfaceOverrides {
     }
 }
 
-function Write-OpenAiYaml {
+function Write-NewOpenAiYaml {
     param(
         [string]$SkillDirectoryPath,
         [string]$SkillNameValue,
@@ -290,11 +296,25 @@ function Write-OpenAiYaml {
         throw "short_description must be 25-64 characters (got $($shortDescription.Length))."
     }
 
+    if ($overrides.ContainsKey("default_prompt")) {
+        $defaultPrompt = $overrides["default_prompt"]
+    } else {
+        $defaultPrompt = Get-DefaultPrompt -SkillNameValue $SkillNameValue
+    }
+    $requiredInvocation = '$' + $SkillNameValue
+    if (-not $defaultPrompt.Contains($requiredInvocation)) {
+        throw "default_prompt must mention '$requiredInvocation'."
+    }
+
     $lines = New-Object System.Collections.Generic.List[string]
     [void]$lines.Add("interface:")
     [void]$lines.Add("  display_name: $(Get-YamlQuotedValue -Value $displayName)")
     [void]$lines.Add("  short_description: $(Get-YamlQuotedValue -Value $shortDescription)")
+    [void]$lines.Add("  default_prompt: $(Get-YamlQuotedValue -Value $defaultPrompt)")
     foreach ($key in $optionalOrder) {
+        if ($key -eq "default_prompt") {
+            continue
+        }
         [void]$lines.Add("  ${key}: $(Get-YamlQuotedValue -Value $overrides[$key])")
     }
 
@@ -304,6 +324,110 @@ function Write-OpenAiYaml {
     $yaml = [string]::Join("`n", $lines) + "`n"
     Set-Content -LiteralPath $yamlPath -Value $yaml -Encoding UTF8
     Write-Output "[OK] Created agents/openai.yaml"
+}
+
+function Update-OpenAiYaml {
+    param(
+        [string]$SkillDirectoryPath,
+        [string]$SkillNameValue,
+        [string]$InterfaceCsv
+    )
+
+    $parsed = Get-InterfaceOverrides -RawInterface $InterfaceCsv
+    $overrides = $parsed.Overrides
+    if ($overrides.Count -eq 0) {
+        return
+    }
+
+    if ($overrides.ContainsKey("display_name") -and $overrides["display_name"].Contains("$")) {
+        throw "display_name must not include '$'."
+    }
+    if ($overrides.ContainsKey("short_description")) {
+        $shortDescription = $overrides["short_description"]
+        if (($shortDescription.Length -lt 25) -or ($shortDescription.Length -gt 64)) {
+            throw "short_description must be 25-64 characters (got $($shortDescription.Length))."
+        }
+    }
+    if ($overrides.ContainsKey("default_prompt")) {
+        $requiredInvocation = '$' + $SkillNameValue
+        if (-not $overrides["default_prompt"].Contains($requiredInvocation)) {
+            throw "default_prompt must mention '$requiredInvocation'."
+        }
+    }
+
+    $agentsDir = Join-Path -Path $SkillDirectoryPath -ChildPath "agents"
+    New-Item -Path $agentsDir -ItemType Directory -Force | Out-Null
+    $yamlPath = Join-Path -Path $agentsDir -ChildPath "openai.yaml"
+    if (-not (Test-Path -LiteralPath $yamlPath -PathType Leaf)) {
+        Write-NewOpenAiYaml -SkillDirectoryPath $SkillDirectoryPath -SkillNameValue $SkillNameValue -InterfaceCsv $InterfaceCsv
+        return
+    }
+
+    $content = Get-Content -LiteralPath $yamlPath -Raw -Encoding UTF8
+    $sourceLines = @($content -split "`r?`n")
+    if (($sourceLines.Count -gt 0) -and ($sourceLines[$sourceLines.Count - 1] -eq "")) {
+        if ($sourceLines.Count -eq 1) {
+            $sourceLines = @()
+        } else {
+            $sourceLines = @($sourceLines[0..($sourceLines.Count - 2)])
+        }
+    }
+    $lines = New-Object System.Collections.Generic.List[string]
+    foreach ($line in $sourceLines) {
+        [void]$lines.Add($line)
+    }
+
+    $interfaceIndex = -1
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match '^interface\s*:\s*$') {
+            $interfaceIndex = $i
+            break
+        }
+    }
+
+    if ($interfaceIndex -lt 0) {
+        $newBlock = New-Object System.Collections.Generic.List[string]
+        [void]$newBlock.Add("interface:")
+        [void]$newBlock.Add("  display_name: $(Get-YamlQuotedValue -Value (Get-DisplayName -SkillNameValue $SkillNameValue))")
+        [void]$newBlock.Add("  short_description: $(Get-YamlQuotedValue -Value (Get-ShortDescription -DisplayName (Get-DisplayName -SkillNameValue $SkillNameValue)))")
+        [void]$newBlock.Add("  default_prompt: $(Get-YamlQuotedValue -Value (Get-DefaultPrompt -SkillNameValue $SkillNameValue))")
+        [void]$newBlock.Add("")
+        for ($i = $newBlock.Count - 1; $i -ge 0; $i--) {
+            $lines.Insert(0, $newBlock[$i])
+        }
+        $interfaceIndex = 0
+    }
+
+    $interfaceEnd = $lines.Count
+    for ($i = $interfaceIndex + 1; $i -lt $lines.Count; $i++) {
+        if (($lines[$i] -match '^\S') -and ($lines[$i] -notmatch '^\s*#')) {
+            $interfaceEnd = $i
+            break
+        }
+    }
+
+    foreach ($key in $overrides.Keys) {
+        $replacement = "  ${key}: $(Get-YamlQuotedValue -Value $overrides[$key])"
+        $escapedKey = [regex]::Escape($key)
+        $existingIndex = -1
+        for ($i = $interfaceIndex + 1; $i -lt $interfaceEnd; $i++) {
+            if ($lines[$i] -match "^\s{2}${escapedKey}\s*:") {
+                $existingIndex = $i
+                break
+            }
+        }
+
+        if ($existingIndex -ge 0) {
+            $lines[$existingIndex] = $replacement
+        } else {
+            $lines.Insert($interfaceEnd, $replacement)
+            $interfaceEnd++
+        }
+    }
+
+    $yaml = [string]::Join("`n", $lines.ToArray()) + "`n"
+    Set-Content -LiteralPath $yamlPath -Value $yaml -Encoding UTF8
+    Write-Output "[OK] Updated agents/openai.yaml without replacing unselected fields"
 }
 
 function New-ResourceDirectories {
@@ -453,6 +577,39 @@ function Get-TopLevelFrontmatterMap {
     return $map
 }
 
+function Get-OpenAiInterfaceMap {
+    param([string]$YamlContent)
+
+    $map = @{}
+    $inInterface = $false
+    $lines = $YamlContent -split "`r?`n"
+    foreach ($line in $lines) {
+        if ($line -match '^interface\s*:\s*$') {
+            $inInterface = $true
+            continue
+        }
+        if ($inInterface -and ($line -match '^\S') -and ($line -notmatch '^\s*#')) {
+            break
+        }
+        if (-not $inInterface) {
+            continue
+        }
+        if ([string]::IsNullOrWhiteSpace($line) -or ($line -match '^\s*#')) {
+            continue
+        }
+        if ($line -notmatch '^\s{2}([A-Za-z0-9_]+)\s*:\s*(.*)$') {
+            throw "Invalid agents/openai.yaml interface line '$line'"
+        }
+        $map[$Matches[1]] = $Matches[2].Trim()
+    }
+    return $map
+}
+
+function Test-QuotedYamlString {
+    param([string]$RawValue)
+    return ($RawValue -match '^"(?:[^"\\]|\\.)*"$') -or ($RawValue -match "^'(?:[^']|'')*'$")
+}
+
 function Test-SkillValidity {
     param([string]$SkillDirectoryPath)
 
@@ -505,13 +662,55 @@ function Test-SkillValidity {
     if ($name.Length -gt $MaxSkillNameLength) {
         return [pscustomobject]@{ Valid = $false; Message = "Name is too long ($($name.Length) characters). Maximum is $MaxSkillNameLength characters." }
     }
+    $directoryName = Split-Path -Path $SkillDirectoryPath -Leaf
+    if ($name -ne $directoryName) {
+        return [pscustomobject]@{ Valid = $false; Message = "Frontmatter name '$name' must match skill directory '$directoryName'" }
+    }
 
     $descriptionValue = ([string]$frontmatter["description"]).Trim()
+    if ([string]::IsNullOrWhiteSpace($descriptionValue)) {
+        return [pscustomobject]@{ Valid = $false; Message = "Description must not be empty" }
+    }
     if ($descriptionValue.Contains("<") -or $descriptionValue.Contains(">")) {
         return [pscustomobject]@{ Valid = $false; Message = "Description cannot contain angle brackets (< or >)" }
     }
     if ($descriptionValue.Length -gt 1024) {
         return [pscustomobject]@{ Valid = $false; Message = "Description is too long ($($descriptionValue.Length) characters). Maximum is 1024 characters." }
+    }
+
+    $openAiYamlPath = Join-Path -Path $SkillDirectoryPath -ChildPath "agents/openai.yaml"
+    if (-not (Test-Path -LiteralPath $openAiYamlPath -PathType Leaf)) {
+        return [pscustomobject]@{ Valid = $false; Message = "agents/openai.yaml not found" }
+    }
+    try {
+        $interface = Get-OpenAiInterfaceMap -YamlContent (Get-Content -LiteralPath $openAiYamlPath -Raw -Encoding UTF8)
+    } catch {
+        return [pscustomobject]@{ Valid = $false; Message = $_.Exception.Message }
+    }
+
+    foreach ($requiredKey in @("display_name", "short_description", "default_prompt")) {
+        if (-not $interface.ContainsKey($requiredKey)) {
+            return [pscustomobject]@{ Valid = $false; Message = "Missing interface.$requiredKey in agents/openai.yaml" }
+        }
+        if (-not (Test-QuotedYamlString -RawValue $interface[$requiredKey])) {
+            return [pscustomobject]@{ Valid = $false; Message = "interface.$requiredKey must be a quoted string" }
+        }
+    }
+
+    $displayName = Get-UnquotedValue -Value $interface["display_name"]
+    if ($displayName.Contains("$")) {
+        return [pscustomobject]@{ Valid = $false; Message = "display_name must not include '$'" }
+    }
+
+    $shortDescription = Get-UnquotedValue -Value $interface["short_description"]
+    if (($shortDescription.Length -lt 25) -or ($shortDescription.Length -gt 64)) {
+        return [pscustomobject]@{ Valid = $false; Message = "short_description must be 25-64 characters (got $($shortDescription.Length))" }
+    }
+
+    $defaultPrompt = Get-UnquotedValue -Value $interface["default_prompt"]
+    $requiredInvocation = '$' + $name
+    if (-not $defaultPrompt.Contains($requiredInvocation)) {
+        return [pscustomobject]@{ Valid = $false; Message = "default_prompt must mention '$requiredInvocation'" }
     }
 
     return [pscustomobject]@{ Valid = $true; Message = "Skill is valid!" }
@@ -552,23 +751,39 @@ try {
                 throw "Skill directory already exists: $skillDirectory"
             }
 
-            New-Item -Path $skillDirectory -ItemType Directory -Force | Out-Null
-            Write-Output "[OK] Created skill directory: $skillDirectory"
+            $createdByThisRun = $false
+            try {
+                New-Item -Path $skillDirectory -ItemType Directory -Force | Out-Null
+                $createdByThisRun = $true
+                Write-Output "[OK] Created skill directory: $skillDirectory"
 
-            $skillTitle = Get-SkillTitle -NormalizedSkillName $normalizedSkillName
-            $content = $SkillTemplate.Replace("__SKILL_NAME__", $normalizedSkillName).Replace("__SKILL_TITLE__", $skillTitle)
-            Set-Content -LiteralPath $skillMdPath -Value $content -Encoding UTF8
-            Write-Output "[OK] Created SKILL.md"
+                $skillTitle = Get-SkillTitle -NormalizedSkillName $normalizedSkillName
+                $content = $SkillTemplate.Replace("__SKILL_NAME__", $normalizedSkillName).Replace("__SKILL_TITLE__", $skillTitle)
+                Set-Content -LiteralPath $skillMdPath -Value $content -Encoding UTF8
+                Write-Output "[OK] Created SKILL.md"
 
-            Write-OpenAiYaml -SkillDirectoryPath $skillDirectory -SkillNameValue $normalizedSkillName -InterfaceCsv $Interface
-            if ($resourceList.Count -gt 0) {
-                New-ResourceDirectories -SkillDirectoryPath $skillDirectory -ResourceList $resourceList
-                if ($Examples) {
-                    New-ExampleFiles -SkillDirectoryPath $skillDirectory -SkillNameValue $normalizedSkillName -ResourceList $resourceList
+                Write-NewOpenAiYaml -SkillDirectoryPath $skillDirectory -SkillNameValue $normalizedSkillName -InterfaceCsv $Interface
+                if ($resourceList.Count -gt 0) {
+                    New-ResourceDirectories -SkillDirectoryPath $skillDirectory -ResourceList $resourceList
+                    if ($Examples) {
+                        New-ExampleFiles -SkillDirectoryPath $skillDirectory -SkillNameValue $normalizedSkillName -ResourceList $resourceList
+                    }
                 }
-            }
 
-            Write-Output "[OK] Created skill '$normalizedSkillName'"
+                Write-Output "[OK] Created skill '$normalizedSkillName'"
+            } catch {
+                if ($createdByThisRun -and (Test-Path -LiteralPath $skillDirectory -PathType Container)) {
+                    $resolvedSkillDirectory = [System.IO.Path]::GetFullPath($skillDirectory)
+                    $resolvedParent = [System.IO.Path]::GetFullPath((Split-Path -Path $resolvedSkillDirectory -Parent))
+                    $resolvedSkillsRoot = [System.IO.Path]::GetFullPath($skillsRoot)
+                    if (-not $resolvedParent.Equals($resolvedSkillsRoot, [System.StringComparison]::OrdinalIgnoreCase)) {
+                        throw "Create failed and rollback target escaped the skills root: $resolvedSkillDirectory"
+                    }
+                    Remove-Item -LiteralPath $resolvedSkillDirectory -Recurse -Force
+                    Write-Output "[OK] Rolled back incomplete skill directory: $resolvedSkillDirectory"
+                }
+                throw
+            }
         }
         "update" {
             if (-not (Test-Path -LiteralPath $skillDirectory -PathType Container)) {
@@ -586,6 +801,9 @@ try {
             }
             if ($PruneResources -and ($resourceList.Count -eq 0)) {
                 throw "-PruneResources requires -Resources to be set."
+            }
+            if ($PruneResources -and (-not $ConfirmDestructive)) {
+                throw "-PruneResources removes directories. Re-run with -ConfirmDestructive after verifying the exact target skill '$skillDirectory'."
             }
 
             $skillContent = Get-Content -LiteralPath $skillMdPath -Raw -Encoding UTF8
@@ -617,7 +835,7 @@ try {
                 Remove-UnlistedResources -SkillDirectoryPath $skillDirectory -KeepList $resourceList
             }
             if ($hasInterface) {
-                Write-OpenAiYaml -SkillDirectoryPath $skillDirectory -SkillNameValue $normalizedSkillName -InterfaceCsv $Interface
+                Update-OpenAiYaml -SkillDirectoryPath $skillDirectory -SkillNameValue $normalizedSkillName -InterfaceCsv $Interface
             }
 
             Write-Output "[OK] Updated skill '$normalizedSkillName'"
@@ -625,6 +843,9 @@ try {
         "delete" {
             if (-not (Test-Path -LiteralPath $skillDirectory -PathType Container)) {
                 throw "Skill directory not found: $skillDirectory"
+            }
+            if (-not $ConfirmDestructive) {
+                throw "Delete removes the complete skill directory. Re-run with -ConfirmDestructive after verifying the exact target '$skillDirectory'."
             }
             Remove-Item -LiteralPath $skillDirectory -Recurse -Force
             Write-Output "[OK] Deleted skill '$normalizedSkillName'"
@@ -641,7 +862,19 @@ try {
             exit 1
         }
         "cleanup-personal" {
-            $personalPath = Join-Path -Path $HOME -ChildPath ".codex/skills/test-skill"
+            $userProfilePath = [Environment]::GetFolderPath([Environment+SpecialFolder]::UserProfile)
+            if ([string]::IsNullOrWhiteSpace($userProfilePath)) {
+                throw "Unable to resolve the user profile directory."
+            }
+            $personalSkillsRoot = [System.IO.Path]::GetFullPath((Join-Path -Path $userProfilePath -ChildPath ".codex/skills"))
+            $personalPath = [System.IO.Path]::GetFullPath((Join-Path -Path $personalSkillsRoot -ChildPath "test-skill"))
+            $expectedPersonalPath = [System.IO.Path]::GetFullPath((Join-Path -Path $userProfilePath -ChildPath ".codex/skills/test-skill"))
+            if (-not $personalPath.Equals($expectedPersonalPath, [System.StringComparison]::OrdinalIgnoreCase)) {
+                throw "Resolved cleanup target escaped the expected personal skill path: $personalPath"
+            }
+            if (-not $ConfirmDestructive) {
+                throw "Cleanup removes the personal test skill recursively. Re-run with -ConfirmDestructive after verifying the exact target '$personalPath'."
+            }
             if (Test-Path -LiteralPath $personalPath -PathType Container) {
                 Remove-Item -LiteralPath $personalPath -Recurse -Force
                 Write-Output "[OK] Removed personal skill at $personalPath"

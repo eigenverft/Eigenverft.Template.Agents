@@ -8,7 +8,7 @@ description: Manage Codex skills in the git-root .agents/skills directory by cre
 ## Overview
 
 Manage skill lifecycle operations with one Windows PowerShell 5.1 script.
-All operations target `.agents/skills` resolved from git root.
+Repository skill operations target `.agents/skills` resolved from git root. The separate `cleanup-personal` action targets only the fixed personal `.codex/skills/test-skill` path.
 
 ## Workflow
 
@@ -23,6 +23,8 @@ All operations target `.agents/skills` resolved from git root.
 - Run:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/skills/skill-manager/scripts/manage_skill.ps1 -Action update -SkillName <skill-name>`
 - Optional: `-Description`, `-Title`, `-BodyFile`, `-Resources`, `-PruneResources`, `-Interface`
+- `-PruneResources` recursively removes unlisted resource directories and therefore also requires `-ConfirmDestructive` after the exact target has been verified.
+- Interface updates are field-level: unspecified `interface` fields and other top-level sections such as `dependencies` and `policy` must remain unchanged.
 
 3. Validate a skill
 - Run:
@@ -30,11 +32,13 @@ All operations target `.agents/skills` resolved from git root.
 
 4. Delete a skill
 - Run:
-  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/skills/skill-manager/scripts/manage_skill.ps1 -Action delete -SkillName <skill-name>`
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/skills/skill-manager/scripts/manage_skill.ps1 -Action delete -SkillName <skill-name> -ConfirmDestructive`
+- Verify the exact normalized target path printed by the dry attempt before granting `-ConfirmDestructive`.
 
 5. Cleanup personal test-skill copy
 - Run:
-  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/skills/skill-manager/scripts/manage_skill.ps1 -Action cleanup-personal`
+  `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/skills/skill-manager/scripts/manage_skill.ps1 -Action cleanup-personal -ConfirmDestructive`
+- This action is limited to the fixed personal `.codex/skills/test-skill` directory and refuses other resolved targets.
 
 ## Constraints At A Glance
 
@@ -46,13 +50,15 @@ All operations target `.agents/skills` resolved from git root.
 - `SKILL.md` frontmatter allows only: `name`, `description`, `license`, `allowed-tools`, `metadata`.
 - `SKILL.md` frontmatter requires: `name` and `description`.
 - `description` must not contain `<` or `>` and must be at most 1024 characters.
+- New `agents/openai.yaml` files include `display_name`, `short_description`, and a `default_prompt` that names `$skill-name`.
+- `delete`, `cleanup-personal`, and `-PruneResources` require `-ConfirmDestructive`.
 
 ## Minimal Quality Checklist
 
 - Replace all template TODO text in generated `SKILL.md`.
 - Ensure `agents/openai.yaml` has meaningful `display_name` and `short_description`.
 - Run `validate` after every `create` or `update`.
-- Smoke test one command for the created or updated skill.
+- Run only a safe, non-mutating smoke check unless the user separately authorizes the skill's real action.
 
 ## Troubleshooting
 
@@ -61,6 +67,7 @@ All operations target `.agents/skills` resolved from git root.
 - `short_description must be 25-64 characters` -> shorten or expand `short_description` into the valid range.
 - `Unexpected key(s) in SKILL.md frontmatter` -> keep only allowed frontmatter keys.
 - `-PruneResources requires -Resources` -> provide `-Resources` when using `-PruneResources`.
+- `Re-run with -ConfirmDestructive` -> verify the exact target path, then add the flag only when the recursive removal is intended.
 - `Unable to resolve git root` -> run the command inside a git repository.
 
 ## Scripts

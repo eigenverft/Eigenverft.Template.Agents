@@ -9,6 +9,8 @@ description: Create and update Codex skill files directly from user descriptions
 
 Use this skill to create or update skill files directly in `.agents/skills` from a concise user description. It is lightweight and focuses on clear instructions, practical defaults, and fast quality checks.
 
+Resolve `.agents/skills` from the current Git root before editing. Do not assume the current working directory is the repository root.
+
 ## When To Use
 
 - You need a new skill scaffold created from requirements.
@@ -56,9 +58,12 @@ When creating or revising a softskill:
 
 ### 2. Update Existing Skill
 
-- Read current files first and preserve valid existing structure.
+- Inventory the complete selected skill package and read every behavior-changing text resource before editing.
+- Preserve unspecified `agents/openai.yaml` fields and top-level sections such as `dependencies` and `policy`.
+- Preserve unselected scripts, references, assets, and user-authored content.
 - Apply minimal, targeted edits tied to the requested behavior.
 - Keep naming, invocation wording, and constraints consistent.
+- If the requested update would overwrite or remove an existing resource, report the exact target and obtain explicit authorization first.
 
 ### 3. Quality Check
 
@@ -66,6 +71,7 @@ When creating or revising a softskill:
 - Ensure `description` is clear and free of angle brackets.
 - Ensure `openai.yaml` interface values are quoted strings.
 - Ensure `short_description` is meaningful and between 25 and 64 characters.
+- Ensure `default_prompt` exists and explicitly mentions `$skill-name`.
 - Remove template placeholders and unresolved markers.
 - For softskills, check whether the instructions are more repo-specific than necessary.
 - For reusable softskills, prefer explicit discovery heuristics over hardcoded project assumptions.
