@@ -1,6 +1,6 @@
 ---
 name: handoff-reconcile-softskill
-description: Use when multiple independently produced handoff sets in AGENTS/HANDOFF/ may overlap, duplicate work, or prescribe incompatible technical directions and must be reconciled before planning or implementation. The fixer reads the complete selected handoff collection, detects producing-run sets by filename hash, performs a strict no-op when only one set exists or when multiple sets are already compatible, rechecks disputed areas against the current repository, makes ordinary technical decisions, and repairs only existing handoff files by keeping, rewriting, redistributing, renaming, merging, or deleting them. It never creates new handoff files and never implements product changes.
+description: Use when multiple independently produced handoff sets in AGENTS/HANDOFF/ may overlap, duplicate work, or prescribe incompatible technical directions and must be reconciled before planning or implementation. The fixer reads the complete selected handoff collection, detects producing-run sets by filename hash, preserves distinct implementation topics, performs a strict no-op when only one set exists or when multiple sets are already compatible, rechecks disputed areas against the current repository, and repairs only existing handoff files. A file is superseded only when it is fully absorbed, contains no remaining implementation task, and has been reduced to a verified redirect before being moved to AGENTS/HANDOFF/SUPERSEDED/. It never creates new handoff files and never implements product changes.
 ---
 
 # Handoff Reconcile Softskill
@@ -19,7 +19,7 @@ Separate direct or delegated review runs may investigate the same or related ass
 - split or group the same work differently
 - contain stale conclusions after the repository changed
 
-The desired result is one coherent implementation-preparation set inside `AGENTS/HANDOFF/`.
+The desired result is one coherent implementation-preparation collection of distinct, topic-bounded actionable handoffs inside `AGENTS/HANDOFF/`. Fully absorbed redirects belong in `AGENTS/HANDOFF/SUPERSEDED/`, not in the active collection.
 
 The desired result is **not** a separate synthesis report and **not** a new generation of handoff files. The fixer changes only the existing handoffs when a real reconciliation problem exists.
 
@@ -29,17 +29,25 @@ Do not optimize, rewrite, merge, rename, or delete handoffs merely because this 
 
 A successful run may make no changes.
 
-The fixer exists to resolve harmful set-level conflicts and overlap, not to restyle valid handoffs.
+The fixer exists to resolve harmful set-level conflicts and overlap, not to restyle valid handoffs or minimize file count. Reconcile by coherent implementation topic and boundary. Do not collapse distinct independently plannable topics into one handoff merely because they are related or because fewer files would look simpler.
 
 ## Handoff Location and Naming
 
-The default directory is:
+The active handoff directory is:
 
 ```text
 AGENTS/HANDOFF/
 ```
 
-New handoffs follow:
+Fully absorbed superseded redirects are archived under:
+
+```text
+AGENTS/HANDOFF/SUPERSEDED/
+```
+
+`SUPERSEDED/` is not an active implementation queue. Create that directory only when at least one fully absorbed handoff must be archived.
+
+Active handoff filenames follow:
 
 ```text
 handoff-<handoffhash>-NN-<topic>.md
@@ -63,7 +71,7 @@ The hash records provenance only. It does not make one recommendation more autho
 
 Before editing anything, group the selected handoffs by handoff hash.
 
-### One agent-run set
+### One producing-run set
 
 When all selected handoffs share one hash, make no changes by default.
 
@@ -77,11 +85,11 @@ In this case:
 - do not rename or renumber
 - do not delete files
 - do not perform a general quality review under this skill
-- report that reconciliation was unnecessary because only one agent-run set was present
+- report that reconciliation was unnecessary because only one producing-run set was present
 
 Only repair a single set when the user explicitly asks for intra-set repair rather than cross-agent reconciliation.
 
-### Multiple agent-run sets
+### Multiple producing-run sets
 
 Multiple hashes are only a reason to inspect for conflicts, not a reason to change files.
 
@@ -108,7 +116,7 @@ Use this skill when:
 
 Do not use this skill when:
 
-- only one agent-run set exists and no explicit intra-set repair was requested
+- only one producing-run set exists and no explicit intra-set repair was requested
 - the task is to generate handoffs
 - the task is to plan or implement handoffs
 - the user requested only a comparison or summary without file changes
@@ -134,7 +142,7 @@ Ignore unrelated Markdown files and nested archive directories unless explicitly
 
 Read the complete inspection collection before editing any handoff.
 
-Do not repair files incrementally while later files remain unread. A locally sensible edit may conflict with another agent-run set.
+Do not repair files incrementally while later files remain unread. A locally sensible edit may conflict with another producing-run set.
 
 For each file, identify:
 
@@ -205,8 +213,8 @@ Resolution:
 
 - choose one existing canonical file
 - preserve the best useful content there
-- prefer replacing each redundant file with a short superseded-handoff redirect after all useful content is retained in the canonical file
-- delete a redundant file only when the user explicitly requests deletion or a redirect cannot be made safely
+- after all useful content is retained in the canonical file, replace each fully redundant file with a short superseded-handoff redirect and move it to `AGENTS/HANDOFF/SUPERSEDED/`
+- delete a redundant file only when the user explicitly requests deletion; inability to archive safely is a blocker, not a reason to delete
 
 ### Partial overlap
 
@@ -247,10 +255,10 @@ Several handoffs are individually too small and naturally form one planning and 
 Resolution:
 
 - merge their useful content into one chosen existing canonical file
-- prefer replacing redundant fragments with superseded-handoff redirects to the canonical file
-- delete a fragment only when the user explicitly requests deletion or a redirect cannot be made safely
+- when a fragment is fully absorbed and has no remaining implementation task, replace it with a superseded-handoff redirect and move it to `AGENTS/HANDOFF/SUPERSEDED/`
+- delete a fragment only when the user explicitly requests deletion; inability to archive safely is a blocker, not a reason to delete
 
-Do not use fragmentation as a reason to merge normal ordered handoffs from one agent-run set under the default no-op rule.
+Do not use fragmentation as a reason to merge normal ordered handoffs from one producing-run set under the default no-op rule.
 
 ### Oversized mixed scope
 
@@ -271,7 +279,7 @@ Resolution:
 
 - remove satisfied scope
 - update the remaining delta
-- when another existing handoff now carries the remaining or authoritative work, prefer replacing this file with a superseded-handoff redirect
+- when another existing handoff now carries all remaining or authoritative work and this file has no independent implementation task, replace it with a superseded-handoff redirect and move it to `AGENTS/HANDOFF/SUPERSEDED/`
 - when no future work and no canonical destination remain, keep a short completed/no-action marker or delete only when the user explicitly requests deletion
 
 Do not turn this skill into a complete current-state audit when no multi-set reconciliation issue exists.
@@ -316,27 +324,43 @@ Allowed transformations:
 - merge several files into one chosen existing canonical file
 - redistribute content across existing files
 - rename an existing file when topic or order is materially misleading
-- replace an absorbed existing file with a superseded-handoff redirect
-- delete an existing file only after useful content is preserved elsewhere and deletion is explicitly requested or a redirect cannot be made safely
+- replace a fully absorbed existing file with a superseded-handoff redirect and move it to `AGENTS/HANDOFF/SUPERSEDED/`
+- delete an existing file only after useful content is preserved elsewhere and the user explicitly requests deletion; an archive blocker must not trigger deletion
 
 Disallowed transformations:
 
 - create an additional handoff
 - create a synthesis handoff
 - create a conflict report beside the handoffs
-- create a replacement set in another directory
+- create a replacement actionable set in another directory; moving verified fully superseded redirects to `AGENTS/HANDOFF/SUPERSEDED/` is the only archive exception
 - copy backup handoffs into the repository
 - preserve the old full proposal after its actionable content was absorbed; replace it with a short redirect instead
 
-The final number of handoff files must be less than or equal to the initial number.
+The final total number of handoff files across the active directory and `SUPERSEDED/` must be less than or equal to the initial total. Reconciliation must not manufacture files to improve organization.
 
 Use Git or surrounding workspace history for recovery when available. Do not create backup handoff files.
 
-## Superseded Handoff Redirect Contract
+## Superseded Handoff Archive Contract
 
-When one existing handoff is fully absorbed into one or more canonical handoffs, prefer rewriting the absorbed file in place instead of deleting it.
+Mark and archive a handoff as superseded only when **all** of these conditions are true:
 
-Use a short, clear form like:
+1. the file's entire useful actionable scope has been incorporated into one or more existing canonical handoffs
+2. the file contains no remaining independent implementation task, decision, constraint, or verification responsibility
+3. every canonical destination is complete and understandable without reading the source file
+4. no useful content would be lost by replacing the source with a redirect
+
+A partial overlap is not superseded. If any independently plannable topic remains, keep the file active in `AGENTS/HANDOFF/`, narrow its scope, and reconcile only the overlapping content.
+
+For a fully absorbed file, use this sequence:
+
+1. move all useful content into the appropriate existing topic-bounded canonical handoff or handoffs
+2. reread the canonical destinations without relying on the source file
+3. rewrite the absorbed file in place as a short redirect
+4. verify that the redirect contains no implementation task or competing technical direction
+5. create `AGENTS/HANDOFF/SUPERSEDED/` only when it does not exist and at least one file qualifies
+6. move the verified redirect into `AGENTS/HANDOFF/SUPERSEDED/`, preserving its original filename
+
+Use a short, clear redirect like:
 
 ```markdown
 # Superseded Handoff
@@ -357,11 +381,13 @@ The redirect must:
 - use the exact line `Status: superseded`
 - name every canonical destination needed to find the absorbed work
 - state that the file is not an implementation task
-- contain no remaining competing recommendation, technical direction, plan, or unresolved option
+- contain no remaining competing recommendation, technical direction, plan, unresolved option, or independent work
 - stay short and easy to understand
-- keep the original filename unless a rename is required to prevent a misleading order or collision
+- preserve the original filename
 
-Do not use a superseded redirect as a substitute for moving the useful content. The canonical destination files must contain the full useful result before the source file is replaced.
+Never overwrite an existing file in `SUPERSEDED/`. Treat a destination collision as a blocker and leave the source file active until the collision is resolved safely.
+
+Do not use a superseded redirect as a substitute for moving useful content. Do not write `Status: superseded` or move the file when any meaningful implementation scope remains.
 
 ## Standalone Canonical Handoff Contract
 
@@ -486,32 +512,34 @@ If a selected handoff has unrelated local edits that cannot be safely preserved,
 5. Build a cross-set overlap and conflict map only when multiple sets exist.
 6. Reinspect current source for material disputes.
 7. Decide the authoritative direction and final existing-file allocation.
-8. Plan all rewrites, merges, renames, and deletions before applying them.
-9. Apply the minimal coherent transformation.
+8. Plan all rewrites, topic-preserving redistributions, merges, renames, superseded archives, and exceptional deletions before applying them.
+9. Apply the minimal coherent transformation without collapsing distinct independently plannable topics.
 10. Reread every actionable canonical handoff both alone and as one collection.
-11. Verify superseded files contain only valid redirects and are not implementation tasks.
-12. Verify there are no unresolved harmful overlaps or contradictions.
-13. Verify no new handoff was created and final count did not increase.
-14. Report changes or the no-op result accurately.
+11. For each fully absorbed file, verify the full-supersession gate, write the redirect, and move it to `AGENTS/HANDOFF/SUPERSEDED/`.
+12. Verify every file in `SUPERSEDED/` contains only a valid redirect and is not an implementation task.
+13. Verify there are no unresolved harmful overlaps or contradictions.
+14. Verify no new handoff was created and the final total count did not increase.
+15. Report changes or the no-op result accurately.
 
 ## Completion Criteria
 
 A reconciliation with changes is complete only when:
 
-- all relevant agent-run sets were read
+- all relevant producing-run sets were read
 - real conflicts and overlaps were resolved against current source
-- each remaining concern has one authoritative direction
-- scopes are coherent and non-duplicative
+- scopes are coherent, non-duplicative, and separated by meaningful implementation topic and boundary
+- distinct independently plannable topics were not collapsed merely to reduce file count
 - dependencies are consistent
 - useful evidence and constraints were preserved
-- absorbed files were preferably replaced with valid superseded redirects, or deleted only under the deletion rule
+- only fully absorbed files with no remaining implementation task were rewritten as valid superseded redirects and moved to `AGENTS/HANDOFF/SUPERSEDED/`
+- partially overlapping files remain active with a clear independent scope
 - every actionable canonical handoff is complete and understandable without reading superseded files
 - no new handoff file was created
 - no product implementation was performed
 
 A no-op reconciliation is complete when:
 
-- only one agent-run set exists, or multiple sets were inspected
+- only one producing-run set exists, or multiple sets were inspected
 - no harmful cross-set duplication, overlap, contradiction, or misleading ordering was found
 - no files were changed merely for stylistic improvement
 
@@ -526,10 +554,11 @@ When no changes were needed, report concisely:
 
 When changes were made, report concisely:
 
-- inspected agent-run set hashes
-- files kept and rewritten
-- files renamed
-- files merged, replaced with superseded redirects, and deleted
+- inspected producing-run set hashes
+- files kept, rewritten, or renamed
+- files merged or redistributed by topic
+- fully absorbed redirects moved to `AGENTS/HANDOFF/SUPERSEDED/`
+- files deleted only when explicitly requested
 - major technical conflicts resolved
 - remaining unresolved external decisions, if any
 - confirmation that no new handoff files were created

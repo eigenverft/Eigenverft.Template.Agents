@@ -1,6 +1,6 @@
 ---
 name: handoff-loop-execute-softskill
-description: Use when an agent should consume one or more implementation handoff files from AGENTS/HANDOFF/, make all remaining technical and optional-scope decisions, plan the work with the harness planning capability when available, implement and verify each handoff completely, move completed handoffs into AGENTS/HANDOFF/DONE/, and continue through the selected queue in order. This is an execution skill, not a review-only or plan-only skill.
+description: Use when an agent should consume one or more active implementation handoff files from AGENTS/HANDOFF/, make all remaining technical and optional-scope decisions, plan, implement, and verify each actionable handoff, move completed actionable handoffs into AGENTS/HANDOFF/DONE/, archive valid fully absorbed top-level redirects in AGENTS/HANDOFF/SUPERSEDED/, and continue until the selected root queue is clean or only unavoidable blockers remain. This is an execution skill, not a review-only or plan-only skill.
 ---
 
 # Handoff Loop Execute Softskill
@@ -17,8 +17,8 @@ The normal flow is:
 4. Resolve all remaining technical and optional-scope decisions.
 5. Implement the accepted work.
 6. Verify the complete outcome.
-7. Move the completed handoff into `AGENTS/HANDOFF/DONE/`.
-8. Continue with the next handoff.
+7. Move the completed actionable handoff into `AGENTS/HANDOFF/DONE/`, or archive a valid fully absorbed redirect in `AGENTS/HANDOFF/SUPERSEDED/`.
+8. Continue with the next top-level handoff until the selected root queue is clean.
 
 Do not stop after analysis or planning when implementation is possible.
 
@@ -40,7 +40,7 @@ Do not:
 - wait for approval of ordinary technical or optional-scope decisions
 - end the run while independently processable selected handoffs remain active
 
-Continue until every selected top-level handoff and resolved redirect has moved to `AGENTS/HANDOFF/DONE/`.
+Continue until every selected top-level actionable handoff has moved to `AGENTS/HANDOFF/DONE/` and every selected valid top-level superseded redirect has moved to `AGENTS/HANDOFF/SUPERSEDED/`. A clean selected root queue is the terminal lifecycle goal.
 
 A genuinely unavoidable blocker on one handoff does not end the queue run. Record it, keep that handoff active, and continue with every later handoff that can be processed safely and independently. Return before the active queue is empty only when no remaining selected work can proceed safely.
 
@@ -54,7 +54,7 @@ The default handoff directory is:
 AGENTS/HANDOFF/
 ```
 
-New handoffs follow:
+Active handoff filenames follow:
 
 ```text
 handoff-<handoffhash>-NN-<topic>.md
@@ -77,7 +77,15 @@ Completed handoffs are stored under:
 AGENTS/HANDOFF/DONE/
 ```
 
-Keep the original filename when moving a completed handoff. Files in `DONE/` are completed history and are not part of the default active queue.
+Keep the original filename when moving a completed actionable handoff. Files in `DONE/` are completed implementation history and are not part of the default active queue.
+
+Fully absorbed redirect archives are stored under:
+
+```text
+AGENTS/HANDOFF/SUPERSEDED/
+```
+
+Files in `SUPERSEDED/` are non-actionable provenance. They are terminal archive records, are not part of the default active queue, and must never be moved to `DONE/` merely because their canonical destinations were completed.
 
 ## When To Use
 
@@ -109,9 +117,9 @@ Determine the work set in this order:
 2. If the user names a handoff hash, select matching `handoff-<hash>-*.md` files and sort them lexically.
 3. If the user requests all handoffs or does not identify a narrower selection, select all top-level Markdown files matching the handoff naming convention in `AGENTS/HANDOFF/` and sort them lexically.
 
-Ignore unrelated Markdown files and nested directories by default. In particular, do not select files already inside `AGENTS/HANDOFF/DONE/` unless the user explicitly asks to inspect or reprocess completed work.
+Ignore unrelated Markdown files and nested directories by default. In particular, do not select files already inside `AGENTS/HANDOFF/DONE/` or `AGENTS/HANDOFF/SUPERSEDED/` as active work. An explicitly named archived file may be inspected, but its archive lifecycle must remain unchanged.
 
-Before building the actionable queue, detect superseded handoff redirects.
+Before building the actionable queue, detect top-level superseded handoff redirects. This supports both the normal Create → Reconcile → Execute flow and the shorter Create → Execute flow when a valid redirect already exists in the root queue.
 
 A redirect is a handoff file that contains the exact line:
 
@@ -119,20 +127,23 @@ A redirect is a handoff file that contains the exact line:
 Status: superseded
 ```
 
-A valid redirect must list one or more canonical handoff paths and state that it is not an implementation task. Resolve each canonical path first at its listed location and then, when it has already been completed, by the same filename under `AGENTS/HANDOFF/DONE/`.
+A valid redirect must list one or more canonical handoff paths and state that it is not an implementation task. Resolve each canonical path first at its listed top-level location and then, when it has already been completed, by the same filename under `AGENTS/HANDOFF/DONE/`.
 
-For a valid redirect:
+For a valid top-level redirect:
 
 - do not plan or implement the redirect file
 - read each canonical destination that is still active
 - treat a canonical destination already present in `DONE/` as completed
-- when the redirect was explicitly named, replace it in the queue with active canonical destinations in the same position
+- when the redirect was explicitly named, replace it in the actionable queue with active canonical destinations in the same position
 - when processing a broad selection, include each active canonical destination once and skip duplicate queue entries
-- leave the redirect active until every canonical destination is completed
-- after every canonical destination is completed or already in `DONE/`, move the redirect itself into `DONE/`
-- record the redirect as superseded rather than as implementation work
+- keep the redirect at the top level while any canonical destination is still active or blocked
+- after every canonical destination is completed or already in `DONE/`, create `AGENTS/HANDOFF/SUPERSEDED/` when needed and move the redirect there with its original filename
+- never overwrite an existing archive file; a destination collision is a blocker and leaves the redirect at the top level
+- record the redirect as archived superseded provenance rather than as implementation work
 
-If a redirect is malformed, points to a missing file, or still contains competing implementation instructions, treat that redirect as a required-work blocker instead of guessing. Keep it active, record the exact problem, and continue with every other selected handoff that can proceed safely and independently. Return early only when this or another blocker prevents all remaining selected work.
+For an explicitly named redirect already inside `SUPERSEDED/`, use it only to locate canonical destinations. Do not move or rewrite the archived redirect.
+
+If a top-level redirect is malformed, points to a missing file, still contains competing implementation instructions, or cannot be archived safely, treat it as a required-work blocker instead of guessing or deleting it. Keep it active, record the exact problem, and continue with every other selected handoff that can proceed safely and independently. Return early only when this or another blocker prevents all remaining selected work.
 
 Lexical sorting is the default because the filename places the hash and two-digit sequence before the topic. Reorder files only when a handoff or current source proves a dependency that requires a different order. Record that decision in the implementation plan.
 
@@ -203,7 +214,7 @@ Classify the handoff scope as:
 1. **Not implemented** — the relevant outcome is still missing.
 2. **Partially implemented** — some requirements or boundaries are already satisfied.
 3. **Already implemented** — the intended outcome is present and consistent with current requirements.
-4. **Superseded** — current code solves the underlying concern through a different, valid design.
+4. **Satisfied by an alternative implementation** — current code already solves the underlying concern through a different, valid design.
 
 The agent must plan and implement only the remaining delta.
 
@@ -215,7 +226,7 @@ When a handoff is partially implemented:
 - avoid replacing working code merely to match the handoff’s suggested shape
 - update tests or documentation only where the remaining delta requires it
 
-When a handoff is already implemented or validly superseded:
+When an actionable handoff is already implemented or satisfied by an alternative implementation:
 
 - do not manufacture changes to make the handoff appear processed
 - run the smallest meaningful verification that supports the conclusion
@@ -233,7 +244,7 @@ If the agent harness exposes a dedicated plan function, planning tool, task trac
 The plan must be an execution plan, not another broad review. It should include:
 
 - the intended outcome
-- the current-state classification: not implemented, partially implemented, already implemented, or superseded
+- the current-state classification: not implemented, partially implemented, already implemented, or satisfied by an alternative implementation
 - the remaining implementation delta after removing already satisfied scope
 - the chosen technical direction
 - decisions resolved from alternatives in the handoff
@@ -318,7 +329,7 @@ For the active handoff:
 4. Resolve every required decision and classify every optional item as implement now, do not implement, or defer.
 5. Implement the remaining coherent required outcome and every optional item accepted for implementation.
 6. Update tests and documentation where required.
-7. Verify the implemented, already-satisfied, or superseded outcome.
+7. Verify the implemented, already-satisfied, or alternative-implementation outcome.
 8. Mark all plan and optional-decision steps complete.
 9. Move the handoff into `AGENTS/HANDOFF/DONE/`.
 10. Continue to the next handoff.
@@ -398,11 +409,11 @@ When code, configuration, workflows, commands, architecture, interfaces, storage
 
 Do not modify runbooks merely to record that they were checked. Leave them unchanged when no reusable knowledge changed.
 
-## Handoff Completion and DONE Lifecycle
+## Handoff Completion and Archive Lifecycle
 
 Treat the content of a handoff as immutable implementation input. Do not rewrite its recommendations or append completion notes during execution.
 
-After a handoff meets every completion criterion, move the original file to:
+After an actionable handoff meets every completion criterion, move the original file to:
 
 ```text
 AGENTS/HANDOFF/DONE/<original-filename>
@@ -416,14 +427,15 @@ Lifecycle rules:
 - do not move a handoff while required work, required decisions, accepted optional work, verification, or required documentation remains open
 - deferred optional work does not prevent the move when the required outcome is complete and verified
 - do not move a blocked or knowingly broken handoff
-- move an already-implemented or validly superseded actionable handoff after the supporting verification succeeds
-- move a superseded redirect only after all canonical destinations are completed or already in `DONE/`
+- move an already-implemented or alternative-implementation-satisfied actionable handoff to `DONE/` after the supporting verification succeeds
+- move a valid top-level superseded redirect to `SUPERSEDED/` only after all canonical destinations are completed or already in `DONE/`
+- leave redirects already archived in `SUPERSEDED/` unchanged
 - do not overwrite an existing destination file
 - treat a destination collision as a blocker unless repository guidance provides an explicit safe rule
 - do not delete the handoff after implementation; the move preserves it as completed history
 - do not stage, commit, or push the move unless explicitly requested
 
-The top-level `AGENTS/HANDOFF/` directory is the active queue. `AGENTS/HANDOFF/DONE/` is completed history.
+The top-level `AGENTS/HANDOFF/` directory is the active queue. `AGENTS/HANDOFF/DONE/` is completed implementation history. `AGENTS/HANDOFF/SUPERSEDED/` is terminal non-actionable redirect history.
 
 ## Git Contract
 
@@ -456,7 +468,7 @@ Do not return a progress-only response while independent selected work remains. 
 
 ## Completion Criteria
 
-A handoff is complete only when:
+An actionable handoff is complete only when:
 
 - the current repository was inspected
 - stale assumptions and overlap with existing work were reconciled
@@ -465,13 +477,13 @@ A handoff is complete only when:
 - ordinary technical decisions were resolved by the agent
 - every optional item was classified as implement now, do not implement, or defer
 - every optional item accepted for implementation was implemented and verified
-- the intended behavior was implemented or proven already satisfied or superseded
+- the intended behavior was implemented, proven already satisfied, or proven satisfied by an alternative implementation
 - relevant tests and documentation were updated when required
 - meaningful verification passed
 - no known implementation defect remains in scope
 - the original handoff file was moved into `AGENTS/HANDOFF/DONE/`
 
-A queue is complete only when every selected actionable handoff is in `DONE/` and every selected superseded redirect has also moved to `DONE/`. Any blocked, active, or unprocessed selected file means the full-queue target was not reached. Do not describe partial progress as queue completion.
+A queue is complete only when every selected actionable handoff is in `DONE/` and every selected valid top-level superseded redirect is in `SUPERSEDED/`. Any blocked, active, or unprocessed selected top-level file means the full-queue target was not reached. Do not describe partial progress as queue completion.
 
 ## Final Response
 
@@ -479,14 +491,14 @@ After execution, report concisely:
 
 - processed handoff paths in execution order
 - final `AGENTS/HANDOFF/DONE/` paths for completed handoffs
-- superseded redirects and their canonical destinations
-- completion, already-satisfied, superseded, or blocker status for each handoff
+- top-level superseded redirects archived in `SUPERSEDED/` and their canonical destinations
+- completion, already-satisfied, alternative-implementation-satisfied, archived-superseded, or blocker status for each selected file
 - important optional items implemented, rejected, or deferred
 - scope reduced because of overlap or existing implementation
 - major technical decisions made
 - implementation files changed
 - tests and verification run with results
-- any active handoffs that could not reach `DONE/`, with the unavoidable blocker and why no remaining safe work could continue
+- any active actionable handoff that could not reach `DONE/` or top-level redirect that could not reach `SUPERSEDED/`, with the unavoidable blocker and why no remaining safe work could continue
 - current Git status at a useful summary level
 
 Do not send the final response merely to ask whether the user wants the loop to continue. The normal final response is emitted after the selected active queue is empty; an earlier response is an exception caused by an unavoidable blocker that prevents all remaining safe work.
