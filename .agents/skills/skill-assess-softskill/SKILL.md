@@ -1,211 +1,172 @@
 ---
 name: skill-assess-softskill
-description: Assess one skill, a skill collection, or multiple skill versions for semantic quality, internal consistency, metadata alignment, safety, interoperability, maintainability, portability, and cross-repository generality. Use for first-party, copied, legacy, or third-party skills. Read each selected skill package completely before rating it, distinguish defects from intentional or still-useful divergence, report separate repository-structure and repository-content generality scores, provide evidence-based quality scores and confidence with reasons, and make no repository changes unless the user separately requests edits.
+description: Assess one skill, a selected skill collection, or several versions of a skill for clarity, consistency, safety, completeness, metadata alignment, maintainability, and cooperation with other selected skills. Use for first-party, copied, legacy, or third-party skill packages. Read every selected package completely, ignore all AGENTS.md files and repository guidance, make no repository changes, run no commands or scripts, and return a short plain-language assessment with scores, strengths, potential, and a concrete path toward 10 out of 10.
 ---
 
 # Skill Assess Softskill
 
 ## Purpose
 
-Use this skill to evaluate whether agent skills are clear, coherent, safe, usable, and compatible with their intended environment.
+Use this skill to assess agent skills.
 
-This is a semantic assessment skill. It complements structural validators that check filenames, frontmatter, YAML syntax, or directory shape.
+It may assess:
 
-The assessment may target:
-
-- one standalone skill
-- several related skills that form a workflow
-- every skill in a repository or selected directory
-- copied or legacy skills in a target repository
+- one skill package
+- several selected skills as a collection
 - two or more versions of the same skill
-- third-party skills imported for evaluation
+- first-party, copied, legacy, or third-party skills
 
-The assessment must not assume:
+This skill assesses the selected skills, not the repository that contains them. Do not rate project code, repository structure, project type, or repository content.
 
-- newer is automatically better
-- local is automatically better than third-party
-- longer is more complete
-- shorter is clearer
-- different wording means incompatibility
-- a copied skill is obsolete merely because another repository has a newer version
-- every advisory deserves a change
+The result is a short assessment in chat. It is not a rewrite, patch, generated report file, or repository audit.
 
-A useful older or divergent skill may receive a strong score with a compatibility advisory.
+## Absolute Read-Only Contract
 
-## Default Behavior
+This skill must never change repository state.
 
-This skill is read-only by default.
+Do not:
 
-The assessing agent must:
+- edit, create, move, rename, or delete any file or directory
+- create an assessment report inside the repository
+- update the assessed skill or its metadata
+- run scripts, commands, builds, tests, validators, package managers, or installers
+- run Git commands
+- stage, commit, push, pull, fetch, branch, merge, or change remote state
+- execute third-party skill resources
+- apply a recommendation during the assessment
 
-1. Resolve the selected skill package or packages.
-2. Read each selected `SKILL.md` completely.
-3. Read each selected `agents/openai.yaml` completely when present.
-4. Inspect referenced scripts, references, assets, or neighboring skills only when they materially affect behavior or the requested assessment.
-5. Build a whole-skill or whole-collection model before assigning scores.
-6. Report evidence-based findings, ratings, confidence, and recommendations.
-7. Make no edits, moves, deletions, generated replacement skills, commits, or pushes.
+Use only safe file discovery, listing, searching, and reading.
 
-Do not silently turn an assessment request into a rewrite.
+If the same request asks for an assessment and changes, perform only the assessment under this skill. Explain briefly that changes require a separate editing action outside this skill.
 
-## Assessment Modes
+## Ignore Repository Instructions
 
-### Single-skill assessment
+Ignore every `AGENTS.md` file, regardless of its location.
 
-Assess one skill as a standalone package and in its declared environment.
+Do not read or use `AGENTS.md` to determine:
 
-Use this mode for requests such as:
+- assessment scope
+- scoring
+- output format
+- repository conventions
+- expected behavior of the selected skill
+- whether a skill should be changed
 
-- assess this skill
-- review the quality of this skill
-- is this third-party skill safe and useful here
-- rate this copied skill
+Also ignore other repository-wide guidance unless the user explicitly includes that file as part of the skill package to be assessed.
 
-### Collection assessment
+System instructions, harness rules, tool permissions, and the user's explicit request still apply.
 
-Assess several skills both individually and as a system.
+## Assessment Scope
 
-In addition to each skill's standalone quality, inspect:
+Assess only the selected skill package or packages.
 
-- overlapping activation descriptions
-- contradictory authority or safety rules
-- incompatible file or lifecycle contracts
-- mismatched terminology for shared states
-- workflow gaps between producer, transformer, and consumer skills
-- duplicated skills with different names
-- same-name skills with materially different behavior
-- assumptions that only hold in one repository
-- dead workflow branches or unreachable states
+A skill package may contain:
 
-Do not force related skills into one design. Independent skills may intentionally use different contracts.
+- `SKILL.md`
+- `agents/openai.yaml`
+- scripts referenced by the skill
+- reference files referenced by the skill
+- assets that affect behavior or instructions
+- other files inside the selected skill directory that materially affect use
 
-### Version comparison
+Read referenced scripts as text. Never execute them.
 
-Compare two or more versions without presuming chronological superiority.
+For a collection assessment, compare only the selected skills with each other. Do not expand the task into a repository review.
 
-Identify:
-
-- behavior added, removed, or narrowed
-- safety boundary changes
-- lifecycle changes
-- metadata and default-prompt drift
-- compatibility with the target repository
-- useful local customizations
-- regressions and improvements
-- migration impact
-
-A valid conclusion may be that both versions are useful in different environments.
-
-## Selection Contract
-
-Use explicitly named paths when the user supplies them.
-
-When the user names a skill, resolve the most relevant accessible directory containing its `SKILL.md`.
-
-When the user requests all skills in a repository, inspect the repository's actual skill locations rather than assuming only `.agents/skills/` exists.
-
-Third-party skills may live in a dedicated import, vendor, evaluation, or staging directory. Do not relocate them merely to assess them.
-
-Exclude generated copies, archive directories, examples, fixtures, and test skills only when repository guidance or the user clearly identifies them as non-targets. Otherwise report the scope decision.
-
-If the complete requested selection cannot be read, do not claim a complete collection assessment. State the missing scope and lower confidence.
+For a version comparison, assess each version on its own terms. Do not assume that the newer version is better.
 
 ## Complete-Read-First Contract
 
-Do not assess a skill from search matches, excerpts, headings, metadata, or the default prompt alone.
+Do not rate a skill from search results, excerpts, headings, filenames, or the default prompt alone.
 
 For every selected skill:
 
-- read `SKILL.md` from beginning to end
-- read `agents/openai.yaml` from beginning to end when present
-- identify every referenced resource that changes execution behavior
-- inspect those resources before rating the affected dimension
-- reread the full skill when local details appear contradictory
+1. Read `SKILL.md` completely.
+2. Read `agents/openai.yaml` completely when present.
+3. Inventory the remaining files in the selected skill directory.
+4. Read every file that can change the skill's behavior.
+5. Build a whole-skill view before assigning scores.
 
-For a collection:
+For several selected skills, finish reading all selected packages before judging their cooperation or conflicts.
 
-1. Inventory all selected skills and resources.
-2. Read each selected package completely.
-3. Build a cross-skill model.
-4. Only then assign collection-level findings and scores.
+If required files are missing or unreadable, state that clearly and lower confidence. Do not fill gaps with assumptions.
 
-A local wording issue may make sense in the full document. A local fix may also create a global contradiction. Whole-document and whole-workflow understanding takes precedence over snippet-level impressions.
+## Neutral Assessment Rules
 
-## Repository Context Contract
+Do not assume:
 
-Skills are evaluated in context, not in isolation from their operating environment.
+- newer means better
+- first-party means safer
+- third-party means worse
+- longer means more complete
+- shorter means clearer
+- specialization means poor quality
+- different wording means conflict
+- every improvement idea should be implemented
 
-Inspect the smallest sufficient repository context needed to understand:
+An older or specialized skill may be excellent for its stated purpose.
 
-- expected skill discovery paths
-- repository guidance and agent instructions
-- available tools and permissions
-- lifecycle directories and naming conventions
-- whether outputs are local, tracked, ignored, archived, or published
-- neighboring skills that explicitly produce or consume the same artifacts
-- platform-specific assumptions
+Do not create criticism to justify a score below 10. When no useful change is needed, say what should be preserved.
 
-Separate these conclusions:
+## Scorecard
 
-- **intrinsic issue** — the skill is internally defective regardless of repository
-- **context mismatch** — the skill is coherent but does not fit the target repository
-- **intentional coupling** — the skill deliberately targets a specific environment
-- **unknown** — evidence is insufficient
+Score every applicable category from `0.0` to `10.0`.
 
-Repository coupling is not automatically a defect. It becomes a portability concern when the skill presents itself as generic or is being considered for reuse elsewhere.
+For every category, always include exactly two short points:
 
-## Assessment Dimensions
+- **Strong:** what already works well
+- **To reach 10/10:** one concrete improvement idea, or `Preserve as-is; no useful addition is needed.`
 
-Score every applicable dimension from `0.0` to `10.0`.
+Do not leave either point out. Do not invent churn merely to fill the second point.
 
-### 1. Purpose and activation clarity
+### 1. Purpose and activation
 
-Assess whether the skill clearly explains:
+Assess whether the skill makes clear:
 
 - what it does
 - when to use it
 - when not to use it
 - its default behavior
-- its terminal result
+- its final result
 
 ### 2. Internal consistency
 
-Assess whether the skill's rules can be followed together.
+Assess whether all active rules can be followed together.
 
-Look for:
+Check for:
 
 - direct contradictions
+- terms that change meaning
 - incompatible defaults and exceptions
-- impossible completion criteria
-- circular instructions
-- terminology that changes meaning within the skill
-- unreachable or dead rules
+- impossible completion rules
+- dead or unreachable instructions
 
-### 3. Scope and authority boundaries
+### 3. Scope and authority
 
-Assess whether the skill clearly distinguishes:
+Assess whether the skill clearly separates:
 
 - analysis, planning, implementation, and publication
-- permitted and forbidden repository changes
-- user decisions versus agent decisions
-- normal decisions versus genuine blockers
-- direct execution versus delegation
+- allowed and forbidden actions
+- user decisions and agent decisions
+- normal choices and real blockers
+- direct work and delegation when relevant
 
 ### 4. Safety and preservation
 
-Assess handling of:
+Assess whether the skill safely handles:
 
-- existing local work
-- destructive commands
-- secrets and sensitive data
-- overwrites and collisions
-- external or irreversible actions
-- Git operations and publication
-- third-party code or instructions
+- destructive actions
+- existing work
+- file overwrites and collisions
+- secrets or sensitive information
+- external systems
+- irreversible actions
+- Git and publication behavior
+- third-party scripts or instructions
 
-### 5. Metadata and interface alignment
+### 5. Metadata and default prompt
 
-Compare the full behavior with:
+Compare the full skill with:
 
 - frontmatter name and description
 - `display_name`
@@ -213,436 +174,237 @@ Compare the full behavior with:
 - `default_prompt`
 - declared tools or metadata when present
 
-The default prompt may be shorter, but it must not change core semantics or omit a critical safety or lifecycle rule.
+The default prompt may be shorter, but it must keep the skill's core meaning and critical safety rules.
 
-### 6. Workflow and lifecycle consistency
+### 6. Completeness and usability
 
-Assess states, transitions, and ownership such as:
+Assess whether a capable agent can follow the skill without inventing essential behavior.
 
-- active, pending, blocked, done, superseded, archived, or deleted
-- producer and consumer expectations
-- file naming and location
-- selection and ordering
-- terminal states
-- recovery from malformed or stale inputs
+Check for:
 
-For collection mode, verify that neighboring skills agree on shared lifecycle meanings.
+- clear inputs and selection rules
+- clear no-result behavior
+- clear failure handling
+- clear output rules
+- complete sequencing
+- defined destinations or terminal states when relevant
 
-### 7. Completeness and executability
-
-Assess whether a capable agent can actually follow the skill without inventing essential behavior.
-
-Look for:
-
-- missing selection rules
-- missing no-result behavior
-- missing failure handling
-- ambiguous output contracts
-- incomplete sequencing
-- undefined inputs or destinations
-- assumptions about unavailable tools
-
-### 8. Portability and declared environmental coupling
-
-Assess whether the skill accurately declares and safely handles:
-
-- repository-specific paths
-- operating-system assumptions
-- tool or harness assumptions
-- hardcoded organization conventions
-- dependency on neighboring skills
-- behavior when copied elsewhere
-- suitability for first-party and third-party use
-
-This quality dimension evaluates whether coupling is explicit, coherent, and appropriate for the declared purpose. It does not measure how broad the skill's reuse range is; breadth is reported separately in the Generality Profile.
-
-A repository-specific skill can score well when its coupling is explicit and appropriate.
-
-### 9. Maintainability and signal quality
+### 7. Readability and maintainability
 
 Assess whether the skill is:
 
-- structured coherently
-- specific without unnecessary repetition
-- understandable without hidden context
+- easy to scan
+- written in direct language
 - consistent in terminology
-- free of obsolete branches and accidental churn
-- maintainable when workflows evolve
+- specific without unnecessary repetition
+- organized so later changes can be made safely
+- free from stale or accidental instructions
 
-Do not penalize necessary repetition that protects a critical contract across distant sections or a default prompt.
+Necessary repetition of a critical safety rule is acceptable.
 
-### 10. Interoperability
+### 8. Cooperation with selected skills
 
-Apply when the skill participates in a workflow or collection.
+Use this category only when several related skills are selected or the skill explicitly depends on another selected skill.
 
-Assess whether it composes safely with:
+Assess whether they agree on:
 
-- producer and consumer skills
-- validators or managers
-- artifact writers
-- planners and executors
-- repository guidance
-- imported third-party skills
+- shared terms
+- input and output formats
+- file locations
+- lifecycle states
+- ownership of decisions
+- producer and consumer expectations
 
-For a truly standalone skill, mark this dimension `N/A` rather than inventing dependencies.
+For a standalone skill with no selected dependency, mark this category `N/A`.
 
-## Generality Profile
+## Overall Score
 
-Report generality separately from semantic quality. A specialized skill can be excellent for its declared purpose while having a deliberately narrow reuse range.
+Provide one overall score from `0.0` to `10.0`.
 
-Provide two independent scores from `0.0` to `10.0`:
+Do not use a blind average. Give the most weight to:
 
-### Repository-structure generality
+1. safety
+2. internal consistency
+3. usability
+4. scope clarity
 
-Measure how well the skill can operate across different repository and project layouts, including:
+Use the other categories to refine the result.
 
-- single-project repositories, monorepos, and repositories containing several unrelated projects
-- nested source, test, documentation, infrastructure, tooling, package, and generated-output directories
-- different programming languages, build systems, package managers, and project types
-- repositories with no conventional `src/`, `test/`, or application entrypoint
-- mixed operating systems and path conventions when relevant
-- repository-local guidance in different locations
-- absent optional directories or files
-- custom artifact, archive, or work-output locations
-- discovery by evidence rather than hardcoded organization assumptions
+Normal score guidance:
 
-A high score means the skill discovers the relevant repository shape and adapts without requiring one expected layout. A low score means correct behavior depends on a narrow or hardcoded tree structure.
+- `9.0-10.0` — ready and exceptionally strong
+- `7.5-8.9` — ready with useful improvement ideas
+- `6.0-7.4` — usable, but important improvements would help
+- `4.0-5.9` — substantial revision is recommended
+- `0.0-3.9` — not ready for reliable use
 
-### Repository-content generality
+A serious safety contradiction should normally keep the overall score below `4.0`.
 
-Measure how well the skill applies across different kinds of repository content, including:
+An impossible core workflow should normally keep the overall score below `6.0`.
 
-- application and library source code
-- tests and fixtures
-- configuration and schemas
-- infrastructure, deployment, and workflow definitions
-- documentation and runbooks
-- data-oriented, model, prompt, policy, or specification repositories
-- mixed repositories containing code and non-code artifacts
-- repositories dominated by assets, generated files, vendored content, or binaries
-- domain-specific versus domain-neutral assumptions
-
-A high score means the skill can identify which content is relevant to its purpose and behave safely across many content mixes. A low score means it assumes a particular content domain, such as conventional application source code, even when that limitation is not declared.
-
-### Generality scoring anchors
-
-Use these anchors for both generality scores:
-
-- `9.0–10.0` — adapts safely across highly varied or initially unknown repositories
-- `7.5–8.9` — broadly reusable with a small number of explicit assumptions
-- `6.0–7.4` — works across several common repository or content types but needs adaptation outside them
-- `4.0–5.9` — useful in a narrow family of layouts or content domains
-- `2.0–3.9` — tightly bound to one repository style, ecosystem, or content type
-- `0.0–1.9` — effectively specific to one exact environment or unusable outside it
-
-Do not interpret a low generality score as a defect by itself. State whether the narrowness is:
-
-- intentional and correctly declared
-- acceptable for the target repository
-- a reuse limitation worth noting
-- or misleading because the skill claims broader applicability than it actually supports
-
-### Relationship to the overall quality score
-
-By default, do **not** average either generality score into the overall quality score. The overall score measures fitness for the skill's declared purpose and intended environment.
-
-Generality should affect the overall score only when at least one of these conditions applies:
-
-- the skill claims to be generic, universal, repository-agnostic, or suitable for arbitrary repositories
-- the user explicitly asks whether the skill can be reused across varied repositories or content types
-- the target environment is intentionally unknown or heterogeneous
-- undeclared assumptions cause incorrect or unsafe behavior outside one narrow repository shape or content domain
-
-When generality affects the overall score, explain exactly which claim or requested use makes it relevant and how it was weighted.
-
-Examples:
-
-- A Windows-only PowerShell skill that clearly targets one Windows repository may score `9.0` for quality and `3.0` for repository-structure generality.
-- A skill claiming to review any repository but assuming `src/`, application code, and one test layout should lose quality points for misleading scope as well as receive lower generality scores.
-- A content-specific database-migration skill may have low repository-content generality but still merit `Keep as-is` when its activation and limitations are clear.
-
-## Scoring Anchors
-
-Use these anchors consistently:
-
-- `9.0–10.0` — exceptionally clear, coherent, safe, and ready for intended use
-- `7.5–8.9` — strong and useful; only targeted advisories or low-risk corrections
-- `6.0–7.4` — usable, but meaningful ambiguity, coupling, drift, or maintenance debt exists
-- `4.0–5.9` — fragile; important corrections are recommended before broad use
-- `2.0–3.9` — seriously inconsistent, unsafe, misleading, or incomplete
-- `0.0–1.9` — unusable for the stated purpose or actively dangerous
-
-Use one decimal place when evidence supports it. Do not imply false precision when evidence is limited.
-
-## Overall Score Contract
-
-Provide an overall score from `0.0` to `10.0`, but do not use a blind arithmetic average.
-
-Weight dimensions according to the skill's purpose and risk.
-
-Keep the two Generality Profile scores separate unless the Generality Profile contract explicitly makes them relevant to the claimed or requested use.
-
-Critical defects must cap the overall score:
-
-- a credible destructive or security-critical contradiction normally caps the score at `3.9`
-- an impossible core lifecycle or completion contract normally caps the score at `5.9`
-- metadata drift alone normally does not cap the score unless the default prompt activates unsafe or materially different behavior
-
-Explain every cap or major weighting decision.
-
-When comparing versions or assessing a collection, provide:
-
-- per-skill scores
-- a collection or compatibility score
-- the reason the collection score differs from individual scores
+Briefly explain any such limit in plain language.
 
 ## Visual Rating
 
-Provide an optional five-star visual derived from the overall score:
+Show the five-star visual by default. Omit it only when the user asks for a compact result without stars.
 
-- `0.0–1.9` → `☆☆☆☆☆`
-- `2.0–3.9` → `★☆☆☆☆`
-- `4.0–5.9` → `★★☆☆☆`
-- `6.0–7.4` → `★★★☆☆`
-- `7.5–8.9` → `★★★★☆`
-- `9.0–10.0` → `★★★★★`
+- `0.0-1.9` -> `☆☆☆☆☆`
+- `2.0-3.9` -> `★☆☆☆☆`
+- `4.0-5.9` -> `★★☆☆☆`
+- `6.0-7.4` -> `★★★☆☆`
+- `7.5-8.9` -> `★★★★☆`
+- `9.0-10.0` -> `★★★★★`
 
-The numeric score and reasoning are authoritative. Stars are only a quick visual summary.
+The numeric score is the main rating.
 
-## Confidence Contract
+## Confidence
 
-Report assessment confidence from `0.00` to `1.00`.
+Report confidence from `0.00` to `1.00`.
 
-Confidence should reflect:
+Base it on:
 
-- completeness of the selected files
-- access to referenced resources
-- understanding of repository context
-- availability of neighboring workflow skills
-- whether the behavior can be validated structurally or by safe smoke inspection
+- whether every selected package file was read
+- whether behavior-changing resources were available
+- whether all selected versions or related skills were available
+- whether any important meaning remains unclear
 
-Do not raise confidence merely because the assessor wrote a detailed report.
+Do not lower confidence because repository code or repository guidance was not inspected. Those are outside this skill's scope.
 
-Use broad interpretations:
+## Plain-Language Output Contract
 
-- `0.85–1.00` — complete package and relevant context were inspected
-- `0.65–0.84` — minor context or resource gaps remain
-- `0.40–0.64` — material environment or intent is uncertain
-- below `0.40` — assessment is preliminary
+Write in the user's language.
 
-## Finding Taxonomy
+Use simple words and short sentences.
 
-Classify each finding by type and severity.
+Avoid terms such as:
 
-Useful finding types include:
+- mode-specific calibration
+- intrinsic defect
+- metadata drift
+- semantic divergence
+- cross-repository generality
+- contextual interoperability
 
-- **Contradiction** — two active rules cannot both be satisfied
-- **Ambiguity** — materially different executions are plausible
-- **Metadata drift** — interface metadata changes or omits core behavior
-- **Lifecycle mismatch** — states or transitions conflict within or across skills
-- **Unsafe authority** — the skill permits unsafe, destructive, or unauthorized behavior
-- **Missing contract** — essential selection, output, failure, or completion behavior is undefined
-- **Dead rule** — a rule is unreachable or made obsolete by another rule
-- **Redundancy** — repeated rules create maintenance risk without adding protection
-- **Portability concern** — hidden or misleading environmental coupling
-- **Intentional divergence** — a difference is coherent and appears deliberate
-- **Legacy but usable** — older behavior remains internally sound and useful in context
-- **Obsolete behavior** — the skill no longer fits its declared workflow or environment
-- **Advisory** — a non-blocking improvement or compatibility note
+When a technical term is necessary, explain it in everyday language.
 
-Severity levels:
+Keep the result easy to scan:
 
-- **Critical** — credible destructive, security, privacy, or irreversible risk
-- **High** — core purpose, lifecycle, or authority is materially broken
-- **Medium** — meaningful ambiguity, mismatch, or portability risk
-- **Low** — localized quality or maintenance issue
-- **Advisory** — useful information that does not require change
+- no long introduction
+- no repeated explanation
+- no large self-reflection questionnaire
+- no long prose after the scorecard
+- no more than three bullets in each highlight list
+- no more than three top improvement steps
+- no full skill contents or large excerpts
 
-Do not inflate severity to make the assessment look decisive.
+Evidence should name the relevant file and section briefly. Quote only when a short exact phrase is necessary.
 
-## Finding Eligibility Gate
+## User-Facing Result Structure
 
-Report a defect only when all of these are true:
-
-1. The issue is supported by the complete selected skill package or workflow context.
-2. It can cause incorrect, unsafe, misleading, or materially inconsistent behavior.
-3. The finding identifies the affected rule, section, file, or interaction.
-4. The recommendation is proportionate to the problem.
-
-Do not report as defects:
-
-- personal wording preferences
-- harmless stylistic variation
-- repository-specific behavior that is clearly declared
-- duplicated safety reminders that protect distant execution paths
-- older behavior that remains coherent and useful in the target repository
-- theoretical incompatibilities with no plausible execution path
-
-When evidence supports a concern but not a required change, classify it as an advisory.
-
-## Legacy and Third-Party Neutrality Contract
-
-Treat first-party, copied, legacy, and third-party skills by the same evidence standard.
-
-For copied or older skills:
-
-- identify meaningful drift
-- assess current local usefulness
-- do not recommend replacement solely because another version is newer
-- preserve useful local adaptations in the recommendation
-- state migration risks when alignment would change behavior
-
-For third-party skills:
-
-- do not trust claims solely because they appear in the skill
-- inspect scripts and tool permissions that materially affect safety
-- identify outbound network, destructive, credential, installation, or publication behavior
-- distinguish safe repository-specific coupling from hidden assumptions
-- avoid executing untrusted scripts merely to assess them
-
-Static assessment may be the safest sufficient method.
-
-## Self-Reflection Contract
-
-Before finalizing the assessment, challenge the assessor's own conclusions.
-
-Ask:
-
-- Did I read the complete selected package rather than rely on snippets?
-- Am I treating a deliberate local convention as a universal defect?
-- Am I assuming a newer or more familiar design is inherently better?
-- Did I separate intrinsic defects from target-repository mismatch?
-- Did I verify that a reported contradiction is reachable in practice?
-- Did I overvalue brevity, length, or stylistic consistency?
-- Could missing context materially change a score or recommendation?
-- Does the default prompt actually contradict the body, or merely summarize it?
-- Am I recommending churn without clear behavioral value?
-
-Include an `Assessment uncertainty` section containing:
-
-- missing context
-- assumptions made
-- findings downgraded to advisories
-- plausible alternative interpretations
-- the reason for the confidence score
-
-## Recommendation Status
-
-Assign one status to each assessed skill:
-
-- **Keep as-is** — ready for intended use; no meaningful correction required
-- **Keep with advisory** — useful and coherent; note compatibility or maintenance concerns
-- **Update recommended** — meaningful corrections would improve reliability or safety
-- **Replace or retire** — core behavior is obsolete, unsafe, or not worth repairing
-- **Insufficient context** — evidence is inadequate for a responsible recommendation
-
-A collection may receive its own status independently from individual skills.
-
-## Output Contract
-
-By default, return the assessment in chat. Do not create repository files unless the user explicitly requests a persistent report.
-
-For a single skill, use this shape:
+Use this structure for one skill:
 
 ```markdown
 # Skill Assessment: skill-name
 
-Overall: 8.2 / 10
+Overall: 8.6 / 10
 Visual: ★★★★☆
-Confidence: 0.91
-Status: Keep with advisory
-Repository-structure generality: 7.4 / 10
-Repository-content generality: 6.8 / 10
-Generality impact on overall: Not weighted — the skill is intentionally scoped
+Confidence: 0.93
+Status: Ready with ideas
 
-## Executive assessment
-A concise explanation of the skill's current fitness.
+## Short verdict
+Two or three short sentences at most.
+
+## Highlights
+
+### Strengths
+- Up to three short bullets.
+
+### Potential
+- Up to three short bullets.
 
 ## Scorecard
-- Purpose and activation clarity: 8.5 / 10 — reason
-- Internal consistency: 7.5 / 10 — reason
-- ...
 
-## Generality profile
-- Repository-structure generality: 7.4 / 10 — supported layouts and limiting assumptions
-- Repository-content generality: 6.8 / 10 — supported content types and limiting assumptions
-- Declared-scope fit: intentional specialization, acceptable limitation, or misleading generality claim
-- Overall-score treatment: not weighted, advisory only, or weighted with reason
+### 1. Purpose and activation — 8.8 / 10
+- Strong: One short reason.
+- To reach 10/10: One concrete idea, or preserve as-is.
 
-## Findings
-### High — Lifecycle mismatch
-- Evidence: exact files, sections, and conflicting behavior
-- Impact: what can go wrong
-- Recommendation: proportionate correction
+Repeat for every applicable category.
 
-## Strengths
-Concrete qualities worth preserving.
+## Top 3 steps toward 10/10
+1. Highest-value improvement.
+2. Next improvement.
+3. Optional third improvement.
 
-## Assessment uncertainty
-Missing context, alternative interpretations, and confidence reasoning.
+Omit this section when every category is 10/10 and no useful change exists.
+
+## Important notes
+Include only real safety issues, contradictions, or blockers. Omit the section when none exist.
+
+## Basis and limits
+- Read: short list of assessed package files.
+- Not used: all AGENTS.md files and repository-wide guidance.
+- Confidence reason: one short sentence.
+- Repository changes: none.
 ```
 
-For a collection, add:
+Use positive, neutral headings. Prefer `Strengths` and `Potential`; do not use `Strengths` and `Weaknesses`.
 
-- an inventory of assessed skills
-- per-skill score and status
-- collection compatibility score
-- cross-skill findings
-- workflow-state and terminology map when relevant
-- legacy or third-party compatibility advisories
-- a repository-structure and repository-content generality matrix
-- explicit identification of skills whose low generality is intentional versus misleading
+Do not add a long findings section after the scorecard. Put ordinary improvement ideas directly into `To reach 10/10` and the prioritized top-three list.
 
-For a version comparison, add:
+## Collection Output
 
-- behavior-drift summary
-- changes by dimension
-- target-environment fit
-- preserve, migrate, or retire recommendation
+For a collection:
 
-Do not produce a long report merely to justify a high score. When no meaningful issue exists, keep findings concise and explain why the skill is sound.
+1. Start with a compact table containing each skill's overall score, confidence, and status.
+2. Add collection-level `Strengths` and `Potential`, each with no more than three bullets.
+3. Show detailed scorecards only for skills with important differences or requested detail.
+4. Add no more than three collection-wide steps toward 10/10.
+5. Name serious cross-skill conflicts in `Important notes`.
 
-## No-Change Contract
+Do not produce a full long-form report for every skill unless the user explicitly requests it.
 
-This skill does not authorize modifications.
+## Version Comparison Output
 
-Do not:
+For a version comparison:
 
-- edit assessed skills
-- create replacement skills
-- move, rename, or delete skill directories
-- update metadata
-- execute untrusted third-party scripts merely for scoring
-- install dependencies
-- stage, commit, or push
+- show both versions side by side
+- state what each version does well
+- state the best use case for each version
+- list the most important behavior differences
+- recommend preserve, adopt, combine, or retire only when evidence supports it
+- do not treat chronology as quality
 
-Read-only inspection and narrowly necessary safe validation are allowed.
+Keep the comparison concise.
 
-When the user separately asks for corrections after reviewing the assessment, treat that as a new editing task and preserve the assessment's evidence and uncertainty.
+## Recommendation Status
 
-## Quality Checklist
+Use one of these plain statuses:
 
-Before returning:
+- **Ready** — no meaningful change is needed
+- **Ready with ideas** — usable now; useful improvements exist
+- **Improvement recommended** — important changes would improve reliability
+- **Revision needed** — core rules need substantial work
+- **Not enough information** — required package content is missing
 
-- every selected `SKILL.md` was read completely
-- every present `agents/openai.yaml` was read completely
-- behavior-changing resources were inspected or explicitly listed as missing
-- intrinsic defects were separated from context mismatch
-- intentional divergence and legacy usefulness were considered
-- each score has a concrete reason
-- repository-structure and repository-content generality were scored separately
-- the report states whether and why generality affected the overall quality score
-- critical issues affected the overall score appropriately
-- stars match the numeric score
-- confidence reflects evidence completeness
-- recommendations avoid unnecessary churn
-- no assessed file was modified
+## Final Safety Check
+
+Before returning, confirm internally:
+
+- every selected package was read completely
+- all `AGENTS.md` files were ignored
+- no repository guidance influenced the rating
+- no command or script was executed
+- no repository file or state was changed
+- each scorecard category has `Strong` and `To reach 10/10`
+- the result uses simple language
+- the result is concise and easy to scan
+
+Do not print this checklist unless the user asks.
 
 ## Typical Invocation Phrases
 
 - `Use $skill-assess-softskill to assess this skill and rate it from 0 to 10.`
-- `Assess all skills in this repository for internal and cross-skill consistency.`
-- `Compare these two versions of the skill without assuming the newer version is better.`
-- `Review the imported third-party skills for safety, portability, and usefulness in this repository.`
-- `Assess copied legacy skills and distinguish required updates from optional alignment.`
-- `Assess how generically these skills work across repository layouts and repository content types without penalizing intentional specialization.`
+- `Assess these selected skills as one collection without reading AGENTS.md.`
+- `Compare these two skill versions without assuming the newer one is better.`
+- `Review these third-party skills without executing scripts or changing the repository.`
+- `Show strengths, potential, and the clearest path toward 10 out of 10.`
