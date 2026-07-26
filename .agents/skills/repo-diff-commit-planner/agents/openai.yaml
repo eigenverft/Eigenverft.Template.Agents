@@ -1,4 +1,4 @@
 interface:
-  display_name: "Repo Diff Commit Executor"
+  display_name: "Repo Diff Commit Planner"
   short_description: "Group repository diffs and execute logical commits"
-  default_prompt: "Use $repo-diff-commit-planner to analyze repository differences, group related changes into logical commits, and execute safe staging and commit steps for all commit-ready groups."
+  default_prompt: "Use $repo-diff-commit-planner to analyze repository differences, group understood in-scope changes into logical local commits, and execute safe staging and commit steps. If I ask for planning, review, or reporting only, stop before staging or committing. Preserve unexplained, sensitive, generated, ignored, or unrelated changes. Do not fetch, pull, push, or change file tracking policy unless I explicitly request that remote or policy action."

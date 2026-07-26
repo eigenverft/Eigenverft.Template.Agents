@@ -79,7 +79,7 @@ A single agent may intentionally create several ordered handoffs for one investi
 
 In this case:
 
-- read enough to confirm the files form one set
+- read every selected handoff completely, then confirm that the files form one producing-run set
 - do not rewrite for style
 - do not merge merely because scopes are related
 - do not rename or renumber

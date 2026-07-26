@@ -7,6 +7,7 @@
 - Confirm generated files are included only when intentionally required.
 - Mark uncertain files as `needs-review` instead of forcing them into a commit.
 - Separate `hold` and `needs-review` items from `commit-now` groups before staging.
+- Do not change a tracked file's tracking state merely because it now matches an ignore rule.
 
 ## Logical Grouping Rules
 
@@ -38,8 +39,8 @@
 - Prefer waiting over manual lock-file deletion during normal execution.
 - Verify `git status` after each commit before proceeding.
 - Run the relevant build or test command when it is part of commit validation.
-- After all commit-ready groups are committed, attempt a normal `git push` unless the user explicitly said not to push.
-- If push fails, summarize the likely reason from git output and do not escalate to force-push behavior.
+- Leave completed commits local by default.
+- Push only when the user explicitly requests it. If that push fails, summarize the likely reason from git output and do not escalate to force-push behavior.
 - Stop if unexpected files appear or if the group boundaries no longer hold.
 
 ## Output Template
@@ -77,7 +78,7 @@ Execution Result
 - Committed:
   - <commit hash> <subject>
 - Push:
-  - <push succeeded or short failure reason>
+  - <not pushed by default, push succeeded, or short failure reason>
 - Deferred:
   - <hold or needs-review item>
 

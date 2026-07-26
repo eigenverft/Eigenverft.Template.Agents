@@ -60,6 +60,7 @@ Default interpretation:
 - generic repo-health files should be created automatically when a safe baseline template is acceptable and no stronger repo-specific source exists
 - already-present surfaces should only be updated when the current version is materially weaker than the newly derived target or when medium/major repo change thresholds are met
 - reruns should be close to no-op unless something is still missing or the repo meaningfully changed
+- repository feature toggles, including private vulnerability reporting, require explicit confirmation immediately before the setting change
 
 If the user explicitly says inspect, review, or report only, do not apply changes.
 
@@ -110,14 +111,12 @@ Run these checks before any repository inspection or update:
    - otherwise use the user-provided `owner/repo`
 4. Test access with a harmless read command such as `gh repo view OWNER/REPO`.
 5. If access fails because authentication is missing or insufficient:
-   - ask the user for a GitHub API token
-   - if the user points to a file that may contain the token, read only enough of that file to retrieve the token
-   - if the user names a secret key inside a file, extract only that value
-   - set `GH_TOKEN` only for the current command scope
-   - never echo the token value back to the user
-   - never write the token to disk or into repo files
-6. After a token is supplied or discovered, retry the repo-access check before continuing.
-7. If the token still does not grant repo access, report that clearly and stop rather than guessing.
+   - do not ask the user to paste a token into chat
+   - do not search for or read a token from a file
+   - ask the user to authenticate `gh` through an approved secure mechanism, or use a runtime-managed GitHub connector when one is already configured for the task
+   - stop before repository inspection or mutation until authenticated access is available
+6. After authentication is configured outside the conversation, retry the repo-access check before continuing.
+7. If authenticated access still does not grant repo access, report that clearly and stop rather than guessing.
 
 ## Source Hierarchy And Decision Model
 
@@ -392,7 +391,7 @@ These are usually safe to auto-create or auto-update when missing or stale:
 - a lightweight README footer when repository owner attribution is clearly derivable
 - restrained unicode section markers when the README tone supports a polished but minimal visual style
 - a generic `SECURITY.md` when no security policy file exists
-- enabling GitHub private vulnerability reporting when it is available, disabled, and the repository permissions and policy signals make it a safe default
+- preparing a recommendation to enable GitHub private vulnerability reporting when it is available, disabled, and the repository permissions and policy signals support it; changing the setting still requires explicit confirmation
 - issue templates when issues are enabled and the repo purpose is clear
 - a pull request template when pull requests are enabled
 - a lightweight `CONTRIBUTING` guide when contribution expectations can be derived from the repo’s current contribution surface, support links, and security handling
@@ -469,7 +468,7 @@ Choose only the concepts the repo actually supports. A Node.js repo, Python repo
 - Treat adding a recognized `SECURITY.md` as the practical way to turn on GitHub security-policy recognition for the repository surface.
 - Keep the policy generic, accurate, and low-commitment.
 - If a recognized `SECURITY.md` already exists and is broadly adequate, skip it.
-- If GitHub private vulnerability reporting is available but disabled, enable it by default when repo access and policy signals make that a safe, low-ambiguity action.
+- If GitHub private vulnerability reporting is available but disabled, report the recommended setting and obtain explicit confirmation immediately before enabling it.
 
 ### Content Rules
 
@@ -617,9 +616,10 @@ Choose only the concepts the repo actually supports. A Node.js repo, Python repo
 
 ## Guardrails
 
-- Do not expose tokens, secret names, or secret values in normal output.
+- Do not request, read, or expose tokens or secret values in normal operation.
 - Do not persist temporary auth unless the user explicitly asks to configure `gh auth login`.
 - Do not skip `gh` inspection of the current state before reading the README.
+- Do not change GitHub repository feature settings without explicit confirmation immediately before the action.
 - Do not treat the local working tree as the same thing as the live GitHub-visible default branch when summarizing results.
 - Do not skip reading `README.md` before recommending substantive metadata changes.
 - Do not treat every deviation from the README as a problem; account for user-surface needs.

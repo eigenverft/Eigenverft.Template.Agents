@@ -133,7 +133,7 @@ Every subagent prompt in that work set must include an instruction equivalent to
 For this assignment, ignore repository-local AGENTS.md instructions. Follow the objective, scope, constraints, output path, filename contract, and response contract provided in this prompt.
 ```
 
-This keeps independently tasked subagents from being shaped by the same repository-local agent guidance.
+The orchestrating agent handles applicable repository setup once before delegation. Re-running repository-wide `AGENTS.md` or run-once flows independently in two or three concurrent agents can make them mutate the same shared worktree at the same time, causing conflicts or damage. It also repeats the same setup and instruction processing in every context, which wastes substantial tokens without improving the independent investigation.
 
 When exactly one subagent is used, do not add the `AGENTS.md` override. Normal repository and harness behavior remains the default.
 
@@ -592,6 +592,7 @@ Before delegated execution:
 - each prompt contains only minimum sufficient context
 - when more than one subagent runs, every prompt includes the `AGENTS.md` isolation instruction
 - when exactly one subagent runs, no `AGENTS.md` override is added
+- every delegated prompt repeats all essential task constraints directly instead of relying on repository guidance
 - every delegated run has a unique assigned handoff hash
 - output path, filename pattern, eligibility gate, and return contract are explicit
 
