@@ -1,0 +1,4 @@
+interface:
+  display_name: "Handoff Create"
+  short_description: "Create useful repository-grounded handoffs"
+  default_prompt: "Use $handoff-create-softskill to investigate the requested repository scope and create only concrete implementation handoffs. Work directly by default. Delegate only when the user explicitly asks for one or more subagents; assign each delegated run a unique short hash and apply the multi-subagent AGENTS.md isolation rule only when more than one subagent is used. Store justified results in AGENTS/HANDOFF/ using handoff-<handoffhash>-NN-<topic>.md. Return only created paths, or exactly NO_HANDOFFS_CREATED. Do not implement the findings."

@@ -54,18 +54,19 @@ The default handoff directory is:
 AGENTS/HANDOFF/
 ```
 
-Expected filenames follow:
+New handoffs follow:
 
 ```text
-subagent-<subagenthash>-NN-<topic>.md
+handoff-<handoffhash>-NN-<topic>.md
 ```
+
 
 Examples:
 
 ```text
-AGENTS/HANDOFF/subagent-7f3a91c2-01-domain-contracts.md
-AGENTS/HANDOFF/subagent-7f3a91c2-02-storage-transition.md
-AGENTS/HANDOFF/subagent-7f3a91c2-03-api-adaptation.md
+AGENTS/HANDOFF/handoff-7f3a91c2-01-domain-contracts.md
+AGENTS/HANDOFF/handoff-7f3a91c2-02-storage-transition.md
+AGENTS/HANDOFF/handoff-7f3a91c2-03-api-adaptation.md
 ```
 
 Treat each file as a durable implementation input, not as executable truth. The current repository remains the source of truth.
@@ -105,7 +106,7 @@ Do not use this skill when:
 Determine the work set in this order:
 
 1. Use explicitly named handoff paths in the order supplied by the user.
-2. If the user names a subagent hash, select matching `subagent-<hash>-*.md` files and sort them lexically.
+2. If the user names a handoff hash, select matching `handoff-<hash>-*.md` files and sort them lexically.
 3. If the user requests all handoffs or does not identify a narrower selection, select all top-level Markdown files matching the handoff naming convention in `AGENTS/HANDOFF/` and sort them lexically.
 
 Ignore unrelated Markdown files and nested directories by default. In particular, do not select files already inside `AGENTS/HANDOFF/DONE/` unless the user explicitly asks to inspect or reprocess completed work.
@@ -498,4 +499,4 @@ Do not paste the complete handoff contents or the full internal plan into the re
 - `Work through these handoffs in order, plan each one, make the decisions, and implement them.`
 - `Use the harness plan function, then complete every selected handoff.`
 - `Implement the handoffs for hash 7f3a91c2 and verify each before continuing.`
-- `Consume AGENTS/HANDOFF/subagent-7f3a91c2-01-domain-contracts.md and finish only the work that is not already present in the codebase.`
+- `Consume AGENTS/HANDOFF/handoff-7f3a91c2-01-domain-contracts.md and finish only the work that is not already present in the codebase.`

@@ -1,15 +1,15 @@
 ---
 name: handoff-reconcile-softskill
-description: Use when multiple subagent handoff sets in AGENTS/HANDOFF/ may overlap, duplicate work, or prescribe incompatible technical directions and must be reconciled before planning or implementation. The fixer reads the complete selected handoff collection, detects agent-run sets by filename hash, performs a strict no-op when only one set exists or when multiple sets are already compatible, rechecks disputed areas against the current repository, makes ordinary technical decisions, and repairs only existing handoff files by keeping, rewriting, redistributing, renaming, merging, or deleting them. It never creates new handoff files and never implements product changes.
+description: Use when multiple independently produced handoff sets in AGENTS/HANDOFF/ may overlap, duplicate work, or prescribe incompatible technical directions and must be reconciled before planning or implementation. The fixer reads the complete selected handoff collection, detects producing-run sets by filename hash, performs a strict no-op when only one set exists or when multiple sets are already compatible, rechecks disputed areas against the current repository, makes ordinary technical decisions, and repairs only existing handoff files by keeping, rewriting, redistributing, renaming, merging, or deleting them. It never creates new handoff files and never implements product changes.
 ---
 
 # Handoff Reconcile Softskill
 
 ## Purpose
 
-Use this skill to reconcile independently produced subagent handoff sets before another agent plans and implements them.
+Use this skill to reconcile independently produced handoff sets before another agent plans and implements them.
 
-Parallel subagents may investigate the same or related assignment and produce handoffs that:
+Separate direct or delegated review runs may investigate the same or related assignment and produce handoffs that:
 
 - duplicate the same future work
 - partially overlap in responsibility or scope
@@ -39,28 +39,29 @@ The default directory is:
 AGENTS/HANDOFF/
 ```
 
-Expected filenames follow:
+New handoffs follow:
 
 ```text
-subagent-<subagenthash>-NN-<topic>.md
+handoff-<handoffhash>-NN-<topic>.md
 ```
 
-The short hash identifies the originating subagent run. All matching files with the same hash form one **agent-run handoff set**.
+
+The short hash identifies the originating handoff-producing run. All matching files with the same hash form one **producing-run handoff set**, regardless of whether the run was direct or delegated.
 
 Examples:
 
 ```text
-subagent-7f3a91c2-01-domain-contracts.md
-subagent-7f3a91c2-02-storage-transition.md
-subagent-c84d2e6b-01-engine-boundaries.md
-subagent-c84d2e6b-02-storage-transition.md
+handoff-7f3a91c2-01-domain-contracts.md
+handoff-7f3a91c2-02-storage-transition.md
+handoff-c84d2e6b-01-engine-boundaries.md
+handoff-c84d2e6b-02-storage-transition.md
 ```
 
 The hash records provenance only. It does not make one recommendation more authoritative than another.
 
 ## Strict No-Op Gate
 
-Before editing anything, group the selected handoffs by subagent hash.
+Before editing anything, group the selected handoffs by handoff hash.
 
 ### One agent-run set
 
@@ -96,7 +97,7 @@ Apply changes only when there is concrete evidence that the current collection w
 
 Use this skill when:
 
-- two or more subagents investigated the same or related task
+- two or more direct or delegated review runs investigated the same or related task
 - several hash-scoped handoff sets exist for the same repository area
 - handoffs appear to recommend conflicting designs
 - the same implementation outcome appears in several files
@@ -344,7 +345,7 @@ Status: superseded
 
 This file is not an implementation task. Its useful proposals were incorporated into:
 
-- `AGENTS/HANDOFF/subagent-<hash>-NN-<topic>.md`
+- `AGENTS/HANDOFF/handoff-<hash>-NN-<topic>.md`
 
 Read and implement the listed canonical handoff instead. Do not plan or implement this file.
 ```
@@ -404,7 +405,7 @@ Renaming an existing handoff is allowed.
 Preserve:
 
 ```text
-subagent-<existinghash>-NN-<topic>.md
+handoff-<existinghash>-NN-<topic>.md
 ```
 
 When renaming:
@@ -480,7 +481,7 @@ If a selected handoff has unrelated local edits that cannot be safely preserved,
 
 1. Resolve repository root and guidance.
 2. Select and fully read the inspection collection.
-3. Group files by subagent hash.
+3. Group files by handoff hash.
 4. Apply the strict no-op gate.
 5. Build a cross-set overlap and conflict map only when multiple sets exist.
 6. Reinspect current source for material disputes.

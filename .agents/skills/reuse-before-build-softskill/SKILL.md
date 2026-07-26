@@ -353,43 +353,24 @@ Use these judgments during analysis:
 
 Only judgments 1, 2, 3, 4, and 6 are eligible for output, and only when they pass the Actionable Finding Gate.
 
-Judgments 5 and 7 are internal review outcomes. Do not report them as findings and do not create implementation handoffs for them.
+Judgments 5 and 7 are internal review outcomes. Do not report them as findings.
 
 Judgment 6 is eligible only when the reduction is recommended now and has meaningful benefit. An optional cleanup, future possibility, or opportunistic refactor is not eligible.
 
 Do not recommend replacement solely to reduce line count. Account for migration risk, behavior compatibility, dependency policy, and long-term ownership.
 
-## Interaction With Handoff Or Artifact Skills
-
-When this softskill is paired with a skill that creates handoffs, reports, issues, or other artifacts, this softskill acts as the **eligibility filter**:
-
-- create an artifact only for a finding that passes the Actionable Finding Gate
-- every created artifact must prepare a concrete current-state replacement or material reduction
-- do not create artifacts for keep-as-is conclusions, insufficient evidence, rejected alternatives, optional modernization, or future-condition ideas
-- do not create an overview artifact merely to say that no replacement was found
-- if no actionable finding exists, create zero artifacts
-
-For subagent handoff workflows, a subagent with no actionable finding must return only:
-
-`NO_HANDOFFS_CREATED`
-
-It must not create an empty handoff or a handoff that recommends no action.
-
 ## No-Change Contract
 
-This softskill is analysis-only.
+This softskill is analysis-only. It reviews the repository and returns findings; it does not authorize repository changes.
 
-When used by itself, do not:
+As part of this skill, do not:
 
 - edit source files
 - add, remove, or update dependencies
 - modify manifests or lock files
 - change configuration
-- create issues, plans, handoffs, reports, or repository-local Markdown files
 - run automatic upgrade or migration commands
 - stage, commit, or push
-
-When explicitly paired with a handoff or artifact-producing skill, only the artifacts permitted by the Interaction With Handoff Or Artifact Skills section may be created. Product code, dependencies, configuration, and Git publication remain unchanged.
 
 Read-only inspection, dependency metadata inspection, and internet research are allowed.
 
@@ -403,7 +384,6 @@ In direct chat, return only:
 
 `No actionable reuse opportunity found.`
 
-In a subagent handoff workflow, follow the sentinel contract above and create no files.
 
 ### One or more actionable findings
 
