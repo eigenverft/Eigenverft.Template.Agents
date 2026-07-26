@@ -27,6 +27,10 @@ The output is not complete unless the recommended steps are concrete enough to b
 If a recommendation cannot be turned into a concrete refactoring task, do not present it as advice yet.
 First refine it until it names an actual change to code structure, dependency direction, module ownership, or system boundaries.
 
+A review with no material architectural recommendation is complete and successful. Do not manufacture direction options or task lists merely to satisfy the format.
+
+This is a read-only review skill. Keep source, tests, configuration, documentation, dependencies, generated files, handoffs, and Git state unchanged. Return architectural guidance in chat; do not implement the proposed refactorings.
+
 ## Scope
 
 This softskill can be used for many project types, including:
@@ -168,9 +172,13 @@ It should not behave like a textbook.
 
 ## Required Output Shape
 
-The response must be structured around **direction options with concrete task lists**.
+When at least one material architecture concern qualifies, the response must be structured around **direction options with concrete task lists**.
 
 Use this shape unless the user asks for another format.
+
+When no material architecture concern qualifies, return only:
+
+`Architecture review complete. Material findings: 0.`
 
 ### 1. What the source suggests today
 
@@ -267,7 +275,7 @@ For example:
 
 ## Minimum Concreteness Rule
 
-This rule is mandatory.
+This rule is mandatory only when at least one material architecture concern qualifies.
 
 - For every direction option, provide at least 3 concrete, source-based refactoring actions.
 - For the recommended direction, provide at least 5 ordered tasks.
@@ -339,8 +347,8 @@ Do not default to rewrites or sweeping restructures.
 
 ### Recommendation rule
 
-Do not just present options.
-Choose one direction unless the evidence is too weak.
+Do not just present options when material findings qualify.
+Choose one direction unless the evidence is too weak. When evidence is too weak to support a worthwhile current change, use the zero-finding result instead.
 
 ### Refactoring-task rule
 

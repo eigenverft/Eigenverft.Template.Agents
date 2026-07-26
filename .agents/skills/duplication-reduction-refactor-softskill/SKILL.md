@@ -307,9 +307,25 @@ Strong signs include:
 
 If you recommend a bounded reduction slice, make sure it is still a meaningful finished change, not just setup for a future cleanup.
 
+## Finding Eligibility And No-Finding Contract
+
+Do not invent duplication work to satisfy the output shape.
+
+A reduction finding qualifies only when current source shows material repeated behavior or needless indirection, the proposed change has a concrete completed boundary, and its clarity or maintenance benefit exceeds churn and abstraction risk.
+
+When no reduction finding qualifies, return only:
+
+`Duplication review complete. Material findings: 0.`
+
+In that case, omit clusters, directions, task lists, and all other required-output sections below.
+
+## Repository-State Contract
+
+This is a read-only review skill. Keep source, tests, configuration, documentation, dependencies, generated files, handoffs, and Git state unchanged. Return refactoring guidance in chat; do not implement it.
+
 ## Required Output Style
 
-The output must be concrete and task-oriented.
+When at least one material reduction finding qualifies, the output must be concrete and task-oriented.
 
 It should answer:
 
@@ -324,6 +340,8 @@ It should answer:
 - which bounded reduction slice should be finished first when there are too many findings to tackle at once
 
 ## Required Output Shape
+
+Use this shape only when at least one material reduction finding qualifies.
 
 ### 1. Highest-value duplication clusters
 
@@ -434,7 +452,7 @@ Mention only relevant risks, such as:
 
 ## Minimum Concreteness Rule
 
-This is mandatory.
+This is mandatory only when at least one material reduction finding qualifies.
 
 - Every direction must include at least 3 concrete refactoring actions.
 - The recommended direction must include at least 5 ordered tasks.

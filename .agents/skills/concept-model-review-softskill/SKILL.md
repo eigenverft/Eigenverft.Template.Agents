@@ -135,9 +135,25 @@ Prefer a codebase where:
 - the main implementation ideas are easy to explain
 - changes do not require crossing many unrelated modules
 
+## Finding Eligibility And No-Finding Contract
+
+Do not invent conceptual pain to satisfy the output shape.
+
+A concept concern qualifies only when repository evidence shows a material recurring cost, the underlying idea can be identified, and a realistic improvement direction would be worthwhile now.
+
+When no concept concern qualifies, return only:
+
+`Concept model review complete. Material findings: 0.`
+
+In that case, omit the concept clusters, alternatives, task list, and all other required-output sections below.
+
+## Repository-State Contract
+
+This is a read-only review skill. Keep source, tests, configuration, documentation, dependencies, generated files, handoffs, and Git state unchanged. Return findings in chat; do not implement the recommended tasks.
+
 ## Required Output Style
 
-The output must be practical, direct, source-based, and action-oriented.
+When at least one material concept concern qualifies, the output must be practical, direct, source-based, and action-oriented.
 
 It should answer:
 
@@ -148,6 +164,8 @@ It should answer:
 - what should become concrete improvement work
 
 ## Required Output Shape
+
+Use this shape only when at least one material concept concern qualifies.
 
 ### 1. Concept pain point list
 
@@ -277,7 +295,7 @@ Focus on the patterns generating repeated pain, not only the places where pain b
 
 ## Minimum Concreteness Rule
 
-This is mandatory.
+This is mandatory only when at least one material concept concern qualifies.
 
 - List multiple concrete concept pain points.
 - Group them into meaningful concept clusters.

@@ -109,6 +109,13 @@ reduce the real-life effort and risk of:
 
 The final recommended workflow should contain as few steps as reasonably possible.
 
+OPERATING BOUNDARY
+This is a source-first, review-only skill. Inspect the project and return analysis
+and proposals in chat. Do not edit source, configuration, documentation, scripts,
+dependencies, generated artifacts, or Git state. Do not execute deployment,
+migration, installation, update, rollback, or publication actions. Read-only checks
+are allowed when they are necessary to verify the current delivery model.
+
 WORKING METHOD
 
 PHASE 1 — IDENTIFY THE SYSTEM BOUNDARY
