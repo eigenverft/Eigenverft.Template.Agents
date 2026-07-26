@@ -177,13 +177,11 @@ $whitelist     = @( '.gitattributes', 'AGENTS.md', '.agents/**', 'AGENTS/**' )
 $destinationNames = @(
     'Eigenverft.App.AutomationWorkbench'
     'Eigenverft.App.BlazorMultihost'
-    'Eigenverft.App.BlazorWebAssemblyStandalone'
     'Eigenverft.App.GlobalServerPwaHost'
     'Eigenverft.App.Lattice'
     'Eigenverft.App.LlamaRunner'
     'Eigenverft.App.McpServer'
     'Eigenverft.App.ReverseProxy'
-    'Eigenverft.App.StackForge'
     'Eigenverft.Distributed.Drydock'
     'Eigenverft.Manifested.Agent'
     'Eigenverft.Manifested.Drydock'
