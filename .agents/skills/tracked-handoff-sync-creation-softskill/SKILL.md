@@ -81,7 +81,7 @@ The run branch protects the result from being left only in a local temporary wor
 Always preserve these invariants:
 
 - never force-push
-- never pull, merge, rebase, switch, reset, clean, commit, or push the current product branch for this workflow
+- never switch, checkout, detach, pull, merge, rebase, reset, clean, commit, or push any existing product checkout or existing product worktree for this workflow
 - never merge a tracked-handoff branch into a product branch
 - never stage, commit, or push product code on a tracked-handoff branch
 - never change a path outside `TRACKED_HANDOFFS/INITIAL/` on an Initial run or integration commit
@@ -92,6 +92,25 @@ Always preserve these invariants:
 - never create an empty run branch, empty result commit, or placeholder file
 
 The current product checkout is read-only source evidence. All writable handoff work happens in isolated temporary worktrees.
+
+Assume other agents may be using the same repository concurrently. Do not change the branch or HEAD of any checkout or worktree that already existed when this run started. Create only new, uniquely named temporary Handoff worktrees and local Handoff branches owned by this run. Removing or reusing another session's active worktree is forbidden.
+
+## Investigation-Only Execution Boundary
+
+This workflow investigates and writes Handoff documents. It does not execute product workflows merely to validate, initialize, or prepare the repository.
+
+Do not run as part of this skill:
+
+- product builds, tests, dependency or package restores, publishes, application launches, or benchmarks
+- product or repository setup, bootstrap, initialization, maintenance, migration execution, formatting, generation, or repository-provided cleanup commands
+- repository-provided one-time, startup, runbook, automation, or environment-preparation procedures
+- a second product-source checkout or detached product worktree merely to run such commands
+
+Existing source, tests, configuration, logs, history, and documented command results may be read as evidence. Do not execute them.
+
+This boundary does not prohibit the fetches, temporary Handoff worktrees, Handoff commits, remote run publication, current integration, mirror refresh, or cleanup of this run's own Handoff artifacts explicitly required by this skill.
+
+If the user explicitly requests command execution, treat it as separate work outside this Creation workflow. It must not be silently added as a verification step and must not change the product branch during this workflow.
 
 ## Remote Resolution
 
@@ -155,7 +174,7 @@ Every top-level run follows five phases.
 ### Phase A: Synchronize the remote Initial phase
 
 1. Resolve repository root, identity, current product branch or detached commit, exact source commit, upstream state, staged changes, unstaged changes, and relevant untracked state.
-2. Preserve all product work without stash, reset, clean, rebase, merge, or branch switching.
+2. Preserve all product work and every pre-existing checkout or worktree without stash, reset, clean, rebase, merge, checkout, detach, or branch switching.
 3. Resolve and fetch the writable remote.
 4. Reject the legacy `tracked-handoffs` branch when present.
 5. Fetch `tracked-handoffs/initial/current` when it exists.
@@ -170,10 +189,10 @@ A later session therefore begins from every Initial Handoff already integrated b
 
 1. Generate one unique 12-character lowercase hexadecimal session token.
 2. Create a session record under the Git common directory.
-3. Create a unique temporary worktree for the producing run.
+3. Create a new uniquely named temporary Handoff worktree and local Handoff branch owned by this run; do not repurpose or switch any existing checkout or worktree.
 4. Base the temporary worktree on the latest fetched `initial/current` when it exists; otherwise use an empty orphan Initial storage tree.
 5. Treat only `TRACKED_HANDOFFS/INITIAL/` as writable in that worktree.
-6. Inspect the designated product checkout read-only.
+6. Inspect the designated product checkout read-only without executing product, setup, maintenance, build, or test workflows.
 7. Apply the Handoff Eligibility Gate to every possible finding.
 8. Write only justified Initial Handoffs.
 
@@ -364,7 +383,7 @@ It is not an authoring workspace for a producing run.
 Rules:
 
 - refresh it by copying files from verified `initial/current`
-- do not switch the product checkout to a tracked-handoff branch
+- do not switch, detach, or repurpose any existing product checkout or worktree to a tracked-handoff branch
 - do not restore or merge a whole branch into the product checkout
 - do not stage or commit mirror changes on the product branch
 - do not modify `.gitignore`
@@ -489,7 +508,7 @@ Before creating a file, answer all four questions:
 1. What current behavior, defect, gap, duplication, risk, or required change creates real implementation work?
 2. What concrete target direction is supported by repository evidence?
 3. Is the concern substantial enough for a later planning agent to act on?
-4. Does preserving this Handoff add more value than leaving the current state unchanged?
+4. Does preserving this source-grounded Handoff add useful input for later reconciliation, planning, or implementation?
 
 If any answer is no, uncertain, speculative, stylistic, or only optional cleanup, do not create the Handoff.
 
@@ -501,6 +520,12 @@ These are not sufficient reasons:
 - the result is keep-as-is, no action, or insufficient evidence
 - a possible future requirement may make a change useful
 - the output format appears to expect a file
+
+Repository comparison determines whether the supplied source still describes real unfinished implementation work. It is not a semantic reconciliation or deduplication pass over the Initial collection.
+
+An existing Initial Handoff with similar, overlapping, or apparently sufficient coverage is not by itself a reason to return `NO_HANDOFFS_CREATED`. When the supplied source and current repository still confirm unfinished work, create a new source-grounded Initial Handoff and record relevant overlap, dependency, or prior Handoff paths where useful. Later Reconcile work decides which Initial Handoffs should be combined, retained, superseded, or discarded.
+
+Only reuse already created paths instead of creating a new run when recovering the same producing run or completing its interrupted publication. Do not suppress a new independent producing run merely because another Initial Handoff discusses the same topic.
 
 Finding nothing is valid.
 
@@ -655,6 +680,8 @@ Use simple, direct language. Explain uncommon technical terms when they matter. 
 
 This skill must not:
 
+- run product builds, tests, dependency or package restores, publishes, product applications, or product/repository setup, bootstrap, initialization, maintenance, migration execution, formatting, generation, or unrelated repository automation
+- create a secondary product-source worktree for command execution or validation
 - modify product source
 - create migrations
 - change product configuration behavior
@@ -751,7 +778,9 @@ Name configuration keys and safe source locations without copying secret values.
 
 Before returning success, verify:
 
-- the product checkout was not switched, committed, merged, rebased, reset, cleaned, or pushed
+- no pre-existing product checkout or worktree was switched, detached, repurposed, committed, merged, rebased, reset, cleaned, or pushed
+- no product build, test, dependency/package restore, publish, application, or product/repository setup, maintenance, migration, generation, formatting, or unrelated automation command was executed
+- no secondary product-source worktree was created for command execution or validation
 - the legacy branch does not block the Initial namespace
 - `initial/current` and all consumed open runs contain only `TRACKED_HANDOFFS/INITIAL/`
 - every producing result was first verified on its own remote run branch
