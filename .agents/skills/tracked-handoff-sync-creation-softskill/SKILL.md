@@ -697,6 +697,8 @@ Split a handoff when it contains multiple independently plannable outcomes or be
 
 Inspect the actual repository before writing conclusions.
 
+Treat every supplied or discovered Markdown document as advisory input, not proof that work is still open. Compare its claims with the current source, tests, configuration, and Git state, and create a handoff only when current repository evidence still confirms concrete unfinished implementation work.
+
 Relevant evidence may include:
 
 - source files
