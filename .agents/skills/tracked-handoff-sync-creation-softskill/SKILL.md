@@ -1,13 +1,13 @@
 ---
 name: tracked-handoff-sync-creation-softskill
-description: Investigate the current repository and create only justified initial implementation handoffs under TRACKED_HANDOFFS/INITIAL/. Save each producing run first on its own remote tracked-handoffs/initial/run/<hash> branch, then integrate it append-only into tracked-handoffs/initial/current without updating the product branch. Recover open remote runs automatically, preserve local work, and return only created paths, NO_HANDOFFS_CREATED with the permitted Markdown explanation, or an exact blocker with the next safe action.
+description: Investigate the current repository and create only justified Initial Implementation Handoffs under TRACKED_HANDOFFS/INITIAL/. Preserve every existing product checkout, author each producing run in a uniquely owned ignored runtime worktree inside the repository root, save it first on tracked-handoffs/initial/run/<hash>, then integrate it append-only into tracked-handoffs/initial/current. Recover open remote and local runs, keep the product branch untouched, and return only synchronized paths, the permitted NO_HANDOFFS_CREATED response, or an exact blocker with the next safe action.
 ---
 
 # Tracked Handoff Sync Creation Softskill
 
 ## Purpose
 
-Use this skill when repository investigation should produce durable Initial Implementation Handoffs that remain available across product branches, independent sessions, local clones, and computers.
+Use this skill when repository investigation should produce durable Initial Implementation Handoffs that remain available across product branches, independent sessions, clones, and computers.
 
 Many independent top-level agents may run this skill at the same time:
 
@@ -18,11 +18,30 @@ Many independent top-level agents may run this skill at the same time:
 
 Each producing run first saves its result on its own remote run branch. The result is then integrated into the shared current Initial collection.
 
-Reconciliation, planning, implementation, completion, supersession, and later lifecycle interpretation are outside this Creation workflow.
+Reconciliation, implementation planning, implementation, completion, supersession, and later lifecycle interpretation are outside this Creation workflow.
+
+## Operational Summary
+
+A normal successful run does this:
+
+1. identify the selected product repository and preserve its exact checkout state
+2. generate a unique session hash and create its session record
+3. ensure the local runtime and mirror paths are ignored through local Git exclude rules
+4. fetch Initial Handoff refs into a session-owned local ref namespace
+5. validate, recover, and integrate safely recoverable open runs
+6. create one uniquely owned temporary producing worktree inside the selected repository root
+7. inspect the product checkout read-only and write justified Initial Handoffs only in the producing worktree
+8. push and verify the producing run on its own remote run branch
+9. integrate the append-only union into `tracked-handoffs/initial/current`
+10. refresh the local visibility mirror, remove only this run's disposable artifacts, and return the allowed response
+
+The remote run branch is the durable intermediate save. The temporary worktree is not the durable save.
 
 ## Core Model
 
-Creation uses these remote branches:
+### Remote branches
+
+Creation uses:
 
 ```text
 tracked-handoffs/initial/current
@@ -36,7 +55,7 @@ tracked-handoffs/<phase>/current
 tracked-handoffs/<phase>/run/<hash>
 ```
 
-This skill owns only the Initial phase:
+This skill owns only:
 
 ```text
 TRACKED_HANDOFFS/INITIAL/
@@ -74,26 +93,54 @@ It does not mean:
 
 > One producing run's remotely saved Initial Handoff result, which may or may not already be integrated into `initial/current`.
 
-The run branch protects the result from being left only in a local temporary worktree when integration into `current` is delayed or rejected.
+After a run branch has been fetched and verified, another session or computer can recover it even if integration into `current` is still pending.
+
+### Local paths
+
+Resolve the selected product checkout with Git rather than directory-name assumptions:
+
+```text
+git rev-parse --show-toplevel
+git rev-parse --git-common-dir
+```
+
+Use these conceptual paths:
+
+```text
+<repository-root>/.tracked-handoff-runtime/worktrees/<session-hash>-produce/
+<repository-root>/.tracked-handoff-runtime/worktrees/<session-hash>-integrate-NN/
+<repository-root>/.tracked-handoff-runtime/worktrees/<session-hash>-recover-NN/
+<repository-root>/TRACKED_HANDOFFS/INITIAL/
+<git-common-dir>/tracked-handoff-initial-sessions/<session-hash>.json
+<git-common-dir>/tracked-handoff-local-exclude.lock
+<git-common-dir>/tracked-handoff-initial-fetch.lock
+<git-common-dir>/tracked-handoff-initial-mirror.lock
+refs/tracked-handoff-initial-sessions/<session-hash>/remote/current
+refs/tracked-handoff-initial-sessions/<session-hash>/remote/runs/<run-hash>
+```
+
+The runtime root and mirror are local visibility or working paths. They are never part of a product commit.
 
 ## Hard Safety Rules
 
 Always preserve these invariants:
 
 - never force-push
-- never switch, checkout, detach, pull, merge, rebase, reset, clean, commit, or push any existing product checkout or existing product worktree for this workflow
+- never switch, checkout, detach, pull, merge, rebase, reset, clean, commit, or push any checkout or worktree that existed when this run started
+- never stash or overwrite unrelated local work
 - never merge a tracked-handoff branch into a product branch
 - never stage, commit, or push product code on a tracked-handoff branch
-- never change a path outside `TRACKED_HANDOFFS/INITIAL/` on an Initial run or integration commit
+- never change a path outside `TRACKED_HANDOFFS/INITIAL/` on an Initial storage commit
 - never edit, rename, move, or delete an already integrated Initial Handoff
-- never overwrite unrelated local work
 - never delete a remote run branch before its complete contribution is verified in `initial/current`
-- never claim cross-computer availability before the relevant remote push is verified
+- never claim cross-computer availability before the relevant remote push is fetched and verified
 - never create an empty run branch, empty result commit, or placeholder file
+- never remove or reuse another active session's runtime directory, worktree, branch, lock, or session record
+- never modify a versioned `.gitignore` as a side effect of this workflow
 
-The current product checkout is read-only source evidence. All writable handoff work happens in isolated temporary worktrees.
+The selected product checkout is read-only source evidence. Handoff authoring and storage commits happen only in new runtime worktrees owned by this run. The sole permitted product-root write is a short refresh of the eligible, locally ignored `TRACKED_HANDOFFS/INITIAL/` visibility mirror under its mirror lock.
 
-Assume other agents may be using the same repository concurrently. Do not change the branch or HEAD of any checkout or worktree that already existed when this run started. Create only new, uniquely named temporary Handoff worktrees and local Handoff branches owned by this run. Removing or reusing another session's active worktree is forbidden.
+Assume other agents may use the same repository concurrently. Existing checkouts and worktrees are shared infrastructure, not disposable scratch space.
 
 ## Investigation-Only Execution Boundary
 
@@ -104,49 +151,175 @@ Do not run as part of this skill:
 - product builds, tests, dependency or package restores, publishes, application launches, or benchmarks
 - product or repository setup, bootstrap, initialization, maintenance, migration execution, formatting, generation, or repository-provided cleanup commands
 - repository-provided one-time, startup, runbook, automation, or environment-preparation procedures
-- a second product-source checkout or detached product worktree merely to run such commands
+- a secondary product-source checkout or detached product worktree merely to run such commands
 
 Existing source, tests, configuration, logs, history, and documented command results may be read as evidence. Do not execute them.
 
-This boundary does not prohibit the fetches, temporary Handoff worktrees, Handoff commits, remote run publication, current integration, mirror refresh, or cleanup of this run's own Handoff artifacts explicitly required by this skill.
+This boundary does not prohibit the fetches, local exclude setup, temporary Handoff worktrees, Handoff commits, remote run publication, current integration, mirror refresh, or cleanup of this run's own Handoff artifacts required by this skill.
 
-If the user explicitly requests command execution, treat it as separate work outside this Creation workflow. It must not be silently added as a verification step and must not change the product branch during this workflow.
+If the user explicitly requests command execution, treat it as separate work outside this Creation workflow. Do not silently add it as verification, and do not change an existing product checkout during this workflow.
 
-## Remote Resolution
+## Repository and Remote Resolution
+
+### Selected repository
+
+Use the repository containing the designated source document or the repository explicitly named by the user.
+
+Do not assume the execution workspace root is the repository root. Customer workspaces may contain:
+
+- one repository at the workspace root
+- repositories in subdirectories
+- monorepositories
+- nested independent repositories
+- submodules
+- linked worktrees
+
+Record the selected repository root, Git common directory, current branch or detached commit, exact source commit, upstream, staged state, unstaged state, and relevant untracked state before any Handoff operation.
+
+### Writable remote
 
 Choose the writable remote deterministically:
 
-1. Use the writable remote configured as the current product branch's upstream remote when one exists.
-2. Otherwise use writable `origin`.
-3. Otherwise use the only remaining writable remote.
-4. If several writable remotes remain and the repository identifies no primary remote, stop and report the ambiguity.
+1. use the writable remote configured as the selected product branch's upstream remote when one exists
+2. otherwise use writable `origin`
+3. otherwise use the only remaining writable remote
+4. if several writable remotes remain and no primary remote can be established, stop and report the ambiguity
 
-Fetch the selected remote before investigation and before every integration attempt. Do not update the product branch after fetching.
+Fetch the selected remote before investigation and before every integration attempt. Fetching must not update any product checkout.
 
-## Legacy Branch Blocker
+### Session-local fetch namespace
 
-The legacy remote branch:
+Do not make concurrent Handoff sessions compete over the same local remote-tracking refs.
 
-```text
-tracked-handoffs
-```
-
-cannot coexist with:
+Discover the legacy branch, current branch, and run branches with exact remote queries such as `git ls-remote`. Fetch only the required Handoff refs into this session's unique local namespace:
 
 ```text
-tracked-handoffs/initial/current
-tracked-handoffs/initial/run/<hash>
+refs/tracked-handoff-initial-sessions/<session-hash>/remote/current
+refs/tracked-handoff-initial-sessions/<session-hash>/remote/runs/<run-hash>
 ```
 
-because Git ref names cannot be both a branch and a directory prefix.
+Use explicit refspecs. Do not fetch product branches or tags merely for this workflow, and do not update `refs/remotes/<remote>/...` when a session-local destination ref can be used.
 
-If the selected remote still contains `tracked-handoffs`, stop before creating new work and report that the repository requires the one-time migration to `tracked-handoffs/initial/current`.
+After confirming the source refs exist, the intended shapes are:
 
-Do not delete or migrate the legacy remote branch automatically during an ordinary Creation run.
+```text
+git fetch --no-write-fetch-head --no-tags <remote> refs/heads/tracked-handoffs/initial/current:refs/tracked-handoff-initial-sessions/<session-hash>/remote/current
+git fetch --no-write-fetch-head --no-tags <remote> refs/heads/tracked-handoffs/initial/run/*:refs/tracked-handoff-initial-sessions/<session-hash>/remote/runs/*
+```
+
+Use the installed Git's equivalent syntax when necessary, but preserve the source and session-owned destination namespaces.
+
+Use `--no-write-fetch-head` so concurrent sessions do not compete over the shared `FETCH_HEAD` file. If the installed Git does not support that option, serialize only the short Handoff fetch command with `<git-common-dir>/tracked-handoff-initial-fetch.lock`; do not hold that fallback lock during investigation, authoring, publication, integration construction, or retry waits.
+
+Repeated fetches may advance this session's current ref and populate its run refs. A non-fast-forward change to a previously fetched current or immutable run ref is unexpected remote history rewriting and must be reported rather than hidden with a forced local ref update.
+
+Session-local refs are not user branches and are not pushed. Delete only this session's local ref namespace after remote verification and local recovery no longer need it.
+
+## Local Exclude Contract
+
+The runtime worktree and local visibility mirror must not appear as product changes.
+
+Use the selected repository's local exclude file:
+
+```text
+<git-common-dir>/info/exclude
+```
+
+Do not require or modify a versioned `.gitignore`.
+
+### Required selected-repository rules
+
+Ensure these anchored rules exist when their paths are used:
+
+```gitignore
+/.tracked-handoff-runtime/
+/TRACKED_HANDOFFS/
+```
+
+Rules in `info/exclude` are persistent local clone configuration. Do not remove them during normal cleanup.
+
+### Safe exclude update
+
+Before creating the runtime root or writing the mirror:
+
+1. resolve the canonical repository root and Git common directory
+2. acquire `<git-common-dir>/tracked-handoff-local-exclude.lock` by atomic directory creation
+3. if another active session owns the lock, wait only with short bounded delays such as 1, 2, 4, 8, and 15 seconds
+4. preserve every existing line and comment in `info/exclude`
+5. append only missing exact rules; do not reorder, normalize, or remove unrelated rules
+6. preserve a valid final newline
+7. verify the intended paths with `git check-ignore -v` or an equivalent Git check
+8. verify that adding the rule did not alter the product index or tracked files
+9. release the lock immediately
+
+A stale local-exclude lock may be removed only after its recorded owner is safely classified as inactive.
+
+If `info/exclude` cannot be read or updated safely, stop before creating runtime content and report the exact blocker.
+
+### Existing path checks
+
+Before taking ownership of `.tracked-handoff-runtime/`:
+
+- verify it is not tracked product content
+- verify it is not a symlink
+- verify it is a directory or absent
+- verify existing children can be attributed to this skill by valid session records or recognized hash-scoped layout
+- leave unrelated or unreadable content untouched
+
+If the reserved runtime root is tracked, is a symlink, or is clearly owned by another purpose, do not repurpose it. Report the conflict.
+
+### Enclosing repositories
+
+A selected repository may be physically contained inside another Git worktree.
+
+Do not modify parent repositories preemptively.
+
+Instead:
+
+1. inspect accessible ancestor directories only within the execution environment's workspace boundary
+2. identify actual enclosing Git worktree roots, not arbitrary `.git`-named paths
+3. test whether the selected runtime or mirror path appears as a change in an enclosing repository
+4. only when it actually appears, add the narrow repository-relative path to that enclosing repository's local `info/exclude` under that repository's own short exclude lock
+5. verify the enclosing repository no longer reports the path
+6. never modify an enclosing repository's index, branch, `.gitignore`, or tracked files
+
+If an enclosing repository sees the path and its local exclude cannot be changed safely, stop before creating the path. Do not knowingly dirty another repository.
+
+For a real submodule, prefer the selected submodule repository's own exclude rules and verify that the parent repository remains clean. Do not alter the parent gitlink.
+
+## Runtime Worktree Contract
+
+Use exactly one producing runtime worktree per direct producing run:
+
+```text
+<repository-root>/.tracked-handoff-runtime/worktrees/<12-character-session-hash>-produce/
+```
+
+The session directory name must be unique lowercase hexadecimal and must not already belong to an active or unreadable session.
+
+The runtime worktree:
+
+- is created only after the exclude checks succeed
+- is a new linked worktree registered by the selected repository
+- uses a uniquely named local Handoff branch owned by this run
+- is based on the latest fetched `initial/current` when it exists
+- uses an orphan Initial storage tree when the phase is empty
+- contains only the pure Initial storage tree
+- is never used to inspect, build, test, or run product source
+
+Recommended local branch prefix:
+
+```text
+tracked-handoff-initial-work/<hash>
+```
+
+Integration and recovery work use separate sibling runtime worktrees such as `<session-hash>-integrate-NN` and `<session-hash>-recover-NN` when a worktree is needed. Never nest a new worktree inside another worktree, and never reuse an existing checkout.
+
+A linked worktree inside the ignored runtime root is allowed because it has its own index and `HEAD` while sharing the selected repository's object store. Its location inside the product worktree does not authorize writing product content.
 
 ## Pure Storage Branch Contract
 
-`tracked-handoffs/initial/current` and every Initial run branch are storage branches. Their trees may contain only:
+`tracked-handoffs/initial/current` and every Initial run branch are pure storage branches. Their trees may contain only:
 
 ```text
 TRACKED_HANDOFFS/
@@ -163,180 +336,13 @@ PROJECTNOTES/
 README.md
 ```
 
-When `initial/current` does not yet exist, treat the Initial collection as empty. The first producing run uses an orphan result commit containing only its Initial Handoffs. After the run branch is verified remotely, integration creates `initial/current` from that result if no competing current branch appeared first.
+When `initial/current` does not exist, treat the Initial collection as empty. The first producing run uses an orphan result commit containing only its Initial Handoffs. After that run is verified remotely, integration creates `initial/current` from the result if no competing current branch appeared first.
 
-Before using any fetched Initial branch, verify that its tree contains no path outside `TRACKED_HANDOFFS/INITIAL/`. A malformed branch is not safe input and must be reported precisely.
+Before using any fetched Initial branch, verify that its complete tree contains no path outside `TRACKED_HANDOFFS/INITIAL/`. A malformed branch is not safe input.
 
-## Normal Workflow
+## Session Records and Ownership
 
-Every top-level run follows five phases.
-
-### Phase A: Synchronize the remote Initial phase
-
-1. Resolve repository root, identity, current product branch or detached commit, exact source commit, upstream state, staged changes, unstaged changes, and relevant untracked state.
-2. Preserve all product work and every pre-existing checkout or worktree without stash, reset, clean, rebase, merge, checkout, detach, or branch switching.
-3. Resolve and fetch the writable remote.
-4. Reject the legacy `tracked-handoffs` branch when present.
-5. Fetch `tracked-handoffs/initial/current` when it exists.
-6. Enumerate remote branches under `tracked-handoffs/initial/run/*`.
-7. Validate and integrate every safely recoverable open remote run into `initial/current` before beginning the requested investigation.
-8. Delete only remote run branches whose complete file contribution is verified byte-for-byte in `initial/current`.
-9. Refresh the local visibility mirror from verified `initial/current` when the short mirror lock is available.
-
-A later session therefore begins from every Initial Handoff already integrated before its fetch, and it also attempts to finish any remotely saved open runs left by earlier sessions.
-
-### Phase B: Investigate in isolation
-
-1. Generate one unique 12-character lowercase hexadecimal session token.
-2. Create a session record under the Git common directory.
-3. Create a new uniquely named temporary Handoff worktree and local Handoff branch owned by this run; do not repurpose or switch any existing checkout or worktree.
-4. Base the temporary worktree on the latest fetched `initial/current` when it exists; otherwise use an empty orphan Initial storage tree.
-5. Treat only `TRACKED_HANDOFFS/INITIAL/` as writable in that worktree.
-6. Inspect the designated product checkout read-only without executing product, setup, maintenance, build, or test workflows.
-7. Apply the Handoff Eligibility Gate to every possible finding.
-8. Write only justified Initial Handoffs.
-
-### Phase C: Save the producing result remotely
-
-When one or more Handoffs were created:
-
-1. Verify that the producing worktree contains no changed path outside `TRACKED_HANDOFFS/INITIAL/`.
-2. Verify that all changes are additions; no integrated file may be modified, renamed, or deleted.
-3. Create exactly one result commit beyond the run's recorded Initial base. For the first empty phase, the result may be one orphan root commit.
-4. Push the result to:
-
-```text
-tracked-handoffs/initial/run/<handoff-hash>
-```
-
-5. Fetch that remote run branch and verify its commit and file contents.
-
-This run push does not use the shared `current` integration path and does not require the local mirror lock. Different agents normally push different remote branch names and therefore do not block each other's first remote save.
-
-After this verified push, the result is available from the remote to another computer even if integration into `initial/current` has not completed.
-
-### Phase D: Integrate remote runs into `current`
-
-After the own run is remotely saved, integrate it together with any other safely recoverable open runs:
-
-1. Fetch the latest `initial/current` and all `initial/run/*` branches again.
-2. Validate each run branch using the Remote Run Contract.
-3. Build the append-only union on a fresh temporary integration branch based on the latest `initial/current`.
-4. Apply only files contributed by validated open runs.
-5. Preserve every file already in `initial/current` byte-for-byte.
-6. Verify that the prospective integration commit changes only `TRACKED_HANDOFFS/INITIAL/` and contains additions only.
-7. Push normally to `tracked-handoffs/initial/current`.
-8. Never force-push.
-9. Fetch and verify the resulting remote `initial/current` tree.
-10. Delete each remote run branch only after all of its contributed files exist with identical content in verified `initial/current`.
-
-### Phase E: Refresh visibility and return
-
-1. Refresh the local `TRACKED_HANDOFFS/INITIAL/` visibility mirror from verified `initial/current` when the short mirror lock is available.
-2. Do not stage or commit mirror changes on the product branch.
-3. Clean local worktrees, local branches, and session records when they contain no unpublished value.
-4. Return only the response allowed by the Return Contract.
-
-## Remote Run Contract
-
-A valid Initial run branch must:
-
-- use `tracked-handoffs/initial/run/<12-character-lowercase-hex-hash>`
-- contain only `TRACKED_HANDOFFS/INITIAL/`
-- have a tip that is exactly one result commit above its first parent, or one orphan result commit for the first empty phase
-- add files only
-- never modify or delete an existing Initial Handoff from its base
-- use the same run hash in its branch name, filenames, headings, and internal run references
-- contain no secrets, credentials, private data, symlinks, or unsafe non-Markdown artifacts
-
-For an ordinary run commit, inspect the tip against its first parent. For an orphan result, inspect the complete tree.
-
-When a remote run is malformed:
-
-- do not merge, cherry-pick, delete, or rewrite it silently
-- continue integrating other independent valid runs when safe
-- report the exact malformed branch and reason
-
-## Open Remote Run Recovery
-
-At the start and before final return, classify every remote `initial/run/*` branch:
-
-### Already integrated
-
-All files contributed by the run exist with identical content in `initial/current`.
-
-Action:
-
-- treat it as integrated
-- delete the remote run branch when possible
-- a failed branch deletion is cleanup debt, not a failure of the integrated Handoff result
-
-### Valid and not yet integrated
-
-The run is valid and contributes one or more files not yet present in `initial/current`.
-
-Action:
-
-- include it in the next append-only integration attempt
-
-### Collision
-
-A contributed path already exists in `initial/current` or another open run.
-
-Action:
-
-1. Read both files completely.
-2. If content is identical, treat the run file as already integrated.
-3. If the run adds no distinct Handoff value, keep the current file and classify the run contribution as a duplicate.
-4. If it is a distinct Handoff, assign a fresh hash and filename to the still-unintegrated content, update its heading and internal hash references, publish a corrected replacement run branch, and integrate the replacement.
-5. Delete the original run branch only after the corrected replacement is verified in `initial/current`.
-6. Stop only when the collision cannot be classified safely.
-
-Never rename or rewrite a file already present in `initial/current`.
-
-## Integration Retry Contract
-
-Updating `initial/current` is the remaining shared remote step. Git push rejection provides the concurrency control.
-
-For a rejected `initial/current` push:
-
-1. Fetch the newest `initial/current` and all open Initial run branches.
-2. Rebuild the append-only union from the newest current tip.
-3. Retry with increasing waits of approximately 10, 20, 30, 45, 60, 75, and 90 seconds.
-4. Add a small random variation when practical so many agents do not retry in lockstep.
-5. Stop after the eighth integration attempt and no more than about six minutes total.
-6. Never force-push.
-
-If integration still fails, the producing result must remain on its verified remote run branch. Return a concise pending-integration blocker that includes:
-
-- the remote run branch
-- the target `tracked-handoffs/initial/current`
-- the exact integration failure
-- that the Handoffs are already saved remotely
-- that the same request may be retried after concurrent integrations settle
-- that a later run on this or another computer will automatically retry the open remote run
-
-Example shape:
-
-```text
-BLOCKED: The Handoffs are safely stored on tracked-handoffs/initial/run/a4c9e17d3b62 but could not yet be integrated into tracked-handoffs/initial/current after the bounded retries because the remote kept changing. Run the same request again after the concurrent integrations settle; the next run will recover the remote run automatically.
-```
-
-Do not report a remote-saved run as existing only locally.
-
-## Local Temporary Artifacts and Recovery
-
-Use 12-character lowercase hexadecimal identifiers.
-
-Recommended local branch prefixes:
-
-```text
-tracked-handoff-initial-work/<hash>
-tracked-handoff-initial-integrate/<session-hash>-NN
-tracked-handoff-initial-recovery/<hash>
-```
-
-Store one local session record at:
+Store one session record at:
 
 ```text
 <git-common-dir>/tracked-handoff-initial-sessions/<session-hash>.json
@@ -344,91 +350,272 @@ Store one local session record at:
 
 Record at least:
 
+- repository identity and canonical root
+- Git common directory
 - host identifier
 - process identifier when available
+- session hash and every producing hash owned by the session
 - start and heartbeat times
-- current phase
-- source product branch and commit
-- local worktree paths and branches
+- current workflow phase
+- source product branch or detached commit
+- exact source commit and publication state
+- runtime directory
+- owned worktrees and local Handoff branches
 - intended remote run branch
-- whether the remote run push was verified
+- whether the remote run push was fetched and verified
+- whether current integration was verified
 
 Refresh the heartbeat at major phases and at least every five minutes during a long investigation.
 
-At startup:
+Ownership is established by the session record plus the expected hash-scoped paths and branch names. A matching name alone is not sufficient permission to delete an artifact.
 
-1. Inspect only session records and local artifacts using this skill's prefixes.
-2. Leave an active session untouched.
-3. For abandoned work not yet pushed as a remote run, recover safe Initial Handoffs into a new valid run and push them remotely before deleting the source.
-4. If the remote run was already verified, prefer remote recovery and remove the obsolete local worktree when safe.
-5. Never delete a local artifact containing unrelated changes or unreadable unpublished value.
-6. Mere existence of an old local worktree is not a blocker when it does not prevent safe current work.
+Every local lock directory created by this skill must contain owner metadata identifying the repository, session hash, host, process when available, acquisition time, and heartbeat. A lock name without readable ownership metadata is uncertain and must not be broken merely because it appears old.
+
+## Normal Workflow
+
+### Phase A: Establish the synchronized Initial state
+
+1. resolve the selected repository, source context, local state, and writable remote
+2. preserve every pre-existing checkout and worktree unchanged
+3. generate one unique 12-character lowercase hexadecimal session hash and create its session record
+4. establish and verify the local exclude contract
+5. reject the legacy `tracked-handoffs` branch when present
+6. enumerate the remote current and run refs without changing shared remote-tracking refs
+7. fetch the required Handoff refs into the session-local fetch namespace
+8. validate current and every visible remote run
+9. recover and integrate every safely recoverable valid open run
+10. delete only remote runs whose full contribution is verified byte-for-byte in current
+11. refresh the local mirror from verified current when the short mirror lock is available
+
+Before the requested investigation starts, the agent must have fetched the complete published current collection and every visible open Initial run. An open remote run must not be ignored merely because integration is temporarily racing.
+
+### Phase B: Investigate and author in isolation
+
+1. for direct execution, use the session hash as the producing hash; delegated producing runs receive their own unique hashes
+2. create the uniquely owned producing runtime worktree
+3. inspect the designated product checkout read-only
+4. read the supplied Markdown completely when the assignment names one
+5. compare its claims with current repository evidence
+6. apply the Handoff Eligibility Gate to each material implementation boundary
+7. write only justified Initial Handoffs under `TRACKED_HANDOFFS/INITIAL/` in the producing worktree
+
+Do not author in the product checkout or the local visibility mirror.
+
+### Phase C: Save the producing result remotely
+
+When one or more Handoffs were created:
+
+1. verify the runtime worktree contains no changed path outside `TRACKED_HANDOFFS/INITIAL/`
+2. verify all changes are additions and no integrated file was modified, renamed, or deleted
+3. verify filenames, headings, and internal run references use the producing hash
+4. create exactly one result commit beyond the run's recorded Initial base, or one orphan root commit for the first empty phase
+5. push the result normally to:
+
+```text
+tracked-handoffs/initial/run/<producing-hash>
+```
+
+6. fetch that exact remote branch
+7. verify its commit, complete tree, and file bytes
+8. update the session record to remote-run-verified
+
+The individual remote run push does not use the mirror lock and does not wait for a shared publication lock. Different producing hashes normally produce independent remote branch names.
+
+After verification, the result is recoverable from another computer even if current integration remains pending.
+
+### Phase D: Integrate open runs into `current`
+
+After the own run is remotely saved, integrate it together with every other safely recoverable open run:
+
+1. fetch the newest current and all open Initial run branches
+2. validate every run with the Remote Run Contract
+3. build the append-only union on a new sibling integration runtime worktree and local Handoff branch owned by this session
+4. preserve every file already in current byte-for-byte
+5. add every safe, not-yet-integrated run contribution
+6. verify the prospective integration changes only `TRACKED_HANDOFFS/INITIAL/` and contains additions only
+7. create an integration commit that records the included run hashes
+8. push normally to `tracked-handoffs/initial/current`
+9. never force-push
+10. fetch and verify the resulting remote current tree
+11. delete each integrated remote run only after its entire contribution is present with identical bytes in verified current
+
+### Phase E: Refresh visibility, recover leftovers, and return
+
+1. classify all remaining open remote runs again
+2. refresh the local visibility mirror when safe
+3. remove only this session's worktrees, local Handoff branches, session-local fetch refs, locks, and session record when they contain no unpublished value
+4. preserve and report any unpublished local value
+5. return only the response allowed by the Return Contract
+
+## Remote Run Contract
+
+A valid Initial run branch must:
+
+- use `tracked-handoffs/initial/run/<12-character-lowercase-hex-hash>`
+- contain only `TRACKED_HANDOFFS/INITIAL/`
+- have a tip exactly one result commit above its recorded Initial base, or one orphan result commit for the first empty phase
+- add files only
+- never modify or delete an Initial Handoff from its base
+- use the same producing hash in branch name, filenames, headings, and internal run references
+- contain regular Markdown files only
+- contain no symlinks, secrets, credentials, private data, or unsafe artifacts
+
+For an ordinary result, inspect the tip against its first parent. For an orphan result, inspect the complete tree.
+
+When a remote run is malformed:
+
+- do not integrate, delete, or rewrite it silently
+- continue processing independent valid runs when safe
+- report the exact branch and reason
+
+## Open Remote Run Recovery
+
+At startup and before final return, classify every remote Initial run.
+
+### Already integrated
+
+All contributed files exist with identical bytes in current.
+
+Action:
+
+- treat the run as integrated
+- delete the remote run when possible
+- treat deletion failure as cleanup debt, not loss of the integrated result
+
+### Valid and not yet integrated
+
+The run is valid and contributes one or more paths absent from current.
+
+Action:
+
+- include it in the next append-only integration attempt
+
+### Path collision
+
+A contributed path already exists in current or another open run.
+
+Action:
+
+1. read both files completely
+2. if bytes are identical, treat the contribution as already integrated
+3. if contents differ, never discard one merely because the topics overlap
+4. preserve the already integrated path unchanged
+5. assign a fresh hash and filename to the still-unintegrated distinct content
+6. update its heading and internal hash references
+7. publish and verify a corrected replacement run
+8. delete the original run only after the replacement is verified in current
+9. stop only when safe classification or preservation is impossible
+
+Semantic combination, supersession, or deduplication of different Initial Handoffs belongs to a later Reconcile workflow.
+
+## Integration Retry Contract
+
+Updating `initial/current` is the shared remote step. Normal non-fast-forward push rejection provides concurrency control.
+
+For a rejected current push:
+
+1. fetch the newest current and all open Initial runs
+2. first check whether another agent already integrated the intended contributions
+3. if work remains, rebuild the append-only union from the newest current tip
+4. retry with increasing waits of approximately 10, 20, 30, 45, 60, 75, and 90 seconds
+5. add a small random variation when practical so many agents do not retry in lockstep
+6. stop after the eighth integration attempt and no more than about six minutes total
+7. never force-push
+
+If integration still fails, every producing result already verified on a remote run branch must remain there.
+
+Return a concise pending-integration blocker containing:
+
+- the remote run branch or branches
+- the target `tracked-handoffs/initial/current`
+- the exact integration failure
+- confirmation that the Handoffs are already saved remotely
+- that the same request can be retried after concurrent integrations settle
+- that a later run on this or another computer will recover the open remote run automatically
+
+Do not report a remote-verified run as existing only locally.
+
+## Local Runtime Recovery
+
+At startup inspect only artifacts using this skill's reserved paths and prefixes.
+
+For each session record and runtime directory:
+
+1. classify the owner as active, inactive, or uncertain
+2. leave active and uncertain sessions untouched
+3. inspect inactive sessions for unpublished Initial Handoffs
+4. when a matching remote run is already verified, prefer remote recovery and remove disposable local artifacts when safe
+5. when a remote run was not verified, recover valid unpublished Initial Handoffs into a fresh valid run before deleting their source
+6. never delete a runtime directory containing unrelated, unreadable, or unattributed content
+7. do not let an unrelated abandoned runtime directory block a new uniquely owned session
 
 Recovery priority:
 
-> Preserve unpublished Initial Handoffs, save them remotely, integrate everything safe, then clean obsolete local artifacts.
+> Preserve unpublished Initial Handoffs, save them remotely, integrate everything safe, then clean only proven disposable artifacts.
+
+Do not use broad cleanup commands that may affect other worktrees. In particular, do not use global worktree cleanup as a substitute for ownership checks.
 
 ## Local Visibility Mirror
 
-The product checkout may expose:
+The selected product checkout may expose:
 
 ```text
 TRACKED_HANDOFFS/INITIAL/
 ```
 
-This directory is a human and agent visibility mirror of verified `tracked-handoffs/initial/current`.
+This is a human and agent visibility mirror of verified `tracked-handoffs/initial/current`.
 
-It is not an authoring workspace for a producing run.
+It is not an authoring workspace.
 
-Rules:
+### Mirror eligibility
 
-- refresh it by copying files from verified `initial/current`
-- do not switch, detach, or repurpose any existing product checkout or worktree to a tracked-handoff branch
-- do not restore or merge a whole branch into the product checkout
-- do not stage or commit mirror changes on the product branch
-- do not modify `.gitignore`
-- leave ordinary local notes outside recognized Initial Handoff files untouched
-- open run branches are not copied into the mirror before integration
+Use the root mirror only when:
 
-### Short mirror lock
+- `TRACKED_HANDOFFS/` is absent or untracked local content reserved for this workflow
+- it is not a symlink
+- it is ignored in the selected repository and every actually affected enclosing repository
+- it contains no unrelated or unreadable content
 
-Use one atomically created phase-specific lock directory only for short mirror reads, mirror writes, and related local cleanup:
+If `TRACKED_HANDOFFS/` is tracked product content, do not overwrite, remove, or reinterpret it. Continue remote synchronization and use the verified storage worktree for reading the collection; skip the root mirror and report only if the missing mirror materially affects the requested result.
+
+### Mirror update
+
+Use an atomically created phase-specific lock:
 
 ```text
 <git-common-dir>/tracked-handoff-initial-mirror.lock
 ```
 
-This lock must not guard investigation, remote run pushes, or remote `current` integration.
+The lock protects only short mirror inspection, copy, and cleanup operations. It must not guard investigation, remote run publication, or current integration.
 
-When another active local session owns the mirror lock:
+When another active session owns the lock:
 
 - do not read or write the mirror concurrently
-- continue using verified remote branches
-- retry briefly with bounded waits such as 1, 2, 4, 8, and 15 seconds
-- if it remains busy, defer the mirror refresh; do not invalidate an already verified remote save or integration
-- a later run rebuilds the mirror from `initial/current`
+- continue using verified remote branches and runtime worktrees
+- retry briefly with waits such as 1, 2, 4, 8, and 15 seconds
+- if still busy, defer mirror refresh without invalidating a verified remote result
 
-A stale mirror lock may be removed only after its recorded owner is safely classified as inactive.
+Refresh the mirror only from verified current. Never copy unintegrated run branches into it.
+
+Do not stage or commit mirror changes on a product branch.
 
 ## Local Unpublished Initial Handoffs
 
-A person or earlier failed process may have placed a candidate directly under the local visibility mirror:
+A person or an earlier failed process may deliberately place a candidate Markdown file directly under the eligible local mirror.
 
-```text
-TRACKED_HANDOFFS/INITIAL/
-```
+When the mirror lock is available:
 
-Deliberate placement there indicates intent to include a document in the shared Initial collection. Private drafts belong elsewhere.
+1. compare direct Markdown files with verified current and open remote runs
+2. read each local-only candidate completely
+3. exclude ordinary notes that do not clearly present repository-specific implementation preparation
+4. reject symlinks, unreadable files, non-Markdown files, secrets, credentials, or sensitive content
+5. for a valid local-only Initial Handoff, preserve the author's content and apply only minimum contract normalization
+6. assign a fresh hash when needed
+7. create, push, and verify a recovery run before changing the mirror source
+8. integrate the recovery run into current
+9. refresh the mirror from verified current
 
-When the short mirror lock is available:
-
-1. Compare direct Markdown files with verified `initial/current` and open remote runs.
-2. Read each local-only candidate.
-3. Exclude normal notes that do not clearly present repository-specific implementation preparation.
-4. Reject symlinks, unreadable files, non-Markdown files, secrets, credentials, or sensitive content.
-5. For a valid local-only Initial Handoff, preserve the author's content, apply only minimum required normalization, assign a fresh hash when needed, create a recovery run branch, and push it remotely.
-6. Do not rewrite or delete the mirror source before remote verification.
-7. After successful integration, refresh the mirror from `initial/current`.
+Deliberate placement in the eligible mirror indicates publication intent. Private drafts belong elsewhere.
 
 If the mirror lock is temporarily unavailable, defer this local-only scan rather than blocking remote investigation or remote publication.
 
@@ -438,32 +625,34 @@ Independent top-level sessions are not subagents of one parent.
 
 Each session must have:
 
-- its own session token
-- its own local temporary worktree
-- its own local work branch
+- its own session record
+- its own producing hash
+- its own ignored producing and integration runtime directories
+- its own linked runtime worktrees and local Handoff branches
+- its own local fetch-ref namespace
 - its own remote `tracked-handoffs/initial/run/<hash>` branch when it produces Handoffs
 - hash-scoped filenames
 
-They may investigate and push their own run branches concurrently.
+Sessions may investigate and publish their own run branches concurrently.
 
 They do not wait for a shared publication lock before remotely saving their results.
 
-Only integration into `initial/current` is shared, and it is resolved through normal fetch, append-only rebuild, push rejection, and bounded retry.
+Only current integration is shared, and it is resolved through fetch, append-only rebuild, normal push rejection, and bounded retry.
 
 ## Direct Execution
 
 Direct execution is the default.
 
-1. Apply startup synchronization and remote run recovery.
-2. Inspect the requested product source directly and read-only.
-3. Generate one unique run hash.
-4. Apply the Eligibility Gate.
-5. Write complete Initial Handoffs for justified concerns.
-6. Push one verified remote run branch when Handoffs exist.
-7. Integrate open runs into `initial/current`.
-8. Verify the remote current collection.
-9. Refresh the local mirror when possible.
-10. Return only the allowed response.
+1. establish local exclude and remote synchronization
+2. recover safe remote and local runs
+3. inspect the requested product source directly and read-only
+4. apply the Eligibility Gate
+5. write complete Initial Handoffs for justified concerns
+6. push and verify one remote run branch when Handoffs exist
+7. integrate all valid open runs into current
+8. verify current
+9. refresh the mirror when possible
+10. return only the allowed response
 
 Do not launch subagents merely because a task is broad.
 
@@ -475,19 +664,19 @@ The parent agent owns all Git synchronization and publication.
 
 The parent must:
 
-1. Complete startup synchronization and remote run recovery once.
-2. Record the shared product source context.
-3. Create a separate temporary writable output area for each subagent.
-4. Assign a unique 12-character hash to each delegated producing run.
-5. Give each subagent a bounded objective and minimum sufficient context.
-6. Require read-only product-source inspection.
-7. Forbid subagents from fetching, branching, committing, pushing, or writing outside their assigned temporary `TRACKED_HANDOFFS/INITIAL/` area.
-8. Collect each successful subagent result.
-9. Publish one remote `initial/run/<assigned-hash>` branch per successful delegated run.
-10. Integrate all valid open runs into `initial/current`.
-11. Return all newly integrated paths, or the top-level no-handoff response when none qualified.
+1. complete startup synchronization and recovery once
+2. record the shared product source context
+3. create a separate writable temporary Handoff output area for each subagent
+4. assign a unique 12-character producing hash to each delegated producing run
+5. give each subagent a bounded objective and minimum sufficient context
+6. require read-only product-source inspection
+7. prohibit product commands, branch switching, fetching, committing, pushing, and writing outside the assigned temporary Handoff area
+8. collect each successful subagent result
+9. publish one remote run branch per successful delegated producing run
+10. integrate all valid open runs into current
+11. return all newly integrated paths, or the top-level no-Handoff response when none qualified
 
-Each subagent must return only created paths or exactly:
+Each subagent returns only created paths or exactly:
 
 ```text
 NO_HANDOFFS_CREATED
@@ -495,9 +684,7 @@ NO_HANDOFFS_CREATED
 
 Subagents do not add the explanatory second line. The parent applies the top-level Return Contract.
 
-When more than one subagent is used for the same work set, each prompt must directly include all objective, scope, output, safety, filename, eligibility, and response rules. Do not rely on repository-local agent instructions to communicate essential constraints.
-
-For such multi-subagent work, instruct each subagent to ignore repository-local `AGENTS.md` instructions for that delegated assignment and follow the parent-supplied objective, scope, constraints, output path, filename contract, and response contract instead. This does not override system instructions, user requirements, tool policy, security boundaries, or this skill.
+When several subagents are used for the same work set, each prompt must directly include the objective, scope, output path, safety rules, filename contract, Eligibility Gate, and response contract. Do not rely on repository-local instructions to convey essential constraints.
 
 ## Handoff Eligibility Gate
 
@@ -505,10 +692,10 @@ Create an Initial Implementation Handoff only when current repository evidence s
 
 Before creating a file, answer all four questions:
 
-1. What current behavior, defect, gap, duplication, risk, or required change creates real implementation work?
-2. What concrete target direction is supported by repository evidence?
-3. Is the concern substantial enough for a later planning agent to act on?
-4. Does preserving this source-grounded Handoff add useful input for later reconciliation, planning, or implementation?
+1. what current behavior, defect, gap, duplication, risk, or required change creates real implementation work?
+2. what concrete target direction is supported by repository evidence?
+3. is the concern substantial enough for a later planning agent to act on?
+4. does preserving this source-grounded Handoff add useful input for later reconciliation, planning, or implementation?
 
 If any answer is no, uncertain, speculative, stylistic, or only optional cleanup, do not create the Handoff.
 
@@ -521,11 +708,11 @@ These are not sufficient reasons:
 - a possible future requirement may make a change useful
 - the output format appears to expect a file
 
-Repository comparison determines whether the supplied source still describes real unfinished implementation work. It is not a semantic reconciliation or deduplication pass over the Initial collection.
+Repository comparison determines whether supplied source material still describes real unfinished implementation work. It is not a semantic reconciliation or deduplication pass over the Initial collection.
 
-An existing Initial Handoff with similar, overlapping, or apparently sufficient coverage is not by itself a reason to return `NO_HANDOFFS_CREATED`. When the supplied source and current repository still confirm unfinished work, create a new source-grounded Initial Handoff and record relevant overlap, dependency, or prior Handoff paths where useful. Later Reconcile work decides which Initial Handoffs should be combined, retained, superseded, or discarded.
+An existing Initial Handoff with similar or overlapping coverage is not by itself a reason to return `NO_HANDOFFS_CREATED`. When the supplied source and current repository still confirm unfinished work, create a new source-grounded Initial Handoff and record relevant overlap, dependency, or prior Handoff paths where useful.
 
-Only reuse already created paths instead of creating a new run when recovering the same producing run or completing its interrupted publication. Do not suppress a new independent producing run merely because another Initial Handoff discusses the same topic.
+Only reuse already created paths when recovering the same producing run or completing its interrupted publication. Do not suppress a new independent producing run merely because another Initial Handoff discusses the same topic.
 
 Finding nothing is valid.
 
@@ -542,19 +729,21 @@ Compare it with current:
 - schemas and migrations
 - workflows
 - public contracts
-- Git state
+- Git state and history
 
 Create a Handoff only when the current repository still confirms concrete unfinished implementation work.
+
+Do not execute builds or tests to make this determination.
 
 A source document may be historically useful even when no new Handoff is justified. Do not automatically edit or delete it.
 
 ## Handoff Hash and Filename Contract
 
-Use one unique 12-character lowercase hexadecimal hash per direct or delegated producing run.
+Use one unique 12-character lowercase hexadecimal producing hash per direct or delegated producing run.
 
 Do not use sequential placeholders, agent numbers, model names, repeated characters, or timestamps alone.
 
-Use this filename pattern:
+Use:
 
 ```text
 initial-handoff-<handoffhash>-NN-<topic>.md
@@ -573,9 +762,9 @@ Rules:
 - use two digits
 - order by dependency or implementation-preparation sequence
 - use short lowercase hyphen-case topics
-- every file in one run uses the same hash
-- the branch name, filenames, headings, and internal run references use the same hash
-- never overwrite an existing file
+- every file in one producing run uses the same hash
+- branch name, filenames, headings, and internal run references use the same hash
+- never overwrite an existing path
 
 ## Source Context Contract
 
@@ -593,7 +782,7 @@ When evidence depends on uncommitted or unpushed product work:
 - state the limitation
 - identify relevant paths without copying secrets or large diffs
 - preserve enough evidence for later revalidation
-- do not claim that another computer can reproduce the exact source state
+- do not claim another computer can reproduce the exact source state
 - do not create the Handoff when unavailable source details make the conclusion unsafe
 
 ## Topic Splitting and Ordering
@@ -642,7 +831,7 @@ How the relevant code currently works.
 The recommended implementation-near target direction.
 
 ## Technical approach
-Likely responsibility changes, contracts, data or control flow, integration seams, error handling, compatibility, and verification surfaces without writing the implementation or a full execution plan.
+Likely responsibility changes, contracts, data or control flow, integration seams, error handling, compatibility, and verification surfaces without writing the implementation or a complete execution plan.
 
 ## Alternatives and recommendation
 Realistic options, repository-specific trade-offs, and the recommended direction.
@@ -680,7 +869,7 @@ Use simple, direct language. Explain uncommon technical terms when they matter. 
 
 This skill must not:
 
-- run product builds, tests, dependency or package restores, publishes, product applications, or product/repository setup, bootstrap, initialization, maintenance, migration execution, formatting, generation, or unrelated repository automation
+- run product builds, tests, restores, publishes, applications, setup, initialization, maintenance, migrations, formatting, generation, or unrelated repository automation
 - create a secondary product-source worktree for command execution or validation
 - modify product source
 - create migrations
@@ -699,7 +888,9 @@ Path-only and `NO_HANDOFFS_CREATED` responses apply only when synchronization su
 
 ### One or more new Handoffs integrated
 
-Return only repository-relative paths, one per line:
+Return only paths produced by this top-level assignment, including its explicitly requested delegated producers. Do not include unrelated older runs merely because this session recovered or integrated them. If another concurrent session integrated this assignment's verified run first, return its paths after confirming identical bytes in current.
+
+Return repository-relative paths, one per line:
 
 ```text
 TRACKED_HANDOFFS/INITIAL/initial-handoff-7f3a91c2d4e6-01-domain-contracts.md
@@ -710,7 +901,9 @@ TRACKED_HANDOFFS/INITIAL/initial-handoff-7f3a91c2d4e6-02-storage-transition.md
 
 Return `NO_HANDOFFS_CREATED` on the first line.
 
-Do not create an own remote run branch, result commit, or placeholder file for a no-Handoff result. Startup recovery and integration of older open remote runs must still complete as far as safely possible, and the local mirror should still be refreshed when available.
+Do not create an own remote run branch, result commit, or placeholder file for a no-Handoff result. Startup recovery and integration of older open runs must still complete as far as safely possible, and the mirror should still be refreshed when available.
+
+Integrating unrelated older runs does not turn a no-Handoff result for the current assignment into a path response.
 
 When the assignment was based on one or more supplied or named Markdown documents, add exactly one concise second line:
 
@@ -725,38 +918,61 @@ This is only a recommendation. Do not modify the source document. Do not claim i
 
 Do not return created paths as fully synchronized.
 
-Return one concise blocker stating that:
+Return one concise blocker stating:
 
 - the Handoffs are saved on the named remote run branch
-- integration into `initial/current` remains pending
+- integration into current remains pending
+- the exact cause
 - the same request may be retried
-- another computer can recover the open remote run
+- another session or computer can recover the open run
 
 ### Failure before remote run verification
 
 Return:
 
-- the intended Handoff path when known
+- intended Handoff paths when known
 - the exact blocker
-- the preserved local worktree path when unpublished work remains
+- the preserved runtime worktree path when unpublished work remains
 - the next safe user action
 
 Do not claim the result was saved remotely.
+
+## Legacy Branch Blocker
+
+The legacy remote branch:
+
+```text
+tracked-handoffs
+```
+
+cannot coexist with:
+
+```text
+tracked-handoffs/initial/current
+tracked-handoffs/initial/run/<hash>
+```
+
+If the writable remote still contains the legacy branch, stop before creating new work and report that the one-time migration is required.
+
+Do not delete or migrate the legacy branch automatically during an ordinary Creation run.
 
 ## Failure Handling
 
 Stop before investigation when:
 
+- the selected repository cannot be established safely
+- the local runtime path cannot be reserved and ignored safely
+- an enclosing repository would be dirtied and cannot be protected through a local exclude rule
 - the writable remote or credentials are unavailable
-- the legacy `tracked-handoffs` branch blocks the new namespace
-- `initial/current` is malformed
+- the legacy branch blocks the namespace
+- current is malformed
 - the already published Initial collection cannot be established safely
 
-Continue safe work and report the specific remaining problem when one malformed or colliding open run does not prevent other valid runs from being integrated.
+Continue safe work and report the remaining problem when one malformed or colliding open run does not prevent independent valid runs from being integrated.
 
 Preserve useful unpublished local work before cleanup.
 
-After a verified remote run push, prefer remote recovery and do not keep unnecessary local worktrees merely because `current` integration is pending.
+After a verified remote run push, prefer remote recovery and do not retain an unnecessary runtime worktree merely because current integration is pending.
 
 ## Security and Privacy
 
@@ -778,17 +994,23 @@ Name configuration keys and safe source locations without copying secret values.
 
 Before returning success, verify:
 
-- no pre-existing product checkout or worktree was switched, detached, repurposed, committed, merged, rebased, reset, cleaned, or pushed
-- no product build, test, dependency/package restore, publish, application, or product/repository setup, maintenance, migration, generation, formatting, or unrelated automation command was executed
-- no secondary product-source worktree was created for command execution or validation
+- the selected repository and writable remote were resolved deterministically
+- no pre-existing checkout or worktree was switched, detached, repurposed, committed, merged, rebased, reset, cleaned, or pushed
+- no product or repository execution workflow was run
+- the runtime path and mirror were locally ignored without modifying a versioned `.gitignore`
+- no selected or enclosing repository was dirtied by runtime or mirror paths
+- every created runtime worktree is uniquely owned by this session
+- Handoff fetches did not contend on shared `FETCH_HEAD`, or used only the short fallback fetch lock
+- Handoff fetches used this session's local ref namespace and did not overwrite another session's refs
+- this session's local fetch-ref namespace was removed when it no longer carried recovery value
 - the legacy branch does not block the Initial namespace
-- `initial/current` and all consumed open runs contain only `TRACKED_HANDOFFS/INITIAL/`
-- every producing result was first verified on its own remote run branch
-- every returned path exists with identical content in verified `initial/current`
+- current and all consumed runs contain only `TRACKED_HANDOFFS/INITIAL/`
+- every producing result was first fetched and verified on its own remote run branch
+- every returned path exists with identical bytes in verified current
 - no integrated Initial Handoff was overwritten, renamed, moved, or deleted
-- no changed path outside `TRACKED_HANDOFFS/INITIAL/` was committed or pushed
-- all safely recoverable open remote runs were processed
+- no storage commit changed a path outside `TRACKED_HANDOFFS/INITIAL/`
+- all safely recoverable open runs were processed
 - integrated remote run branches were deleted when possible
-- the local mirror was refreshed when the short mirror lock was available
-- retained local artifacts still contain unpublished or unrelated work that must not be deleted
+- the mirror was refreshed when eligible and available
+- retained local artifacts contain unpublished or unattributed value that must not be deleted
 - the response follows the Return Contract exactly
