@@ -1,728 +1,596 @@
 ---
 name: tracked-handoff-sync-creation-softskill
-description: Synchronize the complete repository-specific TRACKED_HANDOFFS collection through the dedicated tracked-handoffs branch without updating the current product branch, then investigate current source and create only concrete ordered hash-scoped initial implementation handoffs under TRACKED_HANDOFFS/INITIAL/. Preserve every other tracked-handoff area unchanged. Work directly by default and delegate only when the user explicitly requests subagents. On success return only created paths, or exactly NO_HANDOFFS_CREATED; on failure return the exact blocker.
+description: Investigate the current repository and create only justified initial implementation handoffs under TRACKED_HANDOFFS/INITIAL/. Save each producing run first on its own remote tracked-handoffs/initial/run/<hash> branch, then integrate it append-only into tracked-handoffs/initial/current without updating the product branch. Recover open remote runs automatically, preserve local work, and return only created paths, NO_HANDOFFS_CREATED with the permitted Markdown explanation, or an exact blocker with the next safe action.
 ---
 
 # Tracked Handoff Sync Creation Softskill
 
 ## Purpose
 
-Use this softskill to keep the complete tracked handoff collection synchronized across product branches and local clones before investigating the repository and preserving concrete implementation concerns.
+Use this skill when repository investigation should produce durable Initial Implementation Handoffs that remain available across product branches, independent sessions, local clones, and computers.
 
-Reconciliation, planning, completion, supersession, and execution lifecycle remain intentionally outside this Creation workflow.
+Many independent top-level agents may run this skill at the same time:
 
-## Intended operating model
-
-This skill participates in one shared tracked-handoff collection for a repository. Its own `INITIAL/` output is append-only; later phases may manage their own separate areas without this workflow changing them.
-
-The user may start independent Create sessions for different topics:
-
-- on `main`, development, test, or feature branches
+- on the same computer
 - on different computers
-- in several concurrent sessions on the same computer
+- from `main`, development, test, feature, release, or detached product states
 - directly or with explicitly requested subagents
 
-Every top-level session must:
+Each producing run first saves its result on its own remote run branch. The result is then integrated into the shared current Initial collection.
 
-1. fetch the remote `tracked-handoffs` collection before investigating
-2. begin with the complete tracked-handoff tree already published by earlier sessions and phases
-3. work in its own temporary Creation worktree so other sessions cannot overwrite its initial files
-4. create only new uniquely named initial handoffs under `TRACKED_HANDOFFS/INITIAL/` for its own assigned topic
-5. fetch the remote collection again before publishing
-6. preserve every tracked-handoff artifact published by other sessions or phases while it was running
-7. push only its append-only `INITIAL/` additions on top of the complete latest remote `tracked-handoffs` tree
-8. refresh the product-worktree visibility mirror from the successfully published remote state
+Reconciliation, planning, implementation, completion, supersession, and later lifecycle interpretation are outside this Creation workflow.
 
-A later session therefore sees every tracked-handoff artifact that earlier sessions or phases successfully pushed before that later session's initial synchronization. Results that are still being created or whose push failed are not yet globally synchronized.
+## Core Model
 
-The skill transports only the repository's tracked-handoff collection artifacts. It never synchronizes, commits, or pushes product code merely because a handoff was created from that product state.
+Creation uses these remote branches:
 
-Core characteristics:
+```text
+tracked-handoffs/initial/current
+tracked-handoffs/initial/run/<12-character-hash>
+```
 
-- the canonical published collection is the complete `TRACKED_HANDOFFS/` tree on the remote `tracked-handoffs` branch; the product worktree exposes a repository-root visibility mirror that may appear tracked, untracked, or ignored and is not used as an authoring workspace
-- the canonical transport is the dedicated `tracked-handoffs` branch
-- synchronization and publication are part of every tracked handoff operation
-- this Creation workflow owns only `TRACKED_HANDOFFS/INITIAL/`; it adds initial handoffs there and never edits, moves, or deletes an existing published tracked-handoff artifact; unpublished local initial handoffs may be normalized before their first publication
-- every new initial handoff records the repository identity, product branch, exact source commit, source publication state, relevant working-tree state, and intended applicability
-- the complete `TRACKED_HANDOFFS/` tree is fetched and preserved, but this workflow may stage, commit, or push changes only under `TRACKED_HANDOFFS/INITIAL/`; no product path or other tracked-handoff phase area may be changed
+The general phase pattern is:
 
-Default behavior:
+```text
+tracked-handoffs/<phase>/current
+tracked-handoffs/<phase>/run/<hash>
+```
 
-- fetch the remote collection before investigation and start from every already published handoff
-- create a unique temporary local worktree for this operation
-- perform the requested investigation directly in the current product source
-- write every justified initial handoff into the operation's temporary `TRACKED_HANDOFFS/INITIAL/` area
-- fetch the remote collection again before publication
-- publish only the combined append-only `INITIAL/` additions on top of the complete latest remote `tracked-handoffs` state
-- refresh the product-worktree visibility mirror from the successfully published remote state
-- on success, return only created repository-relative paths, or exactly `NO_HANDOFFS_CREATED`
+This skill owns only the Initial phase:
 
-Delegated behavior applies only when the user explicitly asks to use one or more subagents. The parent synchronizes once and gives each subagent a separate temporary worktree with a writable `TRACKED_HANDOFFS/INITIAL/` area and a local Creation run branch. Subagents create files but do not publish. The parent collects the additions, fetches the remote collection again, publishes the combined result once, and refreshes the visibility mirror.
+```text
+TRACKED_HANDOFFS/INITIAL/
+tracked-handoffs/initial/current
+tracked-handoffs/initial/run/*
+```
 
-Do not launch subagents merely because an assignment is broad. A request such as `/tracked-handoff-sync-creation-softskill mach einen generellen Code-Review` runs directly unless the user also requests subagents.
+A later Reconcile workflow may use separate branches such as:
 
-An **Initial Implementation Handoff** is:
+```text
+tracked-handoffs/reconciled/current
+tracked-handoffs/reconciled/run/<hash>
+```
 
-- grounded in the actual repository source
-- more concrete than a general review observation or recommendation
-- close enough to implementation that a later planning agent can turn it into an implementation plan
-- organized around one coherent, meaningful chunk of work
-- explicit about likely code areas, contracts, dependencies, constraints, and unresolved decisions
-- an implementation-preparation input for later reconciliation and planning, not itself a coding-agent implementation plan
+This Creation skill must not create, update, delete, or reinterpret another phase's branches or files.
 
-The workflow is complete when synchronization succeeded and every justified finding was published as an initial tracked handoff under `TRACKED_HANDOFFS/INITIAL/`, or when synchronization succeeded, no finding qualifies, and the result is exactly `NO_HANDOFFS_CREATED`.
+### Meaning of `current`
 
-Invoking this skill authorizes publication of justified initial handoffs under `TRACKED_HANDOFFS/INITIAL/` without a separate approval prompt. Create remains responsible for evidence, eligibility, and content quality before publication. A later Reconcile skill may resolve overlap or contradiction between independently created handoffs; it is not a substitute for Create validation.
+`tracked-handoffs/initial/current` means:
 
-## Synchronization Contract
+> The currently integrated and remotely published Initial Handoff collection.
 
-### Product worktree protection
+It does not mean:
 
-Treat the current product worktree as the source state being investigated. Fetch remotes and inspect Git state as needed, but do not pull, merge, rebase, switch, reset, clean, configure an upstream for, commit, or push the current product branch as part of handoff synchronization or creation.
+- reconciled
+- approved
+- final
+- ready for implementation
+- correct for every product branch
+- completed or superseded
 
-The Creation workflow may stage, commit, and push changes only under:
+### Meaning of `run/<hash>`
+
+`tracked-handoffs/initial/run/<hash>` means:
+
+> One producing run's remotely saved Initial Handoff result, which may or may not already be integrated into `initial/current`.
+
+The run branch protects the result from being left only in a local temporary worktree when integration into `current` is delayed or rejected.
+
+## Hard Safety Rules
+
+Always preserve these invariants:
+
+- never force-push
+- never pull, merge, rebase, switch, reset, clean, commit, or push the current product branch for this workflow
+- never merge a tracked-handoff branch into a product branch
+- never stage, commit, or push product code on a tracked-handoff branch
+- never change a path outside `TRACKED_HANDOFFS/INITIAL/` on an Initial run or integration commit
+- never edit, rename, move, or delete an already integrated Initial Handoff
+- never overwrite unrelated local work
+- never delete a remote run branch before its complete contribution is verified in `initial/current`
+- never claim cross-computer availability before the relevant remote push is verified
+- never create an empty run branch, empty result commit, or placeholder file
+
+The current product checkout is read-only source evidence. All writable handoff work happens in isolated temporary worktrees.
+
+## Remote Resolution
+
+Choose the writable remote deterministically:
+
+1. Use the writable remote configured as the current product branch's upstream remote when one exists.
+2. Otherwise use writable `origin`.
+3. Otherwise use the only remaining writable remote.
+4. If several writable remotes remain and the repository identifies no primary remote, stop and report the ambiguity.
+
+Fetch the selected remote before investigation and before every integration attempt. Do not update the product branch after fetching.
+
+## Legacy Branch Blocker
+
+The legacy remote branch:
+
+```text
+tracked-handoffs
+```
+
+cannot coexist with:
+
+```text
+tracked-handoffs/initial/current
+tracked-handoffs/initial/run/<hash>
+```
+
+because Git ref names cannot be both a branch and a directory prefix.
+
+If the selected remote still contains `tracked-handoffs`, stop before creating new work and report that the repository requires the one-time migration to `tracked-handoffs/initial/current`.
+
+Do not delete or migrate the legacy remote branch automatically during an ordinary Creation run.
+
+## Pure Storage Branch Contract
+
+`tracked-handoffs/initial/current` and every Initial run branch are storage branches. Their trees may contain only:
+
+```text
+TRACKED_HANDOFFS/
+└── INITIAL/
+    └── initial-handoff-<hash>-NN-<topic>.md
+```
+
+They must not contain ordinary repository paths such as:
+
+```text
+src/
+PROJECTNOTES/
+.agents/
+README.md
+```
+
+When `initial/current` does not yet exist, treat the Initial collection as empty. The first producing run uses an orphan result commit containing only its Initial Handoffs. After the run branch is verified remotely, integration creates `initial/current` from that result if no competing current branch appeared first.
+
+Before using any fetched Initial branch, verify that its tree contains no path outside `TRACKED_HANDOFFS/INITIAL/`. A malformed branch is not safe input and must be reported precisely.
+
+## Normal Workflow
+
+Every top-level run follows five phases.
+
+### Phase A: Synchronize the remote Initial phase
+
+1. Resolve repository root, identity, current product branch or detached commit, exact source commit, upstream state, staged changes, unstaged changes, and relevant untracked state.
+2. Preserve all product work without stash, reset, clean, rebase, merge, or branch switching.
+3. Resolve and fetch the writable remote.
+4. Reject the legacy `tracked-handoffs` branch when present.
+5. Fetch `tracked-handoffs/initial/current` when it exists.
+6. Enumerate remote branches under `tracked-handoffs/initial/run/*`.
+7. Validate and integrate every safely recoverable open remote run into `initial/current` before beginning the requested investigation.
+8. Delete only remote run branches whose complete file contribution is verified byte-for-byte in `initial/current`.
+9. Refresh the local visibility mirror from verified `initial/current` when the short mirror lock is available.
+
+A later session therefore begins from every Initial Handoff already integrated before its fetch, and it also attempts to finish any remotely saved open runs left by earlier sessions.
+
+### Phase B: Investigate in isolation
+
+1. Generate one unique 12-character lowercase hexadecimal session token.
+2. Create a session record under the Git common directory.
+3. Create a unique temporary worktree for the producing run.
+4. Base the temporary worktree on the latest fetched `initial/current` when it exists; otherwise use an empty orphan Initial storage tree.
+5. Treat only `TRACKED_HANDOFFS/INITIAL/` as writable in that worktree.
+6. Inspect the designated product checkout read-only.
+7. Apply the Handoff Eligibility Gate to every possible finding.
+8. Write only justified Initial Handoffs.
+
+### Phase C: Save the producing result remotely
+
+When one or more Handoffs were created:
+
+1. Verify that the producing worktree contains no changed path outside `TRACKED_HANDOFFS/INITIAL/`.
+2. Verify that all changes are additions; no integrated file may be modified, renamed, or deleted.
+3. Create exactly one result commit beyond the run's recorded Initial base. For the first empty phase, the result may be one orphan root commit.
+4. Push the result to:
+
+```text
+tracked-handoffs/initial/run/<handoff-hash>
+```
+
+5. Fetch that remote run branch and verify its commit and file contents.
+
+This run push does not use the shared `current` integration path and does not require the local mirror lock. Different agents normally push different remote branch names and therefore do not block each other's first remote save.
+
+After this verified push, the result is available from the remote to another computer even if integration into `initial/current` has not completed.
+
+### Phase D: Integrate remote runs into `current`
+
+After the own run is remotely saved, integrate it together with any other safely recoverable open runs:
+
+1. Fetch the latest `initial/current` and all `initial/run/*` branches again.
+2. Validate each run branch using the Remote Run Contract.
+3. Build the append-only union on a fresh temporary integration branch based on the latest `initial/current`.
+4. Apply only files contributed by validated open runs.
+5. Preserve every file already in `initial/current` byte-for-byte.
+6. Verify that the prospective integration commit changes only `TRACKED_HANDOFFS/INITIAL/` and contains additions only.
+7. Push normally to `tracked-handoffs/initial/current`.
+8. Never force-push.
+9. Fetch and verify the resulting remote `initial/current` tree.
+10. Delete each remote run branch only after all of its contributed files exist with identical content in verified `initial/current`.
+
+### Phase E: Refresh visibility and return
+
+1. Refresh the local `TRACKED_HANDOFFS/INITIAL/` visibility mirror from verified `initial/current` when the short mirror lock is available.
+2. Do not stage or commit mirror changes on the product branch.
+3. Clean local worktrees, local branches, and session records when they contain no unpublished value.
+4. Return only the response allowed by the Return Contract.
+
+## Remote Run Contract
+
+A valid Initial run branch must:
+
+- use `tracked-handoffs/initial/run/<12-character-lowercase-hex-hash>`
+- contain only `TRACKED_HANDOFFS/INITIAL/`
+- have a tip that is exactly one result commit above its first parent, or one orphan result commit for the first empty phase
+- add files only
+- never modify or delete an existing Initial Handoff from its base
+- use the same run hash in its branch name, filenames, headings, and internal run references
+- contain no secrets, credentials, private data, symlinks, or unsafe non-Markdown artifacts
+
+For an ordinary run commit, inspect the tip against its first parent. For an orphan result, inspect the complete tree.
+
+When a remote run is malformed:
+
+- do not merge, cherry-pick, delete, or rewrite it silently
+- continue integrating other independent valid runs when safe
+- report the exact malformed branch and reason
+
+## Open Remote Run Recovery
+
+At the start and before final return, classify every remote `initial/run/*` branch:
+
+### Already integrated
+
+All files contributed by the run exist with identical content in `initial/current`.
+
+Action:
+
+- treat it as integrated
+- delete the remote run branch when possible
+- a failed branch deletion is cleanup debt, not a failure of the integrated Handoff result
+
+### Valid and not yet integrated
+
+The run is valid and contributes one or more files not yet present in `initial/current`.
+
+Action:
+
+- include it in the next append-only integration attempt
+
+### Collision
+
+A contributed path already exists in `initial/current` or another open run.
+
+Action:
+
+1. Read both files completely.
+2. If content is identical, treat the run file as already integrated.
+3. If the run adds no distinct Handoff value, keep the current file and classify the run contribution as a duplicate.
+4. If it is a distinct Handoff, assign a fresh hash and filename to the still-unintegrated content, update its heading and internal hash references, publish a corrected replacement run branch, and integrate the replacement.
+5. Delete the original run branch only after the corrected replacement is verified in `initial/current`.
+6. Stop only when the collision cannot be classified safely.
+
+Never rename or rewrite a file already present in `initial/current`.
+
+## Integration Retry Contract
+
+Updating `initial/current` is the remaining shared remote step. Git push rejection provides the concurrency control.
+
+For a rejected `initial/current` push:
+
+1. Fetch the newest `initial/current` and all open Initial run branches.
+2. Rebuild the append-only union from the newest current tip.
+3. Retry with increasing waits of approximately 10, 20, 30, 45, 60, 75, and 90 seconds.
+4. Add a small random variation when practical so many agents do not retry in lockstep.
+5. Stop after the eighth integration attempt and no more than about six minutes total.
+6. Never force-push.
+
+If integration still fails, the producing result must remain on its verified remote run branch. Return a concise pending-integration blocker that includes:
+
+- the remote run branch
+- the target `tracked-handoffs/initial/current`
+- the exact integration failure
+- that the Handoffs are already saved remotely
+- that the same request may be retried after concurrent integrations settle
+- that a later run on this or another computer will automatically retry the open remote run
+
+Example shape:
+
+```text
+BLOCKED: The Handoffs are safely stored on tracked-handoffs/initial/run/a4c9e17d3b62 but could not yet be integrated into tracked-handoffs/initial/current after the bounded retries because the remote kept changing. Run the same request again after the concurrent integrations settle; the next run will recover the remote run automatically.
+```
+
+Do not report a remote-saved run as existing only locally.
+
+## Local Temporary Artifacts and Recovery
+
+Use 12-character lowercase hexadecimal identifiers.
+
+Recommended local branch prefixes:
+
+```text
+tracked-handoff-initial-work/<hash>
+tracked-handoff-initial-integrate/<session-hash>-NN
+tracked-handoff-initial-recovery/<hash>
+```
+
+Store one local session record at:
+
+```text
+<git-common-dir>/tracked-handoff-initial-sessions/<session-hash>.json
+```
+
+Record at least:
+
+- host identifier
+- process identifier when available
+- start and heartbeat times
+- current phase
+- source product branch and commit
+- local worktree paths and branches
+- intended remote run branch
+- whether the remote run push was verified
+
+Refresh the heartbeat at major phases and at least every five minutes during a long investigation.
+
+At startup:
+
+1. Inspect only session records and local artifacts using this skill's prefixes.
+2. Leave an active session untouched.
+3. For abandoned work not yet pushed as a remote run, recover safe Initial Handoffs into a new valid run and push them remotely before deleting the source.
+4. If the remote run was already verified, prefer remote recovery and remove the obsolete local worktree when safe.
+5. Never delete a local artifact containing unrelated changes or unreadable unpublished value.
+6. Mere existence of an old local worktree is not a blocker when it does not prevent safe current work.
+
+Recovery priority:
+
+> Preserve unpublished Initial Handoffs, save them remotely, integrate everything safe, then clean obsolete local artifacts.
+
+## Local Visibility Mirror
+
+The product checkout may expose:
 
 ```text
 TRACKED_HANDOFFS/INITIAL/
 ```
 
-It must fetch and preserve the complete remote `TRACKED_HANDOFFS/` tree, including any other phase-owned subdirectories or root-level coordination files, but it must not author, rewrite, move, or delete those other tracked-handoff areas. It must not synchronize product code, runbooks, project notes, configuration, tests, `.gitignore`, or any other repository path.
+This directory is a human and agent visibility mirror of verified `tracked-handoffs/initial/current`.
 
-### Canonical published collection
+It is not an authoring workspace for a producing run.
 
-Use one repository-specific remote branch as the source of truth:
+Rules:
 
-```text
-<normal-writable-remote>/tracked-handoffs
-```
+- refresh it by copying files from verified `initial/current`
+- do not switch the product checkout to a tracked-handoff branch
+- do not restore or merge a whole branch into the product checkout
+- do not stage or commit mirror changes on the product branch
+- do not modify `.gitignore`
+- leave ordinary local notes outside recognized Initial Handoff files untouched
+- open run branches are not copied into the mirror before integration
 
-Choose the writable synchronization remote deterministically:
+### Short mirror lock
 
-1. Use the writable remote configured as the current product branch's upstream remote when one exists.
-2. Otherwise use `origin` when it is writable.
-3. Otherwise use the only remaining writable remote.
-4. When several writable remotes remain and the repository does not identify one as primary, stop and report the ambiguity instead of guessing.
-
-The synchronization branch transports the complete `TRACKED_HANDOFFS/` tree. Never merge that branch into `main`, development, test, feature, release, or another product branch. Never use a whole-branch checkout, restore, merge, or copy to synchronize the product worktree.
-
-The branch may inherit ordinary repository history and files from its initial base commit. That does not authorize touching them: every commit created by this workflow must change only `TRACKED_HANDOFFS/INITIAL/`. All product paths and every other tracked-handoff phase area are outside this workflow's authoring scope and must remain identical to the latest fetched remote state.
-
-The current product worktree may be on any normal branch, including `main`. Its root `TRACKED_HANDOFFS/` directory is only a local visibility mirror. The operation's writable initial-handoff area lives in an operation-specific temporary worktree.
-
-This Creation workflow is append-only within `TRACKED_HANDOFFS/INITIAL/`:
-
-- it may add new uniquely named initial-handoff Markdown files directly under `TRACKED_HANDOFFS/INITIAL/`
-- it must not edit, rename, move, or delete an existing published initial handoff
-- it must preserve every published file outside `TRACKED_HANDOFFS/INITIAL/` byte-for-byte from the latest fetched remote state
-- it must not infer deletion from absence in one clone or product branch
-- it must not interpret reconciliation, completion, supersession, execution state, or later lifecycle areas
-
-### Required synchronization before investigation
-
-Before inspecting the requested product topic:
-
-1. Resolve the repository root and repository identity.
-2. Record the current product branch or detached commit, exact source commit, upstream information, staged changes, unstaged changes, and relevant untracked state.
-3. Preserve all current product work. Do not reset, clean, stash, rebase, merge, force-checkout, or otherwise rewrite it for handoff synchronization.
-4. Fetch configured remotes so the remote `tracked-handoffs` state is current. Do not update the product branch after fetching.
-5. Resolve the normal writable remote and whether its `tracked-handoffs` branch exists.
-6. Generate a session token, create its local session record, and create a managed temporary local run branch and unique temporary worktree using the naming rules below. Base the worktree on the latest fetched `tracked-handoffs` state when that remote branch exists.
-7. Use `TRACKED_HANDOFFS/INITIAL/` in the temporary worktree as the only writable handoff area for this operation. Treat every other path in the temporary worktree as read-only. Do not create or edit handoffs in the product-worktree visibility mirror while investigating.
-8. Before reading or refreshing the visibility mirror, inspect the publication lock. When no active owner may be writing the mirror, compare only the mirror's `TRACKED_HANDOFFS/INITIAL/` candidates with the fetched remote initial-handoff area using the local-file and append-only rules below. Preserve the complete fetched remote `TRACKED_HANDOFFS/` tree unchanged outside the operation's new initial additions. When an active owner may be writing the mirror, do not read it; use the fetched remote as the stable published starting collection and defer mirror comparison until final publication.
-9. If recognized initial handoffs were safely found only under the visibility mirror's `TRACKED_HANDOFFS/INITIAL/`, publish them through the `Publication procedure` below in **intermediate mode** before beginning the new investigation. This pre-investigation publication is authorized by invocation of the skill and does not require another approval prompt. When an active local publisher prevents safe mirror access, continue from the complete globally published remote tracked-handoff collection and recover local-only initial handoffs after the lock becomes available before final publication instead of blocking the investigation unnecessarily.
-10. When a published collection exists and no active lock owner may be writing the visibility mirror, refresh it from the fetched remote state for visibility without updating the product worktree index. When an active owner may be writing it, defer mirror refresh until final publication. When no synchronization branch and no recognized initial-handoff artifact exist yet, continue from a known empty collection and defer branch creation until an actual initial handoff exists.
-
-If synchronization cannot establish the complete already-published collection, stop before investigation and report the exact blocker.
-
-### Initial synchronization branch creation
-
-When no local or remote `tracked-handoffs` branch exists:
-
-- prepare the temporary run branch from the latest fetched commit of the remote default branch, not from an arbitrary local feature commit
-- carry only repository-specific `TRACKED_HANDOFFS/INITIAL/` content into the first synchronization commit created by this workflow
-- do not create placeholder files merely to initialize the branch
-- create and push the branch only when an actual initial-handoff artifact exists, including a recognized initial handoff found only under the visibility mirror's `INITIAL/` area or one created by the current operation
-- configure the pushed branch normally without changing the current product branch
-
-When no synchronization branch and no recognized initial-handoff artifact exist, the complete synchronized starting collection is empty. Do not create or push an empty branch; continue the investigation and initialize the branch only if the run creates a justified handoff.
-
-Invoking this skill authorizes this narrowly scoped branch creation and publication. It does not authorize a product-branch commit or push.
-
-### Ignore handling
-
-Do not modify `.gitignore` as part of this workflow. Check whether `TRACKED_HANDOFFS/INITIAL/` is ignored. When it is not ignored, stage normally. When an ignore rule hides it, use only an explicit path-scoped force-add for the intended initial-handoff files in the temporary synchronization worktree when that is safe. Verify afterward that the synchronization commit contains no changed path outside `TRACKED_HANDOFFS/INITIAL/`.
-
-A global or local ignore rule may make the visibility mirror less visible in `git status`; it does not change the remote collection's authority. The files must still remain readable in the filesystem and synchronizable by this skill.
-
-### Local unpublished initial handoffs
-
-An initial handoff may have been created manually or left local after an earlier push failure. Do not require it to have been produced by this skill. Deliberately placing a document that clearly presents itself as an initial implementation handoff directly under `TRACKED_HANDOFFS/INITIAL/` indicates intent to include it in the published collection; unfinished drafts that must remain private or local belong outside that directory. Files under other tracked-handoff subdirectories are outside this Creation workflow and must not be imported or normalized by it.
-
-For every readable Markdown file directly under `TRACKED_HANDOFFS/INITIAL/` that is not present on the fetched remote branch:
-
-1. Read the file and decide whether it clearly describes repository-specific implementation-preparation work that should be preserved as an initial handoff.
-2. Check for obvious secrets, credentials, private data, or unsafe linked content. Do not publish a symlink, unreadable file, non-Markdown file, or sensitive content.
-3. When it is an initial handoff, copy it into the operation's temporary `TRACKED_HANDOFFS/INITIAL/` area. If its filename or heading does not follow the required initial-handoff filename and heading format, assign a fresh hash and valid filename there and update the unpublished heading and internal hash references consistently. Do not rewrite the visibility-mirror source file before publication succeeds.
-4. Preserve the author’s content. In the temporary worktree, add or correct only the minimum structure needed for a usable handoff. Unknown branch, commit, or publication details must be marked `unknown`; never invent them.
-5. If the file is clearly a normal note rather than an initial handoff, leave it local and exclude it from synchronization. It does not block the run.
-6. Process every other safe local candidate first. Then stop only when a concrete safety problem exists or a filename collision cannot be resolved by the collision procedure below. Do not stop merely because the file was created manually.
-
-A recognized local initial handoff is therefore a readable, safe Markdown document under `TRACKED_HANDOFFS/INITIAL/` whose content clearly represents implementation preparation, whether it was created by this skill, by another agent, or manually by a person.
-
-### Append-only initial-handoff combination rules
-
-Compare initial handoffs by repository-relative path, filename, hash token, and content.
-
-Apply these rules:
-
-- a unique file present only on one valid side is preserved in the combined collection
-- identical content at the same path is already synchronized
-- when local and remote contain different initial-handoff content at the same path, read both before deciding: when the local file adds no distinct initial-handoff value, keep the remote file and exclude the unpublished local duplicate from publication; otherwise assign the distinct unpublished handoff a fresh hash and filename and publish both; stop only when the collision cannot be classified safely
-- similar topics or wording do not make files equivalent
-- a missing file is not evidence of intentional deletion
-- the complete published tree retains every fetched remote tracked-handoff artifact, while the `INITIAL/` union contains all distinct valid initial handoffs from the fetched remote, recognized local initial handoffs, and this operation's new additions
-
-A special hash-token race is handled before publication: when another operation has published the same token while this operation was still unpublished, assign a new token to this operation and update its unpublished filenames, headings, internal token references, and return paths consistently. Do not rename any published tracked-handoff artifact.
-
-### Managed temporary artifacts and startup recovery
-
-Use 12-character lowercase hexadecimal identifiers with these roles:
-
-- **Session token:** identifies one top-level operation and its local session record.
-- **Handoff hash:** identifies the published initial-handoff files produced by one direct or delegated investigation.
-- **Artifact token:** names one temporary worktree and local branch.
-
-For direct execution, use the same value for the session token, handoff hash, and parent artifact token. For delegated execution, keep one parent session token and use each subagent's assigned handoff hash as that subagent's artifact token. Retry artifacts reuse their related artifact token with a retry number suffix. Generate a separate artifact token only when two managed artifacts would otherwise receive the same name.
-
-Use these local branch prefixes:
+Use one atomically created phase-specific lock directory only for short mirror reads, mirror writes, and related local cleanup:
 
 ```text
-tracked-handoff-initial-run/<artifact-token>
-tracked-handoff-initial-retry/<artifact-token>-NN
+<git-common-dir>/tracked-handoff-initial-mirror.lock
 ```
 
-Create one local session record at:
+This lock must not guard investigation, remote run pushes, or remote `current` integration.
+
+When another active local session owns the mirror lock:
+
+- do not read or write the mirror concurrently
+- continue using verified remote branches
+- retry briefly with bounded waits such as 1, 2, 4, 8, and 15 seconds
+- if it remains busy, defer the mirror refresh; do not invalidate an already verified remote save or integration
+- a later run rebuilds the mirror from `initial/current`
+
+A stale mirror lock may be removed only after its recorded owner is safely classified as inactive.
+
+## Local Unpublished Initial Handoffs
+
+A person or earlier failed process may have placed a candidate directly under the local visibility mirror:
 
 ```text
-<git-common-dir>/tracked-handoff-initial-sessions/<session-token>.json
+TRACKED_HANDOFFS/INITIAL/
 ```
 
-Record the host identifier, process identifier when available, start time, last heartbeat time, current phase, and all managed worktree paths and branch names owned by the top-level operation, including delegated and retry artifacts. Refresh the heartbeat at each major phase and at least every five minutes during a long investigation. A recorded operation is active when its process is verifiably running on the current host, or when process liveness cannot be checked but its heartbeat is newer than 15 minutes. It is verifiably abandoned when its recorded process on the current host is no longer running or its record is explicitly marked recovery-needed after a controlled failure. When process liveness cannot be checked and the heartbeat is older than 15 minutes, its lock lease may be recovered, but do not delete its worktree or branch based on age alone. Remove the session record after all managed artifacts are safely cleaned. When unpublished work must be retained, mark the record as recovery-needed and preserve its paths.
+Deliberate placement there indicates intent to include a document in the shared Initial collection. Private drafts belong elsewhere.
 
-Never push these managed local branches or local session records. Only push this operation's `TRACKED_HANDOFFS/INITIAL/` additions on top of the complete latest remote `tracked-handoffs` state.
+When the short mirror lock is available:
 
-At the beginning of each top-level run, inspect leftover session records and only the worktrees and local branches named by those records or using these prefixes. Never treat an unrelated worktree or branch as owned by this skill.
+1. Compare direct Markdown files with verified `initial/current` and open remote runs.
+2. Read each local-only candidate.
+3. Exclude normal notes that do not clearly present repository-specific implementation preparation.
+4. Reject symlinks, unreadable files, non-Markdown files, secrets, credentials, or sensitive content.
+5. For a valid local-only Initial Handoff, preserve the author's content, apply only minimum required normalization, assign a fresh hash when needed, create a recovery run branch, and push it remotely.
+6. Do not rewrite or delete the mirror source before remote verification.
+7. After successful integration, refresh the mirror from `initial/current`.
 
-For each leftover managed worktree or branch:
+If the mirror lock is temporarily unavailable, defer this local-only scan rather than blocking remote investigation or remote publication.
 
-1. Determine whether its recorded owner is still active. Leave an active operation untouched.
-2. Read any unpublished files under its `TRACKED_HANDOFFS/INITIAL/` directory. Copy recognized initial handoffs into the current operation's temporary initial-handoff area and publish them through the `Publication procedure` in **intermediate mode**; do not delete the source before publication is verified. Do not recover or rewrite files from another tracked-handoff phase area.
-3. When an initial handoff is already published with identical content, treat its local copy as recovered.
-4. When the operation is verifiably abandoned, the leftover contains no unpublished initial-handoff value, and it has no changes outside `TRACKED_HANDOFFS/INITIAL/`, remove its worktree registration, worktree directory, local managed branch, and obsolete session record when safe. When abandonment is not verifiable, leave the artifacts in place and continue the current run if they do not block synchronization.
-5. When it contains changes outside `TRACKED_HANDOFFS/INITIAL/`, do not delete or rewrite it. Recover only safe initial handoffs by copy, leave the remaining worktree in place, and continue the current run when that leftover does not prevent synchronization.
-6. Process and publish every safe independent initial handoff before reporting a remaining recovery problem. A leftover is a blocker only when an unpublished initial handoff cannot be read or classified safely, or when it prevents the current operation from establishing or publishing the combined handoff collection. Mere existence of an old managed worktree or branch is not a blocker.
+## Concurrent Top-Level Sessions
 
-The recovery priority is: preserve unpublished initial handoffs first, synchronize everything safe, then report any unresolved concrete problem, and finally remove obsolete managed artifacts. Never delete useful unpublished work merely to obtain a clean local Git listing.
+Independent top-level sessions are not subagents of one parent.
 
-### Concurrent top-level sessions on one computer
+Each session must have:
 
-Several independent skill sessions may investigate different topics concurrently on the same computer.
+- its own session token
+- its own local temporary worktree
+- its own local work branch
+- its own remote `tracked-handoffs/initial/run/<hash>` branch when it produces Handoffs
+- hash-scoped filenames
 
-Each top-level session must have:
+They may investigate and push their own run branches concurrently.
 
-- its own uniquely named temporary worktree
-- its own temporary local run branch
-- its own operation hash token
-- its own writable `TRACKED_HANDOFFS/INITIAL/` area, with the rest of the fetched tracked-handoff tree treated as read-only
+They do not wait for a shared publication lock before remotely saving their results.
 
-No independent session may use the visibility mirror or one shared checked-out `tracked-handoffs` branch as a concurrent write location.
+Only integration into `initial/current` is shared, and it is resolved through normal fetch, append-only rebuild, push rejection, and bounded retry.
 
-Only the short publication phase is serialized locally. Every worktree of the repository must use the same atomically created lock directory:
-
-`<git-common-dir>/tracked-handoff-publication.lock`
-
-Store owner metadata inside it containing at least the session token, host identifier, process identifier when available, acquisition time, last heartbeat time, managed worktree path, and managed branch name. Refresh the heartbeat before commit, before push, and before visibility-mirror refresh.
-
-When the lock already exists:
-
-1. Determine whether the owner is active, verifiably abandoned, or has an expired lock lease using the session-record rules above.
-2. During initial synchronization, a verifiably active owner does not by itself block repository investigation. Do not wait solely for the lock. Use the latest fetched remote as the stable published collection and do not read or refresh the visibility mirror while the owner may be writing it. Continue the investigation, then fetch again and recover any local-only initial handoffs after the lock becomes available before final publication.
-3. During an attempted intermediate or final publication, when the owner is active, check immediately and then at most five more times about 10 seconds apart, for no more than 60 seconds total. If it remains active, preserve the current operation's unpublished work and return the exact lock blocker instead of waiting indefinitely.
-4. If the recorded process is on the current host and is verifiably no longer running, treat the lock as abandoned.
-5. If process liveness cannot be checked, treat only the lock lease as abandoned when its heartbeat is older than 15 minutes and no matching managed operation can be shown to be active. Do not delete its worktree or branch based on age alone.
-6. Before removing an abandoned or expired lock, inspect its recorded phase and worktree. When it belongs to Creation, apply the startup-recovery rules above so unpublished initial handoffs are preserved. When it belongs to another tracked-handoff phase, do not recover, rewrite, or delete that phase's worktree or session artifacts; remove only the stale shared lock after the owner is safely classified as inactive, and leave phase-specific recovery to that workflow.
-
-A lock is a short local publication guard, not a permanent repository state. A stale lock should be recovered safely rather than leaving the repository blocked forever.
-
-### Publication procedure
-
-Use this procedure in one of two modes:
-
-- **Intermediate mode:** publish initial handoffs found before the requested investigation or recovered while the run is still continuing. Keep the current operation's worktree, run branch, and session record after publication.
-- **Final mode:** publish the complete result at the end of the run, then clean the current operation's managed artifacts when safe.
-
-Both modes perform the same fetch, append-only combination, push, verification, mirror refresh, and lock release steps.
-
-After the operation has zero or more unpublished initial handoffs in its temporary worktree:
-
-1. Acquire the repository-wide local publication lock.
-2. Fetch the remote `tracked-handoffs` branch again.
-3. Rebuild the temporary publication branch from the complete latest remote `tracked-handoffs` tip. Reapply only recognized local initial handoffs and this operation's unpublished `TRACKED_HANDOFFS/INITIAL/` additions. Do not carry an older local version of another phase area over the latest remote state.
-4. Preserve every concurrent remote addition in every tracked-handoff phase area. Resolve same-path content differences only for unpublished candidates under `TRACKED_HANDOFFS/INITIAL/` using the collision procedure above; never resolve a conflict by changing another phase area.
-5. Recheck this operation's hash tokens against the latest remote collection and repair only a still-unpublished token race as defined above.
-6. Verify that staging and the prospective commit contain changes only under `TRACKED_HANDOFFS/INITIAL/`. Also verify that all other paths match the latest fetched remote tip exactly.
-7. Commit the combined initial-handoff additions on this operation's temporary run branch only when there is an actual unpublished `INITIAL/` change.
-8. Push normally to the remote `tracked-handoffs` branch. Never force push.
-9. If the push is rejected because another computer or tracked-handoff phase published first, fetch again and rebuild the attempt from the complete latest remote `tracked-handoffs` tip. Prefer a fresh uniquely named temporary retry branch and worktree, then reapply only this operation's still-unpublished `INITIAL/` additions and recompute the initial-handoff union. Make at most three safe publication attempts in total. Do not force push or rewrite the product branch. After the final failed attempt, preserve the unpublished work and report the exact failure.
-10. After a successful push, fetch the remote branch again and verify that it contains this operation's new initial files and the complete concurrent tracked-handoff tree used as the publication base.
-11. Refresh the complete published `TRACKED_HANDOFFS/` visibility mirror from the verified remote state, including phase areas this Creation workflow does not author. Do not delete or overwrite ordinary local notes that were excluded from synchronization, and do not update or stage the product worktree index.
-12. Verify that every published tracked-handoff artifact in the remote collection is present with identical content in the visibility mirror. Extra ordinary local notes are allowed and are not part of this comparison.
-13. Release the publication lock when owned by this operation. In intermediate mode, keep the current operation's worktree, run branch, and session record so the investigation can continue; remove only empty or fully recovered retry artifacts. In final mode, remove the current operation's temporary worktrees, local run or retry branches, and session record when they contain no unpublished initial-handoff value and no changes outside `TRACKED_HANDOFFS/INITIAL/`. Preserve and report the temporary path when unpublished initial handoffs remain after failure.
-
-When no new concern qualifies, do not create an empty commit. The required initial synchronization must still have succeeded. Previously recognized local initial handoffs may still require publication before returning `NO_HANDOFFS_CREATED`.
-
-### Visibility mirror rules
-
-The primary product-worktree `TRACKED_HANDOFFS/` directory exists for human and agent visibility only.
-
-- read it when useful
-- never use it as the operation's writable collection
-- refresh the complete published tracked-handoff tree by file copy from the verified remote collection, not by switching branches or restoring the repository; leave excluded ordinary local notes untouched
-- never stage or commit mirror changes on the product branch as part of this skill
-- do not touch unrelated paths merely to make the product worktree appear clean
-- expect the mirror to appear changed, untracked, or ignored relative to the current product branch
-
-The remote `tracked-handoffs` branch remains the canonical transport regardless of the product branch's snapshot.
-
-### Safety prohibitions
-
-Never use the following for this workflow:
-
-- force push
-- `git reset --hard`
-- `git clean`
-- product-branch rebase or merge for handoff synchronization
-- whole-branch merge of `tracked-handoffs` into a product branch
-- whole-repository restore or checkout from the synchronization branch
-- deletion, overwriting, or stashing of unrelated local work
-- staging, committing, or pushing a changed path outside `TRACKED_HANDOFFS/INITIAL/`
-
-### Synchronization blockers
-
-Stop and report the exact blocker when:
-
-- different content at the same repository-relative initial-handoff path cannot be classified safely as a duplicate or a distinct initial handoff after both files were read
-- the writable remote or required credentials are unavailable
-- the remote keeps changing and three safe publication attempts cannot establish one published collection
-- the current operation's required temporary worktree or run branch cannot be created, or a managed leftover prevents safe synchronization; inability to remove a harmless retained leftover alone is not a blocker
-- the prospective Creation commit contains changes outside `TRACKED_HANDOFFS/INITIAL/`, or another tracked-handoff phase area differs from the latest fetched remote state
-- the local publication lock remains owned by a verifiably active operation after six checks over at most 60 seconds, or its ownership cannot be recovered safely
-- source or repository state is too incomplete to support the requested handoff without unsafe assumptions
-
-Do not claim cross-computer or cross-clone synchronization until the remote synchronization branch contains the final handoff state. Preserve safely written unpublished initial-handoff content in its temporary worktree when publication fails, and report the temporary path.
-
-## Execution Strategy
-
-### Direct execution
+## Direct Execution
 
 Direct execution is the default.
 
-1. Apply the Synchronization Contract.
-2. Fetch the remote handoff collection and create a unique temporary local worktree from its latest published state; when no synchronization branch exists yet, use the initial empty-collection procedure defined above.
-3. Confirm that this temporary collection contains the complete tracked-handoff tree already published before the operation starts, while only `INITIAL/` is writable.
-4. Interpret the requested review or investigation scope.
-5. Record the repository identity, current product branch, exact source commit, source publication state, relevant working-tree state, and intended applicability.
-6. Inspect the current product branch and repository source directly.
-7. Generate one short hash token for the logical initial-handoff run.
-8. Apply the Handoff Eligibility Gate to every finding.
-9. Write the complete useful result for each justified concern into ordered append-only files under the temporary worktree's `TRACKED_HANDOFFS/INITIAL/` area, including the required source context.
-10. Fetch the complete latest remote tracked-handoff state again immediately before publication.
-11. Run the `Publication procedure` in **final mode**: publish only the combined `TRACKED_HANDOFFS/INITIAL/` additions on top of the complete latest remote `tracked-handoffs` tree, verify the published collection, refresh the full visibility mirror, and clean the current operation's managed artifacts when safe.
-12. On success, return only the created repository-relative paths, one per line, or exactly `NO_HANDOFFS_CREATED`.
+1. Apply startup synchronization and remote run recovery.
+2. Inspect the requested product source directly and read-only.
+3. Generate one unique run hash.
+4. Apply the Eligibility Gate.
+5. Write complete Initial Handoffs for justified concerns.
+6. Push one verified remote run branch when Handoffs exist.
+7. Integrate open runs into `initial/current`.
+8. Verify the remote current collection.
+9. Refresh the local mirror when possible.
+10. Return only the allowed response.
 
-A broad request such as a general code review is valid. Inspect the repository systematically, prioritize high-signal implementation concerns, and split justified findings by implementation boundary. Do not invent findings merely to make a broad review appear productive.
+Do not launch subagents merely because a task is broad.
 
-### Delegated execution
+## Delegated Execution
 
-Use delegated execution only when the user explicitly requests a subagent or multiple subagents.
+Use subagents only when the user explicitly requests them.
 
-There is no separate named single-subagent mode:
+The parent agent owns all Git synchronization and publication.
 
-- if the user asks for one subagent, launch one
-- if the user asks for a specific number, launch that number
-- if the user clearly asks for several subagents without a count, choose a small bounded number appropriate to the repository and task
+The parent must:
 
-The orchestrating agent must:
+1. Complete startup synchronization and remote run recovery once.
+2. Record the shared product source context.
+3. Create a separate temporary writable output area for each subagent.
+4. Assign a unique 12-character hash to each delegated producing run.
+5. Give each subagent a bounded objective and minimum sufficient context.
+6. Require read-only product-source inspection.
+7. Forbid subagents from fetching, branching, committing, pushing, or writing outside their assigned temporary `TRACKED_HANDOFFS/INITIAL/` area.
+8. Collect each successful subagent result.
+9. Publish one remote `initial/run/<assigned-hash>` branch per successful delegated run.
+10. Integrate all valid open runs into `initial/current`.
+11. Return all newly integrated paths, or the top-level no-handoff response when none qualified.
 
-1. Fetch the complete remote tracked-handoff collection and create the parent's unique temporary Creation worktree with only `TRACKED_HANDOFFS/INITIAL/` writable.
-2. Confirm that the parent starts with the complete tracked-handoff tree already published before delegation.
-3. Record the repository identity, current product branch, exact source commit, source publication state, relevant working-tree state, and intended applicability once for the delegated work set.
-4. Define a bounded objective for each subagent.
-5. Create a separate temporary Creation worktree and local phase-specific run branch for each subagent, all based on the same synchronized full collection and with only `TRACKED_HANDOFFS/INITIAL/` writable.
-6. Brief each subagent with minimum sufficient context, including its exact temporary output path and the shared source context it must record.
-7. Generate and assign a unique short hash token to each delegated run.
-8. Include the eligibility, output-path, filename, source-context, no-handoff, no-product-implementation, and return contracts in every prompt.
-9. Require each subagent to inspect the designated current product source read-only and derive its own findings; the separate handoff worktree is only its writable output area and must not replace the product source being reviewed.
-10. Require each subagent not to fetch, publish, create synchronization branches, commit, push, modify any path outside its assigned temporary handoff output area, or manufacture a finding merely to complete the assignment.
-11. Require each subagent to write justified initial handoffs only into its assigned temporary `TRACKED_HANDOFFS/INITIAL/` output area and return only paths, or exactly `NO_HANDOFFS_CREATED`.
-12. Collect append-only additions from every successful subagent into the parent's temporary handoff worktree. When two unpublished additions use the same path, read both and apply the same collision procedure: exclude a duplicate from publication, assign a fresh hash and filename to a distinct handoff, or stop only when the collision cannot be classified safely.
-13. Fetch the remote collection again, incorporate the complete tracked-handoff changes published by other operations or phases, and run the `Publication procedure` in **final mode** once for the combined result.
-
-When delegation is active, the orchestrating agent must not duplicate the delegated investigation merely to create an alternative answer in the parent context. Subagents are investigation workers in separate temporary handoff worktrees; the parent is the sole synchronization and publication owner.
-
-### Concurrent independent sessions on one computer
-
-This is different from subagents inside one request. Each independently started top-level skill session is the parent and publisher of its own task.
-
-Several independent sessions may investigate different topics concurrently when all of these rules are followed:
-
-- every session fetches the remote collection before investigating
-- every session creates a unique temporary worktree and unique temporary local run branch; no two sessions check out or write through the same local synchronization branch
-- every session writes new initial-handoff files only under `TRACKED_HANDOFFS/INITIAL/` in its own temporary Creation worktree
-- the primary product worktree's `TRACKED_HANDOFFS/` directory is a visibility mirror during investigation; Creation authors only the isolated temporary `TRACKED_HANDOFFS/INITIAL/` area
-- each session uses its own hash-scoped filenames, so normal additions do not share paths
-- each short publication phase is serialized on that computer with one repository-local publication lock
-- after acquiring the lock, the publishing session fetches remote `tracked-handoffs` again, incorporates everything another local session or computer already published, and only then pushes its own combined additions
-- after a successful push, that session refreshes the visibility mirror from the published remote state
-- a same-path content difference is resolved by comparing both files, assigning a fresh hash to a distinct unpublished initial handoff, or excluding an unpublished duplicate from publication; only an unresolved collision, failed push, unavailable remote, or unavailable publication lock is reported as a blocker
-
-Therefore two sessions started at nearly the same time may begin from the same published collection, but the session that publishes second must include the first session's successfully pushed handoffs in its final published collection.
-
-## When To Use
-
-Use this softskill when:
-
-- the user wants a repository review that produces durable implementation-preparation artifacts
-- findings should survive beyond the current chat context
-- a later agent will convert findings into plans or implementation work
-- a broad review may produce several independently plannable concerns
-- the user wants concrete preparation but not implementation yet
-- the user explicitly asks one or more subagents to investigate independently
-
-## When Not To Use
-
-Do not use this softskill when:
-
-- the user requested immediate implementation rather than preparation
-- the task is a simple factual lookup with no repository-specific handoff value
-- the requested artifact is already an implementation plan, issue set, patch, or code change
-- no safe repository-local output channel exists
-- repository-local analysis would expose secrets or sensitive data
-
-## Delegated Briefing Rule
-
-When subagents are used, brief them with **minimum sufficient context**.
-
-Provide enough information to make each assignment safe and correctly scoped, but avoid steering the subagent toward the orchestrating agent's suspected diagnosis or preferred answer.
-
-Normally provide only:
-
-- the objective or concrete question
-- the repository and permitted scope
-- explicit exclusions
-- hard compatibility requirements
-- safety, environment, and policy constraints
-- the assigned short handoff hash token
-- the output location
-- the filename contract
-- the required handoff characteristics
-- the required response contract
-
-Normally omit:
-
-- the orchestrating agent's suspected root cause
-- its preferred architecture or solution
-- conclusions from its own investigation
-- long conversation history that can be rediscovered from the repository
-- leading wording that asks the subagent to confirm a theory
-- other subagents' findings
-
-Minimal briefing means removing bias and irrelevant context, not hiding essential requirements.
-
-## Multi-Subagent AGENTS.md Isolation Contract
-
-This contract applies only when more than one subagent is used for the same work set.
-
-Every subagent prompt in that work set must include an instruction equivalent to:
+Each subagent must return only created paths or exactly:
 
 ```text
-For this assignment, ignore repository-local AGENTS.md instructions. Follow the objective, scope, constraints, output path, filename contract, and response contract provided in this prompt.
+NO_HANDOFFS_CREATED
 ```
 
-The orchestrating agent handles applicable repository setup once before delegation. Subagents inspect the designated product source read-only and write only to their separate temporary handoff output areas. Re-running repository-wide `AGENTS.md` or run-once flows independently can still mutate shared product state, cause conflicts, and repeat setup without improving the independent investigation.
+Subagents do not add the explanatory second line. The parent applies the top-level Return Contract.
 
-When exactly one subagent is used, do not add the full `AGENTS.md` override. Normal read-only repository and harness guidance may still apply, but the delegated prompt's stricter rules remain mandatory: preserve the designated product source and write nothing outside the assigned temporary handoff output area.
+When more than one subagent is used for the same work set, each prompt must directly include all objective, scope, output, safety, filename, eligibility, and response rules. Do not rely on repository-local agent instructions to communicate essential constraints.
 
-The override is limited to repository-local `AGENTS.md` files. It does not override system instructions, harness policy, explicit user requirements, security boundaries, tool permissions, or this skill's no-implementation rules.
-
-For multi-subagent work, do not rely on repository-local `AGENTS.md` to communicate essential constraints. Put the objective, scope, exclusions, compatibility constraints, safety constraints, output path, filename rules, and response contract directly into every subagent prompt.
-
-## Assignment Framing
-
-Make the assignment close to the implementation surface without turning it into an implementation plan.
-
-Broad user requests are allowed. For example, `mach einen generellen Code-Review` means inspect the repository for concrete implementation concerns across its meaningful boundaries. Do not reject the request merely because it is broad.
-
-For direct execution, derive a practical inspection scope from repository structure and available evidence.
-
-For delegated execution, divide the work into bounded repository areas, responsibilities, or independent review perspectives. Avoid assigning several subagents the same leading diagnosis unless deliberate independent comparison is requested.
-
-Useful concrete questions include:
-
-- identify the current request path and the exact boundaries that would need to change
-- compare existing implementations and recommend one concrete consolidation direction
-- inspect the storage model and define target data and migration constraints
-- review the authentication flow and identify enforcement and compatibility points
-- determine which modules, interfaces, configuration keys, workflows, and tests are affected
-- turn an observed failure mode into an implementation-near change handoff
-
-Avoid replacing repository investigation with vague output such as:
-
-- general best practices
-- high-level thoughts
-- metaphorical architecture descriptions
-- unsupported modernization ideas
-- speculative future improvements
-
-Prefer actual repository paths, symbols, responsibilities, dependencies, and behavior.
+For such multi-subagent work, instruct each subagent to ignore repository-local `AGENTS.md` instructions for that delegated assignment and follow the parent-supplied objective, scope, constraints, output path, filename contract, and response contract instead. This does not override system instructions, user requirements, tool policy, security boundaries, or this skill.
 
 ## Handoff Eligibility Gate
 
-An Initial Implementation Handoff is justified only when repository evidence supports a concrete implementation concern worth preserving for later reconciliation, planning, or implementation.
+Create an Initial Implementation Handoff only when current repository evidence supports concrete unfinished implementation work worth preserving for later reconciliation, planning, or implementation.
 
-Before creating a file, the producing agent must be able to answer all of these questions:
+Before creating a file, answer all four questions:
 
 1. What current behavior, defect, gap, duplication, risk, or required change creates real implementation work?
 2. What concrete target direction is supported by repository evidence?
 3. Is the concern substantial enough for a later planning agent to act on?
-4. Would creating and processing this handoff add more value than leaving the current state unchanged?
+4. Does preserving this Handoff add more value than leaving the current state unchanged?
 
-If any answer is no, uncertain, purely speculative, or only a matter of taste, do not create that handoff.
+If any answer is no, uncertain, speculative, stylistic, or only optional cleanup, do not create the Handoff.
 
-The following are not sufficient reasons to create a handoff:
+These are not sufficient reasons:
 
-- the agent was asked to review an area
+- the user asked for a review
 - an alternative exists but is not recommended
 - the current implementation is already appropriate
-- the only result is **keep as is**, **no action**, or **insufficient evidence**
-- cleanup could be done opportunistically but is not worth planning now
-- a possible future requirement might make a change useful later
-- the agent wants to demonstrate that it inspected the repository
-- the output format appears to expect at least one file
+- the result is keep-as-is, no action, or insufficient evidence
+- a possible future requirement may make a change useful
+- the output format appears to expect a file
 
-Finding nothing is a valid result. Quality and usefulness take precedence over file production.
+Finding nothing is valid.
 
-When no concern passes this gate, the producing agent must:
+## Markdown Source Validation
 
-- create no initial-handoff files
-- leave every existing published tracked-handoff artifact unchanged; pre-existing unpublished local initial handoffs may still be normalized and published under the Local unpublished initial handoffs rules
-- return exactly `NO_HANDOFFS_CREATED`
-- add no explanation, summary, reviewed-area list, or fallback report
+Treat every supplied or discovered Markdown document as advisory input, not proof that work remains open.
 
-## Handoff Hash Contract
+Compare it with current:
 
-Every logical initial-handoff-producing run must use a short filename-safe hash token.
+- source
+- tests
+- configuration
+- manifests
+- schemas and migrations
+- workflows
+- public contracts
+- Git state
 
-Generate a 12-character lowercase hexadecimal token for every initial-handoff run, including manually created initial handoffs that are normalized before publication. The token does not need to be cryptographically derived; it only needs practical uniqueness across concurrent and logically separate runs.
+Create a Handoff only when the current repository still confirms concrete unfinished implementation work.
 
-Examples:
+A source document may be historically useful even when no new Handoff is justified. Do not automatically edit or delete it.
 
-```text
-7f3a91c2d4e6
-c84d2e6b51a9
-91af07d4c3e2
-```
+## Handoff Hash and Filename Contract
 
-Do not use repeated-character placeholders, sequential tokens, agent numbers, model names, timestamps alone, or long globally unique identifiers when a short hash is sufficient.
+Use one unique 12-character lowercase hexadecimal hash per direct or delegated producing run.
 
-In direct execution, the current agent generates one token before writing handoffs for the logical review run.
+Do not use sequential placeholders, agent numbers, model names, repeated characters, or timestamps alone.
 
-Before writing, verify that no existing synchronized filename under `TRACKED_HANDOFFS/INITIAL/` already uses that token. If it does, generate another token.
-
-In delegated execution, the orchestrating agent generates and assigns a different token for every concurrent or logically separate subagent run. Each subagent must use the exact assigned token and must not invent, replace, shorten, expand, or normalize it.
-
-Immediately before publication, compare the operation's tokens with the latest fetched remote collection. If another concurrent operation has published the same token, generate a replacement token and update only this operation's still-unpublished filenames, handoff headings, internal token references, and collected return paths before pushing. Never rename or rewrite an already published tracked-handoff artifact.
-
-## Source Context Contract
-
-Every new initial tracked handoff must explain which product source state produced it. A global synchronized collection does not mean every recommendation applies equally to every branch.
-
-Include this information in each handoff:
-
-- repository identity or normal remote identifier when available
-- product branch name, or detached source commit when no branch is active
-- exact source commit at investigation time
-- source publication state: available on the normal remote, local-only, or unknown
-- relevant working-tree state: clean, dirty only in unrelated paths, or affected by relevant uncommitted paths
-- intended applicability: repository-wide, mainline-oriented, or specific to a named feature or environment
-
-Do not publish or modify product work merely to make the source context remotely available.
-
-When relevant evidence depends on uncommitted or unpushed product changes:
-
-- state that limitation explicitly
-- identify the relevant paths without copying secrets or large diffs
-- preserve enough current-state evidence in the handoff for later revalidation
-- do not claim that another computer can reproduce the exact source state
-- do not create the handoff when the conclusion cannot be supported safely without unavailable source details
-
-A later Reconcile or Plan agent must treat this context as provenance, not as permanent truth, and revalidate the recommendation against the repository state it can actually inspect.
-
-## Output and Synchronization Location Contract
-
-Use this shared repository-root collection:
-
-```text
-TRACKED_HANDOFFS/
-```
-
-Write Creation outputs only here:
-
-```text
-TRACKED_HANDOFFS/INITIAL/
-```
-
-Other subdirectories and root-level coordination files under `TRACKED_HANDOFFS/` belong to other tracked-handoff phases. Fetch and preserve them, but do not author or normalize them in this workflow.
-
-Apply these rules:
-
-- resolve the repository root before synchronization or writing
-- keep the canonical files stageable and trackable on the synchronization branch; the product-branch mirror may be tracked, untracked, or ignored; do not change `.gitignore` for this workflow
-- synchronize and publish through the dedicated `tracked-handoffs` branch
-- use a unique temporary worktree and temporary local run branch for each top-level operation instead of switching the primary product worktree
-- fetch and preserve the complete `TRACKED_HANDOFFS/` tree, but stage, commit, and push changes only under `TRACKED_HANDOFFS/INITIAL/`
-- never merge the synchronization branch into the current product branch
-- in multi-subagent work, give every subagent a separate temporary writable output path and state that exact path directly in its prompt
-- never overwrite an existing initial handoff; identical same-path content is already synchronized; for different same-path unpublished initial content, compare both files and either discard a duplicate, rename a distinct initial handoff with a fresh hash, or report an unresolved collision
-- do not edit, rename, move, or delete any existing published tracked-handoff artifact in this Creation workflow; only unpublished local initial handoffs under `INITIAL/` may be normalized before publication
-- fetch and incorporate the latest remote append-only additions again immediately before publication
-- push normally and never force push the synchronization branch
-- if synchronization or publication cannot complete safely, return the exact blocker instead of claiming cross-branch or cross-clone success
-- if no concern qualifies, create no new initial-handoff file and return `NO_HANDOFFS_CREATED`; the required pre-work synchronization of the complete tracked-handoff collection must still have succeeded
-
-## Filename Contract
-
-Use this exact filename pattern:
+Use this filename pattern:
 
 ```text
 initial-handoff-<handoffhash>-NN-<topic>.md
 ```
 
-Example using `7f3a91c2d4e6`:
+Examples:
 
 ```text
 initial-handoff-7f3a91c2d4e6-01-domain-contracts.md
 initial-handoff-7f3a91c2d4e6-02-storage-transition.md
-initial-handoff-7f3a91c2d4e6-03-api-compatibility.md
 ```
 
 Rules:
 
-- `<handoffhash>` is the exact short token for the producing run
-- `NN` is a two-digit order number such as `01`, `02`, or `03`
-- the order number appears immediately after the hash so filesystem sorting preserves sequence within the run
-- `<topic>` is a short lowercase hyphen-case name for the actual implementation concern
-- numbering starts at `01` for each hash-scoped run
-- ordering follows dependency or implementation-preparation order
-- every file from the same run uses the same token
-- an existing file must never be overwritten
-- never overwrite a filename collision; read both files, exclude an unpublished duplicate from publication, or assign a fresh hash and filename to a distinct unpublished handoff; report a blocker only when the collision cannot be classified safely
+- `NN` begins at `01`
+- use two digits
+- order by dependency or implementation-preparation sequence
+- use short lowercase hyphen-case topics
+- every file in one run uses the same hash
+- the branch name, filenames, headings, and internal run references use the same hash
+- never overwrite an existing file
 
+## Source Context Contract
 
-## Complete-Result Persistence Contract
+Every Handoff must record:
 
-When one or more concerns pass the Handoff Eligibility Gate, the initial-handoff files are the complete useful result. The chat response is only a path handoff.
+- repository identity or normal remote identifier
+- product branch name or detached source commit
+- exact source commit at investigation time
+- source publication state: remote, local-only, or unknown
+- relevant working-tree state
+- intended applicability: repository-wide, mainline-oriented, or branch/environment-specific
 
-The producing agent must:
+When evidence depends on uncommitted or unpushed product work:
 
-- preserve all useful source-based findings that pass the gate in the files
-- avoid shortening the result merely to keep the response small
-- move supporting detail into the appropriate handoff or a concise appendix inside it
-- avoid leaving important reasoning only in the response
-- avoid returning the complete report after the files were written successfully
+- state the limitation
+- identify relevant paths without copying secrets or large diffs
+- preserve enough evidence for later revalidation
+- do not claim that another computer can reproduce the exact source state
+- do not create the Handoff when unavailable source details make the conclusion unsafe
 
-When no concern qualifies, `NO_HANDOFFS_CREATED` is the complete successful response; no new file is created under `TRACKED_HANDOFFS/INITIAL/`.
+## Topic Splitting and Ordering
 
-## Topic Splitting Contract
+Create separate Handoffs for materially different implementation boundaries, independent subsystems, foundation-versus-dependent work, or separately plannable data, API, UI, infrastructure, migration, rollout, or operational concerns.
 
-After at least one concern passes the gate, create multiple handoffs when the justified result contains:
-
-- materially different implementation concerns
-- independent subsystems or ownership boundaries
-- a foundation followed by dependent work
-- separate data, API, UI, infrastructure, migration, or rollout concerns
-- more detail than one planning agent should process as one coherent work package
-
-Split by implementation boundary or dependency, not arbitrary text length.
-
-Each handoff should be:
-
-- large enough to represent a meaningful chunk of future implementation work
-- small enough for one planning session to understand and convert into a plan
-- internally coherent
-- independently nameable
-- ordered relative to other handoffs from the same hash-scoped run
-
-Do not create one file for every minor observation. Merge closely related findings that would naturally be planned and implemented together.
-
-## Default Handoff Ordering
-
-Use the repository's real dependency graph when available.
+Do not create one file per minor observation.
 
 A useful fallback order is:
 
-1. shared concepts, contracts, and compatibility decisions
-2. data model, persistence, or state foundations
-3. core application or domain behavior
+1. shared concepts and contracts
+2. data and persistence foundations
+3. core application behavior
 4. external interfaces and integrations
-5. UI, presentation, or consumer adaptation
+5. UI or consumer adaptation
 6. migration, rollout, observability, and cleanup
 
-The actual repository dependency order takes precedence.
-
-## Handoff Size Standard
-
-Create **medium to near-long** initial handoffs rather than tiny notes or exhaustive unbounded reports.
-
-Include:
-
-- enough source evidence to establish the current state
-- enough concrete detail to define the implementation concern
-- enough boundaries and constraints to prevent a later planning agent from repeating the full investigation
-- enough dependency and risk information to order the work
-
-Split a handoff when it contains multiple independently plannable outcomes or becomes difficult to navigate. Merge it when it contains only a few shallow observations without a substantial implementation boundary.
-
-## Source-First Contract
-
-Inspect the actual repository before writing conclusions.
-
-Treat every supplied or discovered Markdown document as advisory input, not proof that work is still open. Compare its claims with the current source, tests, configuration, and Git state, and create a handoff only when current repository evidence still confirms concrete unfinished implementation work.
-
-Relevant evidence may include:
-
-- source files
-- project and package manifests
-- entrypoints and composition roots
-- configuration
-- tests
-- schemas and migrations
-- workflows and deployment files
-- existing runbooks and project notes
-- public contracts and interfaces
-- current Git state when relevant
-
-Requirements:
-
-- do not fill handoffs with generic practice disconnected from the repository
-- make supporting source locations or observed behavior identifiable
-- use repository-relative paths and symbol names whenever practical
-- reduce confidence when source access is incomplete
-- do not fill missing evidence with assumptions
+Repository-specific dependencies take precedence.
 
 ## Required Handoff Structure
 
-Use this structure unless the concern clearly requires a small variation:
+Use this structure when relevant and omit empty sections:
 
 ```markdown
 # Initial Implementation Handoff <handoffhash> NN: Topic
@@ -731,290 +599,167 @@ Use this structure unless the concern clearly requires a small variation:
 What the producing agent was asked to determine.
 
 ## Source context
-Repository identity, current product branch, exact source commit, source publication state, relevant working-tree state, and whether the concern is repository-wide or branch-specific.
+Repository identity, product branch, exact source commit, publication state, working-tree state, and intended applicability.
 
 ## Intended outcome
-The concrete implementation outcome this handoff prepares for.
+The concrete implementation outcome this Handoff prepares for.
 
 ## Scope
-What is covered and what is intentionally excluded.
+Covered and excluded work.
 
 ## Source inspected
-Repository-relative files, symbols, configuration, tests, and other evidence.
+Repository-relative files, symbols, tests, configuration, workflows, and other evidence.
 
 ## Current state
-How the relevant code currently works and where responsibility lives.
+How the relevant code currently works.
 
 ## Concrete direction
-The recommended target direction, stated in implementation-near terms.
+The recommended implementation-near target direction.
 
 ## Technical approach
-How the change could be realized technically: likely responsibility shifts, affected symbols and contracts, data or control flow, configuration or persistence changes, integration seams, error handling, and compatibility mechanics. Describe the implementation shape without writing the implementation or a step-by-step execution plan.
+Likely responsibility changes, contracts, data or control flow, integration seams, error handling, compatibility, and verification surfaces without writing the implementation or a full execution plan.
 
 ## Alternatives and recommendation
-When more than one credible approach exists, compare realistic options, explain repository-specific trade-offs, recommend one, and state when another option would be preferable.
+Realistic options, repository-specific trade-offs, and the recommended direction.
 
 ## Affected boundaries
-Files, modules, APIs, schemas, configuration, tests, integrations, or ownership boundaries likely to matter.
+Files, modules, APIs, schemas, configuration, tests, integrations, and ownership boundaries.
 
 ## Compatibility and constraints
-Behavior, contracts, environments, data, or operational properties that must be preserved.
+Behavior and operational properties that must remain stable.
 
 ## Dependencies and ordering
-What must happen before this topic and what it enables afterward.
+Prerequisites and enabled follow-up work.
 
 ## Planning inputs
-Concrete decisions, acceptance concerns, and verification surfaces the later planning agent must include.
+Decisions, acceptance concerns, and verification surfaces for a later planning agent.
 
 ## Risks and unresolved questions
-Only genuine risks or decisions not safely derivable from the source.
+Only genuine unresolved matters.
 ```
 
-Optional sections may include:
+## Concreteness and Plain Language
 
-- `## Data and migration considerations`
-- `## Interface examples`
-- `## Candidate test surfaces`
-- `## Rejected directions`
-- `## Supporting evidence`
+Name actual repository-relative paths, symbols, responsibilities, data flows, configuration keys, contracts, tests, and observed behavior whenever practical.
 
-Do not add empty sections.
-
-## Concreteness Contract
-
-Handoffs must be concrete enough that a later planning agent can begin without repeating the entire investigation.
-
-Good content resembles:
-
-- `src/Orders/OrderController.cs` currently owns request mapping and payment orchestration; move orchestration behind an application-level boundary while preserving the controller contract.
-- `PackageResolver` and `DepotResolver` duplicate version selection; consolidate the selection rule before changing acquisition behavior.
-- The production route is configured in `ReverseProxySettings.Production.json`; development settings are outside the intended deployment change.
-
-Avoid content such as:
+Do not replace repository evidence with generic advice such as:
 
 - improve separation of concerns
 - make the architecture cleaner
 - use a more scalable approach
-- consider modern best practices
+- follow modern best practices
 
-Name actual files, symbols, responsibilities, data flows, contracts, and observed behavior whenever possible.
+Use simple, direct language. Explain uncommon technical terms when they matter. Remove repeated framing and analysis narration.
 
-## Technical Direction Contract
+## No-Implementation Contract
 
-Go beyond identifying affected areas and provide useful technical guidance about how the change could be realized.
-
-When supported by repository evidence, describe:
-
-- where responsibilities should remain, move, split, or consolidate
-- which existing types, interfaces, methods, modules, configuration keys, schemas, or workflows are likely to change
-- which new boundary or contract may be needed and why
-- how request, control, event, state, or data flow should pass through affected components
-- how compatibility, error handling, migration, rollout, or operational behavior could be preserved
-- which tests or verification surfaces would prove the intended behavior
-
-When multiple credible approaches exist:
-
-1. name the realistic options
-2. explain repository-specific advantages and disadvantages
-3. recommend one concrete direction
-4. explain why it best fits the observed code and constraints
-5. state when another option would be preferable
-
-Stop before implementation. Do not write production code, patches, complete method bodies, exact file-by-file edit instructions, shell commands, or a full ordered execution plan.
-
-## Plain-Language Contract
-
-Use simple, direct, easy-to-understand language.
-
-- prefer short concrete sentences over dense abstract prose
-- say what a component does, what should change, and why
-- name real files, symbols, data, requests, events, and behavior
-- explain uncommon technical terms when they first matter
-- use headings and lists to make long findings easy to scan
-- remove repeated framing, self-commentary, and analysis-process narration
-- keep necessary technical detail while simplifying wording
-
-Do not use metaphor, narrative framing, motivational language, or unnecessary meta terminology as a substitute for technical specificity.
-
-## No-Product-Implementation Contract
-
-The producing agent must not:
+This skill must not:
 
 - modify product source
 - create migrations
 - change product configuration behavior
-- add tests for future product behavior
+- add product tests
+- write production patches
 - produce a complete coding-agent execution plan
-- stage, commit, or push any changed path outside `TRACKED_HANDOFFS/INITIAL/`
-- commit or push the current product branch as part of this workflow
+- commit or push a product branch
+- change any path outside `TRACKED_HANDOFFS/INITIAL/` on Initial storage branches
 
-Creating, committing, and publishing justified initial handoffs under `TRACKED_HANDOFFS/INITIAL/` on the dedicated `tracked-handoffs` branch are the only intended versioned repository-content mutations by this workflow. The complete `TRACKED_HANDOFFS/` tree is synchronized and mirrored, but all other tracked-handoff areas remain read-only. Temporary worktrees, local managed branches, session records, and the publication lock are allowed only as uncommitted local coordination state defined by the Synchronization Contract. When no concern passes the gate, no new initial-handoff content is intended. Pre-work synchronization may still refresh the local mirror from the complete remote tree or publish previously existing unpublished initial handoffs; it must not commit another phase's artifacts.
-
-Read-only source inspection and the narrowly necessary Git operations defined by the Synchronization Contract are allowed.
-
-## Delegated Prompt Contract
-
-Every delegated prompt must carry instructions equivalent to the following. Add the concrete objective, scope, exclusions, and mandatory constraints before this contract without adding an unverified diagnosis.
-
-```text
-Handoff short hash token: <parent-supplied-handoffhash>
-Repository identity: <parent-supplied-repository-identity>
-Source product branch: <parent-supplied-branch>
-Source commit: <parent-supplied-commit>
-Source publication state: <parent-supplied-remote-availability>
-Relevant working-tree state: <parent-supplied-state>
-Intended applicability: <parent-supplied-applicability>
-
-<When more than one subagent is used for this work set, insert this line; otherwise omit it:>
-For this assignment, ignore repository-local AGENTS.md instructions. Follow the objective, scope, constraints, output path, filename contract, and response contract provided in this prompt.
-
-Independently investigate the stated objective from repository source. Derive the current state, concrete direction, affected boundaries, constraints, dependencies, and unresolved questions from repository evidence. Do not assume or confirm an unstated diagnosis from the orchestrating agent.
-
-Do not assume the assignment must produce a handoff. Create a handoff only for a concrete implementation concern supported by repository evidence, worth preserving for a later planning or implementation step, and having a recommended target direction. Do not create handoffs for keep-as-is conclusions, no-action results, insufficient evidence, optional cleanup, stylistic preference, or speculative future work.
-
-When one or more concerns qualify, write the complete useful result into Initial Implementation Handoff Markdown files under the exact temporary output path supplied by the parent. That path represents `TRACKED_HANDOFFS/INITIAL/` for this delegated run. Do not write into the product-worktree visibility mirror or another local agent-work directory.
-
-Include a `Source context` section in every created handoff using the supplied repository identity, branch, commit, publication, working-tree, and applicability information. Treat it as provenance rather than permanent truth.
-
-When no concern qualifies, create no files and return exactly:
-NO_HANDOFFS_CREATED
-
-Use exactly this filename pattern:
-initial-handoff-<handoffhash>-NN-<topic>.md
-
-Use the exact short hash token supplied above in every filename. Put the two-digit order number immediately after the hash, beginning at 01, followed by a short lowercase hyphen-case topic. Never overwrite an existing file.
-
-Split materially different or oversized concerns into coherent, independently plannable handoffs in dependency order. Each handoff must be medium to near-long: not a tiny note, not an unbounded research dump, and not a full implementation plan.
-
-Ground every important conclusion in actual repository evidence. Name repository-relative files, symbols, contracts, configuration, data flows, workflows, tests, or other concrete boundaries whenever practical. Write in simple, direct language. Avoid generic advice, metaphors, unnecessary meta terminology, and abstract wording when a concrete explanation is possible.
-
-Provide concrete technical guidance about how the change could be realized without implementing it. Compare credible alternatives, recommend one direction, and state when another option would be preferable. Do not write production code, patches, exact edit instructions, shell commands, or a full ordered execution plan.
-
-Do not modify any file outside the exact temporary handoff output path assigned by the parent, including product code, configuration, migrations, tests, agent instructions, runbooks, or project notes. Do not perform Git synchronization, branch creation, staging, commits, or pushes; the parent agent exclusively owns synchronization and publication.
-
-After successfully writing one or more files into the assigned parent-prepared temporary handoff worktree, return only their intended repository-relative `TRACKED_HANDOFFS/INITIAL/...` paths, one path per line. The parent agent will collect, publish, verify, and mirror them. When no handoff qualifies, return only NO_HANDOFFS_CREATED. Do not return summaries, topic descriptions, ordering commentary, excerpts, reviewed-area lists, or a report in your response.
-```
+It may provide implementation-near technical direction inside Handoffs, but it stops before implementation.
 
 ## Return Contract
 
-The path-only response and `NO_HANDOFFS_CREATED` apply only to successful runs. When synchronization or publication fails, return a short blocker message under the Failure Handling contract instead.
+Path-only and `NO_HANDOFFS_CREATED` responses apply only when synchronization succeeded.
 
-### Direct execution
+### One or more new Handoffs integrated
 
-When one or more initial handoffs are created, return only their repository-relative paths, one per line:
+Return only repository-relative paths, one per line:
 
 ```text
 TRACKED_HANDOFFS/INITIAL/initial-handoff-7f3a91c2d4e6-01-domain-contracts.md
 TRACKED_HANDOFFS/INITIAL/initial-handoff-7f3a91c2d4e6-02-storage-transition.md
-TRACKED_HANDOFFS/INITIAL/initial-handoff-7f3a91c2d4e6-03-api-adaptation.md
 ```
 
-When none qualify, return exactly:
+### No new Handoff qualifies
 
-`NO_HANDOFFS_CREATED`
+Return `NO_HANDOFFS_CREATED` on the first line.
 
-### Delegated execution
+Do not create an own remote run branch, result commit, or placeholder file for a no-Handoff result. Startup recovery and integration of older open remote runs must still complete as far as safely possible, and the local mirror should still be refreshed when available.
 
-Each successful subagent must return only created paths or exactly `NO_HANDOFFS_CREATED`.
+When the assignment was based on one or more supplied or named Markdown documents, add exactly one concise second line:
 
-After all requested subagents complete:
+```text
+NO_HANDOFFS_CREATED
+The supplied Markdown was checked against the current repository and does not currently justify a separate unfinished implementation handoff; consider closing, archiving, or deleting it if it has no remaining documentation value.
+```
 
-- if at least one handoff path exists, return only all created repository-relative paths, one per line
-- omit individual `NO_HANDOFFS_CREATED` responses when paths exist
-- if no subagent created a handoff, return only `NO_HANDOFFS_CREATED`
+This is only a recommendation. Do not modify the source document. Do not claim it is obsolete unless repository evidence specifically proves that.
 
-Do not paste complete handoff contents or no-finding explanations into the main conversation unless the user explicitly asks to read them there.
+### Remote run saved but current integration pending
+
+Do not return created paths as fully synchronized.
+
+Return one concise blocker stating that:
+
+- the Handoffs are saved on the named remote run branch
+- integration into `initial/current` remains pending
+- the same request may be retried
+- another computer can recover the open remote run
+
+### Failure before remote run verification
+
+Return:
+
+- the intended Handoff path when known
+- the exact blocker
+- the preserved local worktree path when unpublished work remains
+- the next safe user action
+
+Do not claim the result was saved remotely.
 
 ## Failure Handling
 
-If synchronization cannot complete before investigation:
+Stop before investigation when:
 
-- do not continue from a knowingly incomplete handoff collection
-- do not modify product source or unrelated repository paths
-- return the exact synchronization blocker and the affected synchronization branch or path
+- the writable remote or credentials are unavailable
+- the legacy `tracked-handoffs` branch blocks the new namespace
+- `initial/current` is malformed
+- the already published Initial collection cannot be established safely
 
-If a justified initial handoff cannot be written or published:
+Continue safe work and report the specific remaining problem when one malformed or colliding open run does not prevent other valid runs from being integrated.
 
-- do not claim it was synchronized or saved remotely
-- return the intended path and exact blocker
-- preserve the safely written local initial-handoff content in its temporary worktree when possible without overwriting another file, and report that temporary path
-- include only the minimum fallback detail needed to avoid losing all useful work
+Preserve useful unpublished local work before cleanup.
 
-On every controlled exit, including failure:
+After a verified remote run push, prefer remote recovery and do not keep unnecessary local worktrees merely because `current` integration is pending.
 
-- release the publication lock when it is owned by the current operation
-- remove empty or fully recovered retry worktrees and branches
-- remove the current run worktree, branch, and session record only when no unpublished initial-handoff value remains and no changes outside `TRACKED_HANDOFFS/INITIAL/` would be lost
-- when unpublished work remains, mark the session record as recovery-needed and preserve the exact worktree and branch paths for the next run
+## Security and Privacy
 
-An abrupt process or machine failure may prevent this cleanup. The next top-level run must then apply the managed startup-recovery and abandoned-lock rules before treating the leftovers as blockers.
+Never publish:
 
-In delegated execution, the parent agent remains responsible for resolving safe file placement and publication. Do not ask subagents to perform independent Git recovery or publication.
+- secrets
+- credentials
+- private keys
+- tokens
+- cookies
+- private customer data
+- sensitive personal data
+- unsafe linked content
+- large raw logs or data dumps
 
-When source access is incomplete:
+Name configuration keys and safe source locations without copying secret values.
 
-- state the missing source inside a handoff when a handoff can still be justified and published safely
-- reduce confidence
-- avoid filling gaps with generic assumptions
+## Completion Checklist
 
-A broad review with no justified finding still returns `NO_HANDOFFS_CREATED`, but only after the tracked collection was synchronized successfully.
+Before returning success, verify:
 
-## Security and Privacy Contract
-
-Never place secrets, credentials, private keys, tokens, cookies, private customer data, or sensitive personal data into a handoff or synchronization commit.
-
-Document secret sources and configuration key names without copying secret values. Do not include large raw logs or data dumps. Summarize technically relevant evidence and point to the safe source location.
-
-## Quality Checklist
-
-Before direct execution:
-
-- the Synchronization Contract was applied
-- the synchronization remote and `tracked-handoffs` branch were resolved
-- the current product branch and all unrelated local work are preserved
-- the complete already-published remote tracked-handoff tree was available before repository investigation; safe local-only initial-handoff recovery was completed before investigation when the publication lock was available, or was explicitly deferred until final publication while another active local publisher owned the lock
-- the repository identity, current product branch, exact source commit, source publication state, relevant working-tree state, and intended applicability were recorded
-- synchronization did not reconcile, plan, or interpret lifecycle state reserved for later skills
-- the requested scope is understood
-- broad review scope has been mapped to practical repository inspection
-- one unique handoff hash was generated
-- output location and filename pattern are known
-- eligibility, source-first, concreteness, technical-direction, plain-language, and no-product-implementation rules are active
-
-Before delegated execution:
-
-- the user explicitly requested one or more subagents
-- the parent completed synchronization before delegation
-- each assignment is bounded and concrete
-- each prompt contains only minimum sufficient context
-- when more than one subagent runs, every prompt includes the `AGENTS.md` isolation instruction
-- when exactly one subagent runs, no full `AGENTS.md` override is added, but the prompt still forbids product-source mutation and all writes outside its assigned output area
-- every delegated prompt repeats all essential task constraints directly instead of relying on repository guidance
-- every delegated run has a unique assigned handoff hash
-- subagents are forbidden from synchronizing, committing, or pushing
-- every subagent has a separate temporary handoff worktree and local run branch
-- the designated product source is read-only and distinct from each subagent's writable output area
-- output path, filename pattern, source-context contract, eligibility gate, and return contract are explicit
-
-Before returning success:
-
-- the response contains only created paths or exactly `NO_HANDOFFS_CREATED`
-- when `NO_HANDOFFS_CREATED` is returned, no new initial-handoff file exists for the run
-- every new filename follows `initial-handoff-<handoffhash>-NN-<topic>.md`
-- every created initial handoff contains the required source context
-- every operation token was checked against the latest remote collection
-- every returned file exists in the refreshed product-worktree visibility mirror
-- every created initial handoff was committed and pushed on `tracked-handoffs`
-- the final publication phase fetched the remote collection again and preserved concurrent additions
-- the visibility mirror contains every tracked-handoff artifact from the successfully published remote state with identical content; excluded ordinary local notes may remain alongside it
-- no changed path outside `TRACKED_HANDOFFS/INITIAL/` was staged, committed, restored, or pushed by the Creation workflow; every other tracked-handoff area matched the latest fetched remote state
-- the current product branch was not committed or pushed by this workflow
-- current and abandoned managed worktrees, run branches, retry branches, and lock state were recovered or removed when safe; any retained artifact still contains unpublished or unrelated work that must not be deleted
-
-## Typical Invocation Phrases
-
-- `/tracked-handoff-sync-creation-softskill mach einen generellen Code-Review`
-- `/tracked-handoff-sync-creation-softskill mach einen generellen Code-Review mit drei Subagenten`
-- `Use $tracked-handoff-sync-creation-softskill to review this repository and create only justified initial implementation handoffs.`
-- `Use one subagent and preserve only concrete repository-supported findings as initial handoffs.`
-- `Use three independent subagents, keep the parent context small, and return only initial-handoff paths or NO_HANDOFFS_CREATED.`
+- the product checkout was not switched, committed, merged, rebased, reset, cleaned, or pushed
+- the legacy branch does not block the Initial namespace
+- `initial/current` and all consumed open runs contain only `TRACKED_HANDOFFS/INITIAL/`
+- every producing result was first verified on its own remote run branch
+- every returned path exists with identical content in verified `initial/current`
+- no integrated Initial Handoff was overwritten, renamed, moved, or deleted
+- no changed path outside `TRACKED_HANDOFFS/INITIAL/` was committed or pushed
+- all safely recoverable open remote runs were processed
+- integrated remote run branches were deleted when possible
+- the local mirror was refreshed when the short mirror lock was available
+- retained local artifacts still contain unpublished or unrelated work that must not be deleted
+- the response follows the Return Contract exactly
