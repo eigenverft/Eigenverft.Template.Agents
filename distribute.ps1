@@ -3,6 +3,19 @@
 # the template ships the same relative path (then it overwrites).
 # You run this script; it does not commit.
 
+[CmdletBinding()]
+param(
+    [string]$WorkspaceRoot
+)
+
+if ([string]::IsNullOrWhiteSpace($WorkspaceRoot)) {
+    $WorkspaceRoot = Split-Path -Path $PSScriptRoot -Parent
+}
+
+$WorkspaceRoot = [System.IO.Path]::GetFullPath($WorkspaceRoot)
+if (-not (Test-Path -LiteralPath $WorkspaceRoot -PathType Container)) {
+    throw "WorkspaceRoot does not exist or is not a directory: $WorkspaceRoot"
+}
 function Copy-GitTemplateSnapshot {
     [CmdletBinding()]
     param(
@@ -168,7 +181,6 @@ function Copy-GitTemplateSnapshot {
     }
 }
 
-$workspaceRoot = 'C:\dev\github.com\eigenverft'
 $templateUrl   = 'https://github.com/eigenverft/Eigenverft.Template.Agents.git'
 $whitelist     = @( '.gitattributes', 'AGENTS.md', '.agents/**', 'AGENTS/**' )
 
