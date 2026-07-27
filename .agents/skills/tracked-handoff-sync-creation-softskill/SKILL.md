@@ -1,9 +1,9 @@
 ---
-name: tracked-sync-handoff-create-softskill
+name: tracked-handoff-sync-creation-softskill
 description: Synchronize the repository-specific TRACKED_HANDOFFS collection through the dedicated tracked-handoffs branch without updating the current product branch, then investigate current source and create only concrete ordered hash-scoped implementation handoffs. Work directly by default and delegate only when the user explicitly requests subagents. Publish only TRACKED_HANDOFFS changes to the synchronization branch. On success return only created paths, or exactly NO_HANDOFFS_CREATED; on failure return the exact blocker.
 ---
 
-# Tracked Sync Handoff Create Softskill
+# Tracked Handoff Sync Creation Softskill
 
 ## Purpose
 
@@ -59,7 +59,7 @@ Default behavior:
 
 Delegated behavior applies only when the user explicitly asks to use one or more subagents. The parent synchronizes once and gives each subagent a separate temporary writable handoff worktree and local run branch. Subagents create files but do not publish. The parent collects the additions, fetches the remote collection again, publishes the combined result once, and refreshes the visibility mirror.
 
-Do not launch subagents merely because an assignment is broad. A request such as `/tracked-sync-handoff-create-softskill mach einen generellen Code-Review` runs directly unless the user also requests subagents.
+Do not launch subagents merely because an assignment is broad. A request such as `/tracked-handoff-sync-creation-softskill mach einen generellen Code-Review` runs directly unless the user also requests subagents.
 
 An **Implementation Handoff** is:
 
@@ -1002,8 +1002,8 @@ Before returning success:
 
 ## Typical Invocation Phrases
 
-- `/tracked-sync-handoff-create-softskill mach einen generellen Code-Review`
-- `/tracked-sync-handoff-create-softskill mach einen generellen Code-Review mit drei Subagenten`
-- `Use $tracked-sync-handoff-create-softskill to review this repository and create only justified implementation handoffs.`
+- `/tracked-handoff-sync-creation-softskill mach einen generellen Code-Review`
+- `/tracked-handoff-sync-creation-softskill mach einen generellen Code-Review mit drei Subagenten`
+- `Use $tracked-handoff-sync-creation-softskill to review this repository and create only justified implementation handoffs.`
 - `Use one subagent and preserve only concrete repository-supported findings as handoffs.`
 - `Use three independent subagents, keep the parent context small, and return only handoff paths or NO_HANDOFFS_CREATED.`
