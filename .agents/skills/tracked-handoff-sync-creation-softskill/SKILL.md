@@ -215,6 +215,8 @@ Repeated fetches may advance this session's current ref and populate its run ref
 
 Session-local refs are not user branches and are not pushed. Delete only this session's local ref namespace after remote verification and local recovery no longer need it.
 
+The remote query is authoritative. Before classifying open runs, remove only this session's local run refs whose matching remote source ref no longer exists. Never treat a stale session-local ref as proof that a remote run is still open. If `initial/current` was previously observed but disappears remotely, report the unexpected remote deletion instead of silently using the stale local ref.
+
 ## Local Exclude Contract
 
 The runtime worktree and local visibility mirror must not appear as product changes.
@@ -371,6 +373,18 @@ Ownership is established by the session record plus the expected hash-scoped pat
 
 Every local lock directory created by this skill must contain owner metadata identifying the repository, session hash, host, process when available, acquisition time, and heartbeat. A lock name without readable ownership metadata is uncertain and must not be broken merely because it appears old.
 
+### Session state classification
+
+Classify local sessions and lock owners with these concrete rules:
+
+- **active:** the recorded process is verifiably still the same process on the recorded host, or the readable heartbeat is no older than 15 minutes
+- **inactive:** the record belongs to the current host, the recorded process identity can be checked and is verifiably no longer running, and the heartbeat is older than 15 minutes
+- **uncertain:** the record is unreadable, the host is different, process identity cannot be checked safely, the process identifier may have been reused, timestamps are implausible, or the evidence does not satisfy either rule above
+
+Record process start identity or an equivalent process discriminator when available, not only a numeric process identifier.
+
+Age alone never makes a session, lock, worktree, or branch safe to delete. Leave uncertain ownership untouched and continue independent safe work. When an uncertain artifact blocks required local setup, report its exact path and the manual ownership check needed rather than guessing.
+
 ## Normal Workflow
 
 ### Phase A: Establish the synchronized Initial state
@@ -401,6 +415,18 @@ Before the requested investigation starts, the agent must have fetched the compl
 
 Do not author in the product checkout or the local visibility mirror.
 
+### Source Stability Under Concurrent Local Work
+
+Other agents may change the selected product checkout while this skill is reading it. Do not create a Handoff from a mixture of incompatible repository states.
+
+1. Record the initial `HEAD`, branch or detached state, working-tree summary, and content identity of every repository file materially used as evidence.
+2. Immediately before finalizing the Handoff files, re-read `HEAD`, the working-tree summary, and the relevant evidence paths.
+3. When relevant evidence changed, re-read and re-evaluate the changed paths, update the Source context, and perform one final stability check.
+4. Unrelated changes do not block the run.
+5. If relevant evidence keeps changing or a coherent source state cannot be established safely, do not publish a conclusion based on mixed states. Preserve any draft only as local unpublished work and return a precise blocker naming the unstable paths and next safe action.
+
+Do not lock, reset, stash, or otherwise freeze the product checkout to obtain stability.
+
 ### Phase C: Save the producing result remotely
 
 When one or more Handoffs were created:
@@ -422,6 +448,18 @@ tracked-handoffs/initial/run/<producing-hash>
 The individual remote run push does not use the mirror lock and does not wait for a shared publication lock. Different producing hashes normally produce independent remote branch names.
 
 After verification, the result is recoverable from another computer even if current integration remains pending.
+
+### Remote run name collision
+
+Treat every published run branch as immutable.
+
+Before the first push, query the exact intended remote run ref. If it already exists:
+
+1. fetch and validate it
+2. when its commit and bytes are exactly this same interrupted producing result, treat the publication as idempotently recovered
+3. otherwise generate a fresh producing hash, rename the still-unpublished files, headings, and internal run references, create a new result commit, update the session record, and publish the new run name
+
+Never overwrite, force-update, or delete a different existing remote run merely because its hash collided.
 
 ### Phase D: Integrate open runs into `current`
 
@@ -555,6 +593,25 @@ Recovery priority:
 
 Do not use broad cleanup commands that may affect other worktrees. In particular, do not use global worktree cleanup as a substitute for ownership checks.
 
+## Artifact Lifecycle and Cleanup
+
+No artifact is deleted solely because it is old. The lifecycle is evidence-based:
+
+| Artifact | Keep while | Safe cleanup condition |
+| --- | --- | --- |
+| `initial/current` | always | never deleted by this Creation skill |
+| valid unintegrated remote run | any contribution is absent from current | delete only after every contributed file is byte-identical in verified current |
+| integrated remote run | remote deletion has not succeeded yet | retry deletion on a later run after repeating byte verification |
+| malformed remote run | ownership or content is unsafe | do not delete automatically; report it |
+| runtime worktree and local Handoff branch | unpublished or unattributed value remains | remove only after remote verification or successful recovery proves no local-only value remains |
+| session-local fetch refs | remote verification or local recovery still needs them | delete only this session's namespace when no recovery value remains |
+| session record | any owned artifact still needs classification or recovery | remove after all owned artifacts are safely resolved |
+| local lock | protected operation is active | release immediately after the operation; break later only when the owner is proven inactive |
+| `info/exclude` rules | the clone may use runtime or mirror paths | keep as persistent local configuration |
+| local mirror | local visibility is useful | rebuild from verified current; never treat it as the durable source |
+
+A valid unintegrated remote run is a durable pending item, not garbage. If no later Creation run ever occurs, it may remain as harmless remote cleanup debt rather than risk data loss. A future maintenance workflow may list or clean only already integrated runs, but this skill must remain independently safe without such a workflow.
+
 ## Local Visibility Mirror
 
 The selected product checkout may expose:
@@ -685,6 +742,8 @@ NO_HANDOFFS_CREATED
 Subagents do not add the explanatory second line. The parent applies the top-level Return Contract.
 
 When several subagents are used for the same work set, each prompt must directly include the objective, scope, output path, safety rules, filename contract, Eligibility Gate, and response contract. Do not rely on repository-local instructions to convey essential constraints.
+
+Delegation is one level only. A delegated subagent must not launch, request, or coordinate further subagents. The parent prompt must state this prohibition explicitly so delegated work cannot fan out recursively.
 
 ## Handoff Eligibility Gate
 
@@ -1000,17 +1059,21 @@ Before returning success, verify:
 - the runtime path and mirror were locally ignored without modifying a versioned `.gitignore`
 - no selected or enclosing repository was dirtied by runtime or mirror paths
 - every created runtime worktree is uniquely owned by this session
+- local sessions and locks were classified with the concrete active/inactive/uncertain rules, and no artifact was deleted because of age alone
 - Handoff fetches did not contend on shared `FETCH_HEAD`, or used only the short fallback fetch lock
 - Handoff fetches used this session's local ref namespace and did not overwrite another session's refs
 - this session's local fetch-ref namespace was removed when it no longer carried recovery value
 - the legacy branch does not block the Initial namespace
 - current and all consumed runs contain only `TRACKED_HANDOFFS/INITIAL/`
+- every remote run branch was treated as immutable and any run-name collision was resolved without overwriting the existing ref
 - every producing result was first fetched and verified on its own remote run branch
 - every returned path exists with identical bytes in verified current
+- materially used product evidence was rechecked before publication and represents one coherent recorded source state
 - no integrated Initial Handoff was overwritten, renamed, moved, or deleted
 - no storage commit changed a path outside `TRACKED_HANDOFFS/INITIAL/`
 - all safely recoverable open runs were processed
 - integrated remote run branches were deleted when possible
 - the mirror was refreshed when eligible and available
 - retained local artifacts contain unpublished or unattributed value that must not be deleted
+- delegated subagents, when used, did not delegate further
 - the response follows the Return Contract exactly
