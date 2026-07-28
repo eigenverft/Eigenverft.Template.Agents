@@ -18,6 +18,8 @@ Many independent top-level agents may run this skill at the same time:
 
 Each producing run first saves its result on its own remote run branch. The result is then integrated into the shared current Initial collection.
 
+Activating this skill authorizes creation of uniquely owned Initial run branches, append-only updates of `tracked-handoffs/initial/current`, and guarded deletion of Initial run branches already proven fully integrated. It never authorizes a product-branch commit, push, merge, reset, or checkout change.
+
 Reconciliation, implementation planning, implementation, completion, supersession, and later lifecycle interpretation are outside this Creation workflow.
 
 ## Operational Summary
@@ -125,7 +127,8 @@ The runtime root and mirror are local visibility or working paths. They are neve
 
 Always preserve these invariants:
 
-- never force-push
+- never force-update, rewrite, or replace remote history; do not use force-push for run publication or current integration
+- the only permitted `--force-with-lease` use is an exact expected-object guard that either requires a new run ref to be absent or requires an integrated run ref still to equal the previously verified object before deletion; it must never move an existing ref to a different commit
 - never switch, checkout, detach, pull, merge, rebase, reset, clean, commit, or push any checkout or worktree that existed when this run started
 - never stash or overwrite unrelated local work
 - never merge a tracked-handoff branch into a product branch
@@ -364,6 +367,8 @@ Record at least:
 - runtime directory
 - owned worktrees and local Handoff branches
 - intended remote run branch
+- the full Initial base commit OID used by each producing run, or the literal `EMPTY` for an orphan first run
+- the full result commit OID after it is created
 - whether the remote run push was fetched and verified
 - whether current integration was verified
 
@@ -427,6 +432,21 @@ Other agents may change the selected product checkout while this skill is readin
 
 Do not lock, reset, stash, or otherwise freeze the product checkout to obtain stability.
 
+### Durable run-base provenance
+
+Every producing result must remain independently verifiable after the local session record is gone.
+
+Record the full Initial base in both the session record and the result commit message:
+
+```text
+Tracked-Handoff-Run: <producing-hash>
+Tracked-Handoff-Base: <full-commit-oid-or-EMPTY>
+```
+
+For a normal result, the commit must have exactly one parent and that parent must equal `Tracked-Handoff-Base`. For the first empty phase, the result must be an orphan root commit and the trailer must be `Tracked-Handoff-Base: EMPTY`.
+
+A later computer validates the run from its commit graph and trailers, not from an unavailable local session record. Missing, conflicting, abbreviated, or false base provenance makes the run malformed.
+
 ### Phase C: Save the producing result remotely
 
 When one or more Handoffs were created:
@@ -434,16 +454,19 @@ When one or more Handoffs were created:
 1. verify the runtime worktree contains no changed path outside `TRACKED_HANDOFFS/INITIAL/`
 2. verify all changes are additions and no integrated file was modified, renamed, or deleted
 3. verify filenames, headings, and internal run references use the producing hash
-4. create exactly one result commit beyond the run's recorded Initial base, or one orphan root commit for the first empty phase
-5. push the result normally to:
+4. record the full Initial base OID, or `EMPTY`, in the session record
+5. create exactly one result commit from that base, with the required `Tracked-Handoff-Run` and `Tracked-Handoff-Base` trailers
+6. record the full result commit OID in the session record
+7. query the exact intended remote run ref and prepare a create-only push that succeeds only while that ref is absent
+8. push the result to:
 
 ```text
 tracked-handoffs/initial/run/<producing-hash>
 ```
 
-6. fetch that exact remote branch
-7. verify its commit, complete tree, and file bytes
-8. update the session record to remote-run-verified
+9. fetch that exact remote branch
+10. verify its object ID, commit trailers, parent/base relationship, complete tree, and file bytes
+11. update the session record to remote-run-verified
 
 The individual remote run push does not use the mirror lock and does not wait for a shared publication lock. Different producing hashes normally produce independent remote branch names.
 
@@ -453,13 +476,27 @@ After verification, the result is recoverable from another computer even if curr
 
 Treat every published run branch as immutable.
 
-Before the first push, query the exact intended remote run ref. If it already exists:
+The initial run push must be create-only. Use an explicit lease that requires the exact remote run ref to be absent. If the installed Git cannot express that safely, query the exact ref immediately before a normal create push and treat every rejection as a collision; never retry by updating the existing ref.
 
-1. fetch and validate it
-2. when its commit and bytes are exactly this same interrupted producing result, treat the publication as idempotently recovered
-3. otherwise generate a fresh producing hash, rename the still-unpublished files, headings, and internal run references, create a new result commit, update the session record, and publish the new run name
+The verified command shape is:
 
-Never overwrite, force-update, or delete a different existing remote run merely because its hash collided.
+```text
+git push --force-with-lease=<run-ref>: <remote> <result-oid>:<run-ref>
+```
+
+The empty expected value after `<run-ref>:` means the remote ref must not exist. Use full ref names and the full result OID. A rejection is a collision signal, not permission to retry without the lease.
+
+If the intended remote run ref already exists or appears during the push:
+
+1. fetch and validate its exact object ID and bytes
+2. when it is exactly this same interrupted producing result, treat publication as idempotently recovered
+3. otherwise preserve the original Initial base, generate a fresh producing hash, and create a new sibling replacement worktree from that same base
+4. write the renamed files, headings, and internal run references in the replacement worktree
+5. create exactly one new result commit from the original base with the new run/base trailers
+6. publish and verify the new create-only run ref
+7. remove the superseded unpublished local worktree and commit only after the replacement is remotely verified
+
+Do not add a second result commit on top of the colliding commit. Never overwrite, force-update, or delete the different existing remote run.
 
 ### Phase D: Integrate open runs into `current`
 
@@ -491,7 +528,7 @@ A valid Initial run branch must:
 
 - use `tracked-handoffs/initial/run/<12-character-lowercase-hex-hash>`
 - contain only `TRACKED_HANDOFFS/INITIAL/`
-- have a tip exactly one result commit above its recorded Initial base, or one orphan result commit for the first empty phase
+- have a tip exactly one result commit above the full base OID declared by its `Tracked-Handoff-Base` trailer, or one orphan result commit declaring `Tracked-Handoff-Base: EMPTY` for the first empty phase
 - add files only
 - never modify or delete an Initial Handoff from its base
 - use the same producing hash in branch name, filenames, headings, and internal run references
@@ -499,6 +536,8 @@ A valid Initial run branch must:
 - contain no symlinks, secrets, credentials, private data, or unsafe artifacts
 
 For an ordinary result, inspect the tip against its first parent. For an orphan result, inspect the complete tree.
+
+Require a full, matching `Tracked-Handoff-Run` trailer and a full `Tracked-Handoff-Base` trailer. For an ordinary result, the declared base must equal the sole first parent. Do not depend on a local session record to recover this provenance.
 
 When a remote run is malformed:
 
@@ -517,7 +556,8 @@ All contributed files exist with identical bytes in current.
 Action:
 
 - treat the run as integrated
-- delete the remote run when possible
+- record the exact verified remote run object ID
+- delete the remote run only through the OID-bound deletion contract
 - treat deletion failure as cleanup debt, not loss of the integrated result
 
 ### Valid and not yet integrated
@@ -545,6 +585,27 @@ Action:
 9. stop only when safe classification or preservation is impossible
 
 Semantic combination, supersession, or deduplication of different Initial Handoffs belongs to a later Reconcile workflow.
+
+## OID-Bound Remote Run Deletion
+
+Remote run deletion is a compare-and-delete operation, not an unconditional ref deletion.
+
+1. Fetch the exact run ref and record its full verified object ID.
+2. Verify that every contributed file from that exact object is byte-identical in verified current.
+3. Delete only with an explicit expected-object lease requiring the remote run ref still to equal that verified object ID.
+
+Use the verified command shape:
+
+```text
+git push --force-with-lease=<run-ref>:<verified-oid> <remote> :<run-ref>
+```
+
+Use the full run ref and full verified OID. Never substitute an implicit tracking value or an abbreviated OID.
+4. If the ref is already absent, treat cleanup as complete after confirming the remote query.
+5. If the lease fails because the ref changed, fetch and reclassify the new object. Do not delete it based on the earlier verification.
+6. If the installed Git or remote cannot perform the expected-object deletion safely, leave the branch as cleanup debt rather than using an unconditional delete.
+
+This narrow lease is permitted only for deletion of a proven integrated run. It never authorizes updating a run or current ref to another commit.
 
 ## Integration Retry Contract
 
@@ -601,7 +662,7 @@ No artifact is deleted solely because it is old. The lifecycle is evidence-based
 | --- | --- | --- |
 | `initial/current` | always | never deleted by this Creation skill |
 | valid unintegrated remote run | any contribution is absent from current | delete only after every contributed file is byte-identical in verified current |
-| integrated remote run | remote deletion has not succeeded yet | retry deletion on a later run after repeating byte verification |
+| integrated remote run | OID-bound remote deletion has not succeeded yet | retry only after repeating byte verification and recording the current exact run OID |
 | malformed remote run | ownership or content is unsafe | do not delete automatically; report it |
 | runtime worktree and local Handoff branch | unpublished or unattributed value remains | remove only after remote verification or successful recovery proves no local-only value remains |
 | session-local fetch refs | remote verification or local recovery still needs them | delete only this session's namespace when no recovery value remains |
@@ -658,21 +719,23 @@ Do not stage or commit mirror changes on a product branch.
 
 ## Local Unpublished Initial Handoffs
 
-A person or an earlier failed process may deliberately place a candidate Markdown file directly under the eligible local mirror.
+A person or an earlier failed process may deliberately place a publication-ready candidate Markdown file directly under the eligible local mirror. Placement alone is not sufficient proof of publication intent.
 
 When the mirror lock is available:
 
 1. compare direct Markdown files with verified current and open remote runs
 2. read each local-only candidate completely
-3. exclude ordinary notes that do not clearly present repository-specific implementation preparation
-4. reject symlinks, unreadable files, non-Markdown files, secrets, credentials, or sensitive content
-5. for a valid local-only Initial Handoff, preserve the author's content and apply only minimum contract normalization
-6. assign a fresh hash when needed
-7. create, push, and verify a recovery run before changing the mirror source
-8. integrate the recovery run into current
-9. refresh the mirror from verified current
+3. require a valid `initial-handoff-<hash>-NN-<topic>.md` filename, an `Initial Implementation Handoff` first heading, and substantive `Source context` and `Intended outcome` sections
+4. reject files marked draft, private, temporary, do-not-publish, or equivalent
+5. exclude ordinary notes that do not clearly present repository-specific implementation preparation
+6. reject symlinks, unreadable files, non-Markdown files, secrets, credentials, or sensitive content
+7. for a valid publication-ready local-only Initial Handoff, preserve the author's content and apply only minimum contract normalization
+8. assign a fresh hash when needed
+9. create, push, and verify a recovery run before changing the mirror source
+10. integrate the recovery run into current
+11. refresh the mirror from verified current
 
-Deliberate placement in the eligible mirror indicates publication intent. Private drafts belong elsewhere.
+Only deliberate placement together with the publication-ready Handoff structure above indicates publication intent. Ambiguous files remain untouched and are reported only when they block a safe mirror refresh. Private drafts belong elsewhere.
 
 If the mirror lock is temporarily unavailable, defer this local-only scan rather than blocking remote investigation or remote publication.
 
@@ -960,6 +1023,8 @@ TRACKED_HANDOFFS/INITIAL/initial-handoff-7f3a91c2d4e6-02-storage-transition.md
 
 Return `NO_HANDOFFS_CREATED` on the first line.
 
+Use this clean response only when no independent synchronization problem still requires user attention. If no new Handoff qualifies but a malformed, unsafe, or unresolved run remains, return a blocker that states both facts: no new Handoff was justified for this assignment, and the named synchronization problem remains with its next safe action.
+
 Do not create an own remote run branch, result commit, or placeholder file for a no-Handoff result. Startup recovery and integration of older open runs must still complete as far as safely possible, and the mirror should still be refreshed when available.
 
 Integrating unrelated older runs does not turn a no-Handoff result for the current assignment into a path response.
@@ -972,6 +1037,20 @@ The supplied Markdown was checked against the current repository and does not cu
 ```
 
 This is only a recommendation. Do not modify the source document. Do not claim it is obsolete unless repository evidence specifically proves that.
+
+### Assignment integrated but an independent synchronization problem remains
+
+Do not return a clean path-only success when another malformed, unsafe, or otherwise unresolved Initial run still requires user attention.
+
+Return one concise blocker that:
+
+- states that this assignment's Handoffs were successfully integrated
+- lists those integrated paths
+- names each independent unresolved run or artifact and its exact reason
+- confirms that the integrated paths are safely stored and were not rolled back
+- states the next safe action
+
+Do not hide the independent problem, and do not describe the successfully integrated assignment as lost or pending.
 
 ### Remote run saved but current integration pending
 
@@ -1067,6 +1146,9 @@ Before returning success, verify:
 - current and all consumed runs contain only `TRACKED_HANDOFFS/INITIAL/`
 - every remote run branch was treated as immutable and any run-name collision was resolved without overwriting the existing ref
 - every producing result was first fetched and verified on its own remote run branch
+- every result commit contains full, matching run and base provenance that can be validated without its local session record
+- every run ref was created without replacing an existing remote ref
+- every deleted remote run was removed only while its remote object ID still matched the previously verified object
 - every returned path exists with identical bytes in verified current
 - materially used product evidence was rechecked before publication and represents one coherent recorded source state
 - no integrated Initial Handoff was overwritten, renamed, moved, or deleted
@@ -1077,3 +1159,4 @@ Before returning success, verify:
 - retained local artifacts contain unpublished or unattributed value that must not be deleted
 - delegated subagents, when used, did not delegate further
 - the response follows the Return Contract exactly
+- path-only success was not returned while an independent unresolved synchronization problem still required user attention
