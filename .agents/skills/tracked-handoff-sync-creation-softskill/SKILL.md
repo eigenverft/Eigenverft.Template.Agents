@@ -128,20 +128,20 @@ The runtime root and mirror are local visibility or working paths. They are neve
 Always preserve these invariants:
 
 - never force-update, rewrite, or replace remote history; do not use force-push for run publication or current integration
-- the only permitted `--force-with-lease` use is an exact expected-object guard that either requires a new run ref to be absent or requires an integrated run ref still to equal the previously verified object before deletion; it must never move an existing ref to a different commit
+- the only permitted `--force-with-lease` use is an exact expected-object guard that requires a new run ref to be absent, requires the first `initial/current` ref to be absent, or requires an integrated run ref still to equal the previously verified object before deletion; it must never move an existing ref to a different commit
 - never switch, checkout, detach, pull, merge, rebase, reset, clean, commit, or push any checkout or worktree that existed when this run started
 - never stash or overwrite unrelated local work
 - never merge a tracked-handoff branch into a product branch
 - never stage, commit, or push product code on a tracked-handoff branch
 - never change a path outside `TRACKED_HANDOFFS/INITIAL/` on an Initial storage commit
 - never edit, rename, move, or delete an already integrated Initial Handoff
-- never delete a remote run branch before its complete contribution is verified in `initial/current`
+- never delete a remote run branch before its complete contribution is verified in `initial/current` either byte-for-byte or through the explicit path-collision replacement terminal proof
 - never claim cross-computer availability before the relevant remote push is fetched and verified
 - never create an empty run branch, empty result commit, or placeholder file
 - never remove or reuse another active session's runtime directory, worktree, branch, lock, or session record
 - never modify a versioned `.gitignore` as a side effect of this workflow
 
-The selected product checkout is read-only source evidence. Handoff authoring and storage commits happen only in new runtime worktrees owned by this run. The sole permitted product-root write is a short refresh of the eligible, locally ignored `TRACKED_HANDOFFS/INITIAL/` visibility mirror under its mirror lock.
+The selected product checkout is read-only source evidence. Handoff authoring and storage commits happen only in new runtime worktrees owned by this run. The only permitted local write areas below the repository root are the locally ignored `.tracked-handoff-runtime/` area and, when eligible, the locally ignored `TRACKED_HANDOFFS/INITIAL/` visibility mirror under its mirror lock. Neither area is product content or may enter a product commit.
 
 Assume other agents may use the same repository concurrently. Existing checkouts and worktrees are shared infrastructure, not disposable scratch space.
 
@@ -271,6 +271,8 @@ Before taking ownership of `.tracked-handoff-runtime/`:
 - verify existing children can be attributed to this skill by valid session records or recognized hash-scoped layout
 - leave unrelated or unreadable content untouched
 
+Use no-follow or `lstat`-equivalent inspection for runtime, hook, staging, backup, transaction, and mirror paths. Recheck each path and its existing parent components immediately before create, rename, replacement, or deletion. If a path changes into a symlink or reparse target, skip that local operation, preserve remote-safe progress, and continue through a fresh uniquely owned path when possible.
+
 If the reserved runtime root is tracked, is a symlink, or is clearly owned by another purpose, do not repurpose it. Report the conflict.
 
 ### Enclosing repositories
@@ -322,6 +324,22 @@ Integration and recovery work use separate sibling runtime worktrees such as `<s
 
 A linked worktree inside the ignored runtime root is allowed because it has its own index and `HEAD` while sharing the selected repository's object store. Its location inside the product worktree does not authorize writing product content.
 
+### Controlled Git execution
+
+Repository-local hooks, signing settings, default push refspecs, tag-following, and content filters must not silently expand or alter this storage workflow.
+
+Create one empty, regular, non-symlink hook directory owned by the session under the ignored runtime root. Run every skill-owned command that can invoke local hooks with an explicit absolute `core.hooksPath` pointing to that empty directory. Disable commit, tag, and push signing for skill-owned storage operations. Use `--no-verify` where the Git command supports it, use `--no-follow-tags` for pushes, and always provide one explicit full source and destination refspec. Do not modify the customer's persistent Git configuration.
+
+Conceptually apply equivalent per-command configuration such as:
+
+```text
+git -c core.hooksPath=<absolute-empty-session-hook-dir> -c commit.gpgSign=false -c tag.gpgSign=false -c push.gpgSign=false -c push.followTags=false <command>
+```
+
+Server-side remote hooks remain authoritative. Treat their rejection as an ordinary publication or integration failure; never attempt to bypass them.
+
+Before creating the result commit, verify that every staged Handoff blob is byte-identical to the intended regular Markdown file. If attributes, line-ending conversion, or a clean filter changed a staged blob, replace only that session-owned index entry with the raw file blob using Git's no-filter object/index plumbing, then verify again before committing. After the commit, read every committed blob back from the commit and compare its bytes again before the first push. Never publish a commit whose stored Markdown bytes differ from the verified authored bytes.
+
 ## Pure Storage Branch Contract
 
 `tracked-handoffs/initial/current` and every Initial run branch are pure storage branches. Their trees may contain only:
@@ -341,7 +359,22 @@ PROJECTNOTES/
 README.md
 ```
 
-When `initial/current` does not exist, treat the Initial collection as empty. The first producing run uses an orphan result commit containing only its Initial Handoffs. After that run is verified remotely, integration creates `initial/current` from the result if no competing current branch appeared first.
+When `initial/current` does not exist, treat the Initial collection as empty. The first producing run uses an orphan result commit containing only its Initial Handoffs.
+
+After that run is verified remotely:
+
+1. query the exact `refs/heads/tracked-handoffs/initial/current` ref again
+2. while it remains absent, create it directly from the verified orphan result with an explicit absent-ref lease
+3. use the full current ref and full result OID, equivalent to:
+
+```text
+git push --force-with-lease=<current-ref>: --no-verify --no-follow-tags <remote> <result-oid>:<current-ref>
+```
+
+4. fetch and byte-verify the created current tree
+5. if the create-only push is rejected because another agent created current first, fetch that current and integrate the run through the normal append-only integration path
+
+Never overwrite or replace a concurrently created current ref.
 
 Before using any fetched Initial branch, verify that its complete tree contains no path outside `TRACKED_HANDOFFS/INITIAL/`. A malformed branch is not safe input.
 
@@ -373,6 +406,18 @@ Record at least:
 - whether current integration was verified
 
 Refresh the heartbeat at major phases and at least every five minutes during a long investigation.
+
+### Atomic session-record updates
+
+Never overwrite a session JSON file in place. For every creation or update:
+
+1. serialize the complete next record to a uniquely named sibling temporary file
+2. flush and close it
+3. read it back and validate the JSON, repository identity, session hash, phase, and owned paths
+4. replace the final session record with a same-directory atomic rename or atomic replace operation
+5. keep the previous valid final record until the replacement succeeds
+
+A crash may leave a hash-scoped temporary record, but must not leave a partially written final record. A later session may promote a temporary record only when the final record is absent and the temporary record is complete, valid, and attributable to the same inactive session. Otherwise it ignores or safely removes only an attributable disposable temporary file. Session records are removed last during cleanup.
 
 Ownership is established by the session record plus the expected hash-scoped paths and branch names. A matching name alone is not sufficient permission to delete an artifact.
 
@@ -454,19 +499,21 @@ When one or more Handoffs were created:
 1. verify the runtime worktree contains no changed path outside `TRACKED_HANDOFFS/INITIAL/`
 2. verify all changes are additions and no integrated file was modified, renamed, or deleted
 3. verify filenames, headings, and internal run references use the producing hash
-4. record the full Initial base OID, or `EMPTY`, in the session record
-5. create exactly one result commit from that base, with the required `Tracked-Handoff-Run` and `Tracked-Handoff-Base` trailers
-6. record the full result commit OID in the session record
-7. query the exact intended remote run ref and prepare a create-only push that succeeds only while that ref is absent
-8. push the result to:
+4. verify every staged Handoff blob is byte-identical to the intended authored file, bypassing local content filters for the session-owned index entry when necessary
+5. record the full Initial base OID, or `EMPTY`, in the session record
+6. create exactly one result commit from that base, with the required `Tracked-Handoff-Run` and `Tracked-Handoff-Base` trailers, local hooks disabled, and commit signing disabled
+7. read every committed Handoff blob back from the result commit and verify its exact bytes
+8. record the full result commit OID in the session record
+9. query the exact intended remote run ref and prepare a create-only explicit-ref push that succeeds only while that ref is absent, with local hooks, signing, and tag-following disabled
+10. push the result to:
 
 ```text
 tracked-handoffs/initial/run/<producing-hash>
 ```
 
-9. fetch that exact remote branch
-10. verify its object ID, commit trailers, parent/base relationship, complete tree, and file bytes
-11. update the session record to remote-run-verified
+11. fetch that exact remote branch
+12. verify its object ID, commit trailers, parent/base relationship, complete tree, and file bytes
+13. update the session record atomically to remote-run-verified
 
 The individual remote run push does not use the mirror lock and does not wait for a shared publication lock. Different producing hashes normally produce independent remote branch names.
 
@@ -506,13 +553,15 @@ After the own run is remotely saved, integrate it together with every other safe
 2. validate every run with the Remote Run Contract
 3. build the append-only union on a new sibling integration runtime worktree and local Handoff branch owned by this session
 4. preserve every file already in current byte-for-byte
-5. add every safe, not-yet-integrated run contribution
+5. add every safe, not-yet-integrated run contribution, including unaffected paths from replacement-pending original runs
 6. verify the prospective integration changes only `TRACKED_HANDOFFS/INITIAL/` and contains additions only
-7. create an integration commit that records the included run hashes
-8. push normally to `tracked-handoffs/initial/current`
-9. never force-push
-10. fetch and verify the resulting remote current tree
-11. delete each integrated remote run only after its entire contribution is present with identical bytes in verified current
+7. verify every staged integration blob is byte-identical to its verified source run or current blob
+8. create one integration commit that records the included run hashes, with local hooks and signing disabled
+9. read the committed integration tree back and byte-verify it before push
+10. push through one explicit full refspec to `tracked-handoffs/initial/current`, with local hooks, signing, and tag-following disabled
+11. never force-update current
+12. fetch and verify the resulting remote current tree
+13. delete each integrated remote run only after its entire contribution is byte-identical in verified current or its explicit replacement terminal proof is complete
 
 ### Phase E: Refresh visibility, recover leftovers, and return
 
@@ -538,6 +587,8 @@ A valid Initial run branch must:
 For an ordinary result, inspect the tip against its first parent. For an orphan result, inspect the complete tree.
 
 Require a full, matching `Tracked-Handoff-Run` trailer and a full `Tracked-Handoff-Base` trailer. For an ordinary result, the declared base must equal the sole first parent. Do not depend on a local session record to recover this provenance.
+
+When replacement trailers are present, require one full original run OID and one or more unambiguous old-to-new path mappings. The original OID must identify the fetched replacement-pending run. Normalize only exact old/new producing hashes, mapped paths, first-heading identity, and internal run/hash references; after that normalization, all remaining bytes must match. Missing, ambiguous, duplicate-conflicting, or unverifiable replacement mappings do not authorize deletion of the original run.
 
 When a remote run is malformed:
 
@@ -578,11 +629,25 @@ Action:
 2. if bytes are identical, treat the contribution as already integrated
 3. if contents differ, never discard one merely because the topics overlap
 4. preserve the already integrated path unchanged
-5. assign a fresh hash and filename to the still-unintegrated distinct content
-6. update its heading and internal hash references
-7. publish and verify a corrected replacement run
-8. delete the original run only after the replacement is verified in current
-9. stop only when safe classification or preservation is impossible
+5. classify the original run as replacement-pending without modifying it
+6. create a fresh replacement run from the newest verified current, containing only the still-unintegrated distinct collided content under a fresh producing hash and fresh path
+7. change only identity-dependent fields required by the new run: filename, first heading identity, producing hash, and internal run/hash references
+8. add full commit trailers for each replaced source:
+
+```text
+Tracked-Handoff-Replaces-Run: <full-original-run-oid>
+Tracked-Handoff-Replaces-Path: <old-path> => <new-path>
+```
+
+9. verify that each replacement file becomes byte-identical to its source after deterministic normalization of only those permitted identity fields
+10. publish and fetch-verify the replacement run normally
+11. integrate every unaffected original path together with the mapped replacement paths through the normal append-only integration procedure
+12. prove the original run's terminal replacement state: every unaffected original path is byte-identical in current, every mapped replacement path is integrated and normalization-equivalent, and the original remote ref still has the recorded OID
+13. delete the original run with the OID-bound deletion contract
+
+A replacement run has exactly one result commit above its own newest-current base. It does not add a commit to the original run and does not rewrite the original ref.
+
+If an automatic replacement proof cannot be established, preserve the original run and continue integrating independent valid runs. Treat it as isolated cleanup debt unless it prevents safe completion of the current assignment; do not ask the user merely to choose between two preserved contents.
 
 Semantic combination, supersession, or deduplication of different Initial Handoffs belongs to a later Reconcile workflow.
 
@@ -591,7 +656,7 @@ Semantic combination, supersession, or deduplication of different Initial Handof
 Remote run deletion is a compare-and-delete operation, not an unconditional ref deletion.
 
 1. Fetch the exact run ref and record its full verified object ID.
-2. Verify that every contributed file from that exact object is byte-identical in verified current.
+2. Verify either that every contributed file from that exact object is byte-identical in verified current, or that the exact object has completed the explicit path-collision replacement terminal proof.
 3. Delete only with an explicit expected-object lease requiring the remote run ref still to equal that verified object ID.
 
 Use the verified command shape:
@@ -654,6 +719,21 @@ Recovery priority:
 
 Do not use broad cleanup commands that may affect other worktrees. In particular, do not use global worktree cleanup as a substitute for ownership checks.
 
+### Canonical cleanup for an inactive owned session
+
+Cleanup is idempotent and runs only for artifacts attributed to one proven inactive session:
+
+1. atomically mark the session record `cleanup-started`
+2. establish whether every local Handoff value is remote-verified, integrated, or successfully recovered
+3. remove each exact registered owned worktree through `git worktree remove <exact-path>` using the controlled Git configuration
+4. verify that the exact worktree is no longer registered; do not run global `git worktree prune`
+5. remove an owned local Handoff branch only when it is not checked out and its tip has no local-only value beyond verified remote run or current state
+6. delete only the exact session-local fetch-ref namespace with exact ref operations
+7. remove attributable temporary session files, mirror staging or backup directories, and the empty session hook directory
+8. delete the final session record last
+
+If the physical worktree is already absent but Git retains uncertain administration metadata, leave that metadata as cleanup debt rather than deleting shared Git internals manually. A new session uses a new hash, path, branch, and ref namespace and continues normally. Failure to remove disposable local metadata must not downgrade a remote-verified or integrated result into a lost-result blocker.
+
 ## Artifact Lifecycle and Cleanup
 
 No artifact is deleted solely because it is old. The lifecycle is evidence-based:
@@ -662,6 +742,7 @@ No artifact is deleted solely because it is old. The lifecycle is evidence-based
 | --- | --- | --- |
 | `initial/current` | always | never deleted by this Creation skill |
 | valid unintegrated remote run | any contribution is absent from current | delete only after every contributed file is byte-identical in verified current |
+| replacement-pending original run | a colliding contribution has not reached the proven replacement terminal state | delete only after unaffected paths and every normalized replacement mapping are verified in current and the original OID still matches |
 | integrated remote run | OID-bound remote deletion has not succeeded yet | retry only after repeating byte verification and recording the current exact run OID |
 | malformed remote run | ownership or content is unsafe | do not delete automatically; report it |
 | runtime worktree and local Handoff branch | unpublished or unattributed value remains | remove only after remote verification or successful recovery proves no local-only value remains |
@@ -715,6 +796,17 @@ When another active session owns the lock:
 
 Refresh the mirror only from verified current. Never copy unintegrated run branches into it.
 
+Build every refresh completely in a session-owned staging directory under `.tracked-handoff-runtime/`, not in the visible mirror. Byte-verify the staged tree against the verified current tree before acquiring the mirror lock. Under the short mirror lock:
+
+1. write an atomic session-owned mirror transaction record containing the verified current OID, target path, staging path, and backup path
+2. recheck that current and the staging bytes still match the recorded OID
+3. move an existing complete mirror to the recorded hash-scoped backup path without deleting it
+4. move the complete staging directory into the visible mirror target
+5. verify the installed mirror against the recorded current OID
+6. on failure, restore the complete backup before releasing the lock when possible
+7. after success, remove the backup and transaction record
+
+On startup, recover only attributable inactive mirror transactions under the mirror lock. If the visible target is missing, restore the complete backup or rebuild from verified current. Never treat a partial staging directory as the authoritative mirror. Since the mirror is only visibility data, an abandoned refresh must not block remote run publication or current integration.
 Do not stage or commit mirror changes on a product branch.
 
 ## Local Unpublished Initial Handoffs
@@ -1138,6 +1230,9 @@ Before returning success, verify:
 - the runtime path and mirror were locally ignored without modifying a versioned `.gitignore`
 - no selected or enclosing repository was dirtied by runtime or mirror paths
 - every created runtime worktree is uniquely owned by this session
+- skill-owned worktree, commit, and push commands used the session-owned empty hooks path, disabled signing, explicit refspecs, and no tag-following
+- every committed Handoff blob was byte-identical to the intended authored bytes before the first push
+- session records were updated through validated same-directory temporary files and atomic replacement
 - local sessions and locks were classified with the concrete active/inactive/uncertain rules, and no artifact was deleted because of age alone
 - Handoff fetches did not contend on shared `FETCH_HEAD`, or used only the short fallback fetch lock
 - Handoff fetches used this session's local ref namespace and did not overwrite another session's refs
@@ -1156,6 +1251,9 @@ Before returning success, verify:
 - all safely recoverable open runs were processed
 - integrated remote run branches were deleted when possible
 - the mirror was refreshed when eligible and available
+- any mirror refresh was built and verified in staging before the short transaction-style swap
+- the first `initial/current` creation, when needed, used an absent-ref lease and never replaced a concurrent current branch
+- path-collision replacements reached the explicit replacement terminal state before the original run was deleted
 - retained local artifacts contain unpublished or unattributed value that must not be deleted
 - delegated subagents, when used, did not delegate further
 - the response follows the Return Contract exactly
