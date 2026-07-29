@@ -1,15 +1,15 @@
 # Notice incidental spelling errors
 
-If you happen to notice a clear spelling error while performing the normal run-once work, point it out briefly to the user.
+This instruction applies throughout the complete run-once phase.
 
-Do not search specifically for spelling errors or expand the current task to find them. Do not report grammar, style, wording, naming, or logic issues as spelling errors.
+While performing the required run-once work, remember any clear spelling errors you happen to notice in repository-owned filenames or file contents. Do not search for spelling errors, open extra files for this check, or treat grammar, style, wording, naming, or logic as spelling errors.
 
-Do not fix the error unless the user asks. If no clear spelling error is noticed, say nothing about spelling.
-
-Use only this block:
+After all run-once instructions are complete, append the following block to the next user-facing response only when at least one clear spelling error was noticed. Omit a section with no entries. Number the entries so the user can refer to `A1`, `A2`, `B1`, and so on. Do not fix anything unless the user asks.
 
 ```markdown
 ##SPELLINGSCHECK
+
+The following clear spelling corrections were noticed incidentally during the run-once work.
 
 A) Filenames
 1. `path/to/file` `incorrect` → `correct`
