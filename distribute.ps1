@@ -191,7 +191,7 @@ $destinationNames = @(
     'Eigenverft.App.BlazorMultihost'
     'Eigenverft.App.GlobalServerPwaHost'
     'Eigenverft.App.Lattice'
-    'Eigenverft.App.LlamaRunner'
+    'Eigenverft.NetLib.LlamaCpp'
     'Eigenverft.App.McpServer'
     'Eigenverft.App.ReverseProxy'
     'Eigenverft.Distributed.Drydock'
