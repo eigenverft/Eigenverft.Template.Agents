@@ -282,6 +282,10 @@ $destinationNames = @(
     'Eigenverft.Manifested.Package'
     'Eigenverft.Manifested.Sandbox'
     'Eigenverft.Routed.RequestFilters'
+    'Eigenverft.Web.ControlPlaneMcp'
+    'Eigenverft.Web.EdgeReverseProxy'
+    'Eigenverft.Web.SessionBridge'
+    'Eigenverft.WebLib.Infrastructure'
     'Eigenverft.Windows.ProcessIsolationRestricted'
     'Eigenverft.Windows.ProcessIsolationSandbox'
 )
