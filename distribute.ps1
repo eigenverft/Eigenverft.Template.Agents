@@ -184,8 +184,14 @@ function Copy-GitTemplateSnapshot {
 $templateUrl   = 'https://github.com/eigenverft/Eigenverft.Template.Agents.git'
 $whitelist     = @( '.gitattributes', 'AGENTS.md', '.agents/**', 'AGENTS/**' )
 
+# Repositories that must never receive the agent overlay.
+$excludedDestinationNames = @(
+    'Eigenverft.Template.Agents'
+    'Eigenverft.Archive.All'
+    'eigenverft'
+)
+
 # All active Eigenverft sibling repos that should share the agent overlay.
-# Excluded: Template.Agents (source), Archive.All (cold archive).
 $destinationNames = @(
     'Eigenverft.App.AutomationWorkbench'
     'Eigenverft.App.BlazorMultihost'
@@ -206,6 +212,7 @@ $destinationNames = @(
 
 $destinations = @(
     $destinationNames |
+        Where-Object { $_ -notin $excludedDestinationNames } |
         ForEach-Object { Join-Path $workspaceRoot $_ }
 )
 
