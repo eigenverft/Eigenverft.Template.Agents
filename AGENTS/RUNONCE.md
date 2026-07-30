@@ -2,7 +2,9 @@
 
 `AGENTS/RUNONCE/` contains repository instructions that must be applied once at the start of each new chat session.
 
-On the first read of `AGENTS.md` in a chat session, read every Markdown file in `AGENTS/RUNONCE/` fully and apply it before doing other work. Do not repeat an instruction after it has completed successfully in the same chat session. Process every instruction again when a new chat session starts.
+On the first read of `AGENTS.md` in a chat session, first read every Markdown file in `AGENTS/RUNONCE/` fully. Then apply the instructions once in ascending filename order before doing other work. The three-digit filename prefixes define the execution order.
+
+Do not repeat an instruction after it has completed successfully in the same chat session. Process every instruction again when a new chat session starts.
 
 A failed, blocked, or incomplete instruction is not completed for the current chat session. Retry it if the blocker is resolved, but do not claim completion without verifying the intended outcome.
 
