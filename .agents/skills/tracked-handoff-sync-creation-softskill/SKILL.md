@@ -354,7 +354,7 @@ They must not contain ordinary repository paths such as:
 
 ```text
 src/
-PROJECTNOTES/
+ISSUES/
 .agents/
 README.md
 ```
