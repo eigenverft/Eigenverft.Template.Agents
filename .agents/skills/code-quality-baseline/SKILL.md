@@ -1,13 +1,13 @@
 ---
 name: code-quality-baseline
-description: Discover repository languages by file extension and load every applicable rule file before creating, modifying, or reviewing code.
+description: Discover repository source-code languages by file extension and load every applicable rule file before creating, modifying, or reviewing code.
 ---
 
 # Code Quality Baseline
 
 ## Overview
 
-Use this skill as a generic dispatcher for repository code rules. The skill does not define language-specific coding rules itself. It discovers relevant file types and loads the rule files registered for them.
+Use this skill as a generic dispatcher for repository source-code rules. The skill does not define language-specific coding rules itself. It discovers relevant source-code file types and loads the rule files registered for them.
 
 ## When To Use
 
@@ -23,7 +23,7 @@ Use this skill as a generic dispatcher for repository code rules. The skill does
 ## Rule Package Contract
 
 - `references/rules/index.md` is the authoritative rule catalog.
-- The catalog maps normalized file extensions to one or more rule files.
+- The catalog maps normalized source-code file extensions to one or more rule files.
 - The catalog may mark rule files as always applicable.
 - Rule-file paths are relative to `references/rules/` unless the catalog states otherwise.
 - Languages and rule filenames must not be hardcoded in this `SKILL.md`.
@@ -36,21 +36,23 @@ Repository instructions, configuration, analyzers, formatters, and established l
 Before creating, modifying, or reviewing code:
 
 1. Determine the repository root and the files relevant to the current task.
-2. Inspect repository-owned files and collect their normalized, lowercase file extensions.
-3. Identify languages and file types exclusively from those extensions. Do not infer a language from the repository name, documentation, directory names, or file contents.
-4. Ignore `.git`, dependency directories, generated output, build output, vendored code, and binary files unless the current task explicitly targets them.
-5. Read `references/rules/index.md` completely.
-6. Select every rule file marked as always applicable.
-7. Select every rule file mapped to an extension affected by the current task.
-8. Select additional rule files explicitly required by the catalog for mixed-language or cross-cutting changes.
-9. Read every selected rule file completely before writing or reviewing code.
-10. Do not load rule files for unrelated languages.
+2. Read `references/rules/index.md` completely.
+3. Inspect repository-owned source-code filenames and collect their normalized, lowercase file extensions.
+4. Identify supported languages exclusively from extensions registered in the catalog. Do not infer a language from the repository name, documentation, directory names, file contents, compiler output, or runtime metadata.
+5. Ignore unregistered documentation, configuration, solution, metadata, and data-file extensions. Do not report them as missing language mappings merely because they exist in the repository.
+6. Ignore `.git`, dependency directories, generated output, build output, vendored code, and binary files unless the current task explicitly targets them.
+7. Select every rule file marked as always applicable.
+8. Select every rule file mapped to a source-code extension affected by the current task.
+9. Select additional rule files explicitly required by the catalog for mixed-language or cross-cutting changes.
+10. Read every selected rule file completely before writing or reviewing code.
+11. Do not load rule files for unrelated languages.
 
-If the task does not yet identify target files, use all detected repository extensions until the scope becomes narrower. If the task later includes another extension, repeat the selection and read every newly applicable rule file completely.
+If the task does not yet identify target files, use all catalog-registered source-code extensions present in the repository until the scope becomes narrower. If the task later includes another extension, repeat the selection and read every newly applicable rule file completely.
 
 ## Missing Or Ambiguous Mappings
 
-- If an affected extension has no catalog entry, follow repository-local instructions and report the missing mapping.
+- Report a missing mapping only when the current task explicitly identifies an affected file as source code and its extension has no catalog entry.
+- Do not report unmapped documentation, configuration, solution, metadata, data, or other non-source extensions.
 - Do not invent language-specific rules or silently map an extension based on file contents.
 - If a catalog entry references a missing file, report the exact missing path before writing code governed by that entry.
 - If multiple catalog entries apply, use the union of their rule files and read each selected file once.
@@ -59,6 +61,6 @@ If the task does not yet identify target files, use all detected repository exte
 
 After rule discovery:
 
-1. Apply the selected rule files together with higher-priority repository guidance.
+1. Evaluate and apply the selected rule files against repository source code together with higher-priority repository guidance.
 2. Re-evaluate the selection whenever the set of affected extensions changes.
-3. In the final response, name the rule files that were applied and report any missing or ambiguous mapping.
+3. Follow the processing, final-verification, and output contract in `common.md`.
