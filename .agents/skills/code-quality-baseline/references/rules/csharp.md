@@ -6,3 +6,6 @@ Rule: The explicit Main method must always be declared async when possible.
 
 Name: Program Main Has Args Array
 Rule: The explicit Main method must always declare a string[] args parameter.
+
+Name: DI Class Has Logger
+Rule: If a C# class uses DI and has no logger, add a Microsoft ILogger<T>.
