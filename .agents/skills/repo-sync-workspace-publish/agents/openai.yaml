@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repo Workspace Sync and Publish"
+  short_description: "Safely synchronize and publish a Git workspace"
+  default_prompt: "Use $repo-sync-workspace-publish to safely synchronize the current Git branch and all understood intended workspace changes with its configured remote, preserve local work, commit publishable changes, use only a normal push, and verify that local and remote heads match."
