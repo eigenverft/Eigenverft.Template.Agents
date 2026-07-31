@@ -1,6 +1,6 @@
 ---
 name: repo-sync-workspace-publish
-description: Discover one or more Git repositories from explicit targets, container directories, current context, workspace roots, or equivalent workspace interfaces, then safely synchronize and publish their complete intended shareable state. Preserve local commits and working changes, integrate remote changes without history rewriting, commit only understood publishable work, use normal pushes, and verify actual remote heads. Use for single-repository, multi-repository, workspace handoff, or sync-everything-and-push requests; do not use for local-only commits, branch-to-main promotion, or force-push workflows.
+description: Discover one or more Git repositories from explicit targets, container directories, current context, workspace roots, or equivalent workspace interfaces, then safely synchronize and publish their complete intended shareable state. Explicit activation authorizes proportional intent assessment: after safety and completeness checks, tracked modifications, renames, and deletions are positive publication candidates, and conventional safe project-scoped settings are positive candidates even without a prior tracked counterpart or explicit per-file policy; preserve local commits and working changes, integrate remote changes without history rewriting, commit understood publishable work, use normal pushes, and verify actual remote heads. Use for single-repository, multi-repository, workspace handoff, or sync-everything-and-push requests; do not use for local-only commits, branch-to-main promotion, or force-push workflows.
 ---
 
 # Repo Workspace Sync And Publish
@@ -52,7 +52,7 @@ If the user asks only for discovery, a plan, a review, or status, perform non-mu
 - **Execution workspace:** the roots, working directory, tool context, and scoped authentication contexts supplied by the current environment.
 - **Git worktree:** one local checkout with its own current branch, index, uncommitted files, and worktree state.
 - **Selected repository set:** the frozen, deduplicated set of local Git worktrees that can enter the full synchronization workflow. Remote-only or otherwise unsupported targets remain reported candidates or blockers rather than being passed into local worktree steps.
-- **Relevant work:** local commits and working-tree changes that are understood, belong to the requested shared state, and are safe to publish.
+- **Relevant work:** local commits and working-tree changes whose publication intent has been assessed proportionally from repository evidence, that belong to the requested shared state, and are safe to publish.
 - **Shareable repository state:** state that can be represented by commits and published through the selected remote. Ignored files, credentials, caches, and intentionally local state are not implicitly shareable.
 - **Git publication:** transferring Git commits to the selected remote branch through a normal push. It does not mean building or publishing application artifacts, packages, installers, deployments, releases, or samples.
 - **Current remote state:** the fetched or equivalently queried state of the selected upstream immediately before integration or push.
@@ -74,7 +74,7 @@ Do not:
 - turn a synchronization request into architecture review, code review, dependency maintenance, packaging, deployment, or release work
 - modify tracked files solely to make an unrelated check pass
 
-If an incidental problem does not affect safe interpretation or publication of the actual unpublished delta, leave it unchanged and omit it unless it materially explains a blocker. If it does block safe synchronization, report the blocker without fixing it unless the user separately authorizes that work.
+If an incidental problem does not affect safe interpretation or publication of the actual unpublished delta, leave it unchanged and omit it unless it materially explains a blocker. Only concrete contrary evidence or a specific missing fact that prevents safe interpretation blocks synchronization; report such a blocker without fixing it unless the user separately authorizes that work.
 
 ## Tool And Capability Routing
 
@@ -256,7 +256,7 @@ Inspect and retain enough information to restore or explain the starting state:
 - running merge, rebase, cherry-pick, revert, bisect, or other Git operation
 - existing stashes and their identifiers
 
-Stop if a Git operation is already incomplete. Do not absorb or overwrite work whose owner or purpose is unclear.
+Stop if a Git operation is already incomplete. Do not absorb or overwrite work with concrete evidence of another owner, local-only purpose, or unsafe handling requirements; general uncertainty alone requires proportional repository-local assessment rather than an automatic block.
 
 Inspect candidate changes for generated output, ignored files, local runtime state, and likely secret-bearing paths. Never print secret values. Existing ignored files are not normal publication candidates.
 
@@ -349,11 +349,19 @@ Drop that stash only after successful verification. If restoration conflicts, ke
 
 Inspect the complete resulting working-tree and staged diff. Also inspect every local-only commit that would be published, including its full changed-path set and relevant diff, rather than assuming an existing commit is safe merely because it is already committed.
 
+#### Intent Assessment For Working-Tree Changes
+
+Explicit activation means the agent owns a proportional assessment of whether the actual unpublished changes belong in the requested shared state. Tracked modifications, renames, and deletions are strong positive evidence of publication intent and default to **commit now** after safety and completeness checks. Block or hold them only when concrete contrary evidence shows that they are excluded, local-only, unsafe, incomplete, or outside the requested shared state.
+
+Untracked files require positive project classification before they can be committed. Conventional project-scoped configuration or settings files are positive publication candidates when they are syntactically plausible and contain no secrets, credentials, private keys, personal identifiers, machine-specific absolute paths, or generated/local-only markers. Localhost or development profiles alone are not contrary evidence. The absence of a previous tracked counterpart or an explicit per-file policy is not a blocker; concrete local-only evidence overrides the positive inference.
+
+Before classifying work as **needs review**, exhaust proportional repository-local evidence such as the changed paths and diff, nearby tracked files, project conventions, manifests, and narrowly relevant documentation. State the exact unresolved risk or missing fact. General uncertainty or the lack of per-file user approval is insufficient. Never silently sanitize unsafe values or force-add ignored files.
+
 Classify every changed path and unpublished change as:
 
-- **commit now:** understood, in scope, safe, and complete
-- **hold:** explicitly excluded, generated, ignored, sensitive, or intentionally local
-- **needs review:** unclear ownership, incomplete intent, suspected secret, or risky behavior
+- **commit now:** tracked modification, rename, or deletion with no concrete contrary evidence, or an untracked file with positive project classification; in each case understood, in scope, safe, and complete
+- **hold:** explicitly excluded, generated, ignored, sensitive, intentionally local, or supported by other concrete local-only evidence
+- **needs review:** incomplete intent, suspected secret, risky behavior, or a specific unresolved risk or missing fact that remains after proportional repository-local assessment
 
 Group `commit now` changes into coherent commits that preserve a usable progression. Stage only exact intended paths and use concise messages derived from the changes. Do not force-add ignored files, silently change tracking policy, or combine unrelated work merely to empty the worktree.
 
@@ -373,7 +381,7 @@ Validation is evidence for the unpublished delta, not a new task. Do not inspect
 
 A failing directly relevant check blocks claiming a fully synchronized publish unless the user explicitly accepts publication with that known failure. A skipped check should be reported only when useful, including the reason it was unnecessary or outside scope.
 
-If relevant work remains under `needs review`, stop before claiming complete synchronization. Existing safe commits may be published only when doing so does not misrepresent or break the shared state; report the result as partial.
+If relevant work remains under `needs review`, state the exact unresolved risk or missing fact and stop before claiming complete synchronization. Existing safe commits may be published only when doing so does not misrepresent or break the shared state; report the result as partial. Do not use general uncertainty, lack of a previous tracked counterpart, lack of explicit policy, or lack of per-file user approval as the sole reason to leave work under `needs review`.
 
 ### 9. Recheck The Remote Immediately Before Push
 
