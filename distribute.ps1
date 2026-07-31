@@ -301,6 +301,10 @@ $explicitlyIgnoredProjects = @(
         Reason = 'Cold archive'
     }
     [pscustomobject][ordered]@{
+        Name   = 'Eigenverft.Templates.HtmlJavascriptDemos'
+        Reason = 'Independent HTML and JavaScript demo templates'
+    }
+    [pscustomobject][ordered]@{
         Name   = 'eigenverft'
         Reason = 'Organization profile repository'
     }
