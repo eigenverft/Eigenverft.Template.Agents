@@ -9,7 +9,7 @@ Recommend an empty directory tree only when an ordinary file inside it would be 
 After all run-once instructions are complete, append the following block to the next user-facing response only when at least one qualifying empty directory tree is recommended. Number the entries for readability. This is a recommendation only; do not remove anything unless the user asks.
 
 ```markdown
-##RemoveEmptyDirs
+## RemoveEmptyDirs
 
 Git does not track empty directories. This check recommends removing the following empty directory trees.
 

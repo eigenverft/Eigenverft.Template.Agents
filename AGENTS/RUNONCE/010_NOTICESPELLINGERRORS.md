@@ -7,7 +7,7 @@ While performing the required run-once work, remember any clear spelling errors 
 After all run-once instructions are complete, append the following block to the next user-facing response only when at least one clear spelling error was noticed. Omit a section with no entries. Do not fix anything unless the user asks.
 
 ```markdown
-##SPELLINGSCHECK
+## SPELLINGSCHECK
 
 The following clear spelling corrections were noticed incidentally during the run-once work.
 
