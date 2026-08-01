@@ -437,9 +437,22 @@ Only then mark this repository fully synchronized.
 
 ## Final Report
 
-For one repository, keep a successful report compact. For several repositories, start with a concise per-repository result table.
+For one repository, keep a successful report compact. For a multi-repository run, start with a concise result table containing one row for every selected repository and every resolved repository candidate that was skipped or blocked. The table must contain at least these columns:
 
-Include:
+| Repository | Status vorher | Maßnahme | Status nachher | Ergebnis |
+| --- | --- | --- | --- | --- |
+
+Use the columns as follows:
+
+- **Repository:** identify the repository unambiguously; add columns when branch, upstream, or publication target cannot be represented clearly in the same cell.
+- **Status vorher:** record the initial ahead/behind classification, concise worktree status, and the initial `HEAD` when the workflow changes `HEAD` or the hash is needed to explain the result.
+- **Maßnahme:** state only actions actually performed, such as `keine`, `Fast-forward`, `Merge`, `Commit erstellt`, `Push`, or `blockiert`; list multiple actions in execution order when necessary.
+- **Status nachher:** record the final ahead/behind state, concise worktree status, independent remote-verification result, and the final `HEAD` when relevant.
+- **Ergebnis:** use exactly one of `vollständig synchronisiert`, `teilweise veröffentlicht`, `blockiert`, or `übersprungen`. Use `vollständig synchronisiert` only after the existing verification criteria are satisfied; the other labels summarize incomplete, blocked, or intentionally skipped outcomes without changing those criteria.
+
+When a status value was not obtained because a repository was skipped or blocked before that workflow stage, write `nicht ermittelt` with a concise reason instead of guessing.
+
+The table is the primary summary for routine per-repository state, actions, and outcomes. Across the table, a short target-resolution preface, and any necessary follow-up details, include:
 
 - requested target and how it resolved
 - selected repositories and skipped or blocked candidates
@@ -452,6 +465,6 @@ Include:
 - validation commands and results, or that validation was skipped because there was no unpublished delta
 - push and independent remote-head verification result
 - remaining local, excluded, incomplete, sensitive, or stashed work
-- whether each repository and the overall selected workspace are fully synchronized
+- per-repository result in the table and the overall selected-workspace result outside it
 
-Expand only for surprising discovery, divergence, conflicts, partial publication, authentication problems, failed validation, or failed push. Never reproduce secret values in the report.
+Do not repeat facts in prose when the table already communicates them clearly. Add detail after the table only when it is needed for surprising discovery, divergence, conflicts, safety-stash or safety-branch recovery, partial publication, authentication problems, remaining work, failed validation, failed push, or a concrete next action. Never reproduce secret values in the report.
