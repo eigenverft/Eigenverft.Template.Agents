@@ -6,13 +6,24 @@ A directory tree is empty when it contains no files anywhere below it. Report on
 
 Recommend an empty directory tree only when an ordinary file inside it would be eligible for version control under the repository's effective ignore rules. Ignored, generated, build, test, cache, runtime, dependency, vendored, or otherwise repository-classified local paths are not recommendations.
 
-After all run-once instructions are complete, append the following block to the next user-facing response only when at least one qualifying empty directory tree is recommended. Number the entries so the user can refer to `A1`, `A2`, and so on. This is a recommendation only; do not remove anything unless the user asks.
+After all run-once instructions are complete, append the following block to the next user-facing response only when at least one qualifying empty directory tree is recommended. Number the entries for readability. This is a recommendation only; do not remove anything unless the user asks.
 
 ```markdown
 ##RemoveEmptyDirs
 
 Git does not track empty directories. This check recommends removing the following empty directory trees.
 
-A) Recommended removals
+Recommended removals
+
 1. `path/to/directory`
+```
+
+## Suggested follow-up actions
+
+When this instruction reports at least one finding, contribute one or more suitable suggested follow-up actions to the response. Use the following as the standard example, adapting, replacing, or extending its actions when the actual findings justify a different or additional follow-up:
+
+```markdown
+<letter>) Source: `070_NOTICEEMPTYDIRECTORIES.md`
+
+1. Remove all recommended empty directory trees.
 ```
