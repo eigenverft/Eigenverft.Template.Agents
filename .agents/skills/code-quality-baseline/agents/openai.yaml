@@ -1,4 +1,4 @@
 interface:
   display_name: "Code Quality Baseline"
-  short_description: "Load source-code rules by file extension"
-  default_prompt: "Use $code-quality-baseline to detect repository source-code types by extension and read every applicable rule file before implementing or reviewing code."
+  short_description: "Load main-product code rules by extension"
+  default_prompt: "Use $code-quality-baseline to detect main-product source-code types by extension and read every applicable rule file before implementing or reviewing product code."
