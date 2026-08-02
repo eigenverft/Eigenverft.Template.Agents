@@ -7,7 +7,8 @@
 # paths are overwritten only when their content differs.
 # You run this script; it does not commit.
 
-[CmdletBinding()]
+# SupportsShouldProcess is justified because strict rollouts recursively replace target .agents trees.
+[CmdletBinding(SupportsShouldProcess)]
 param(
     [string]$WorkspaceRoot,
 
@@ -29,12 +30,107 @@ $DistributionStatus = [ordered]@{
     UpToDate          = 'UpToDate'
     Missing           = 'Missing'
     CopyFailed        = 'CopyFailed'
+    NotApplied        = 'NotApplied'
     Candidate         = 'Candidate'
     ExplicitlyIgnored = 'ExplicitlyIgnored'
 }
 
+function Test-FileContentEqual {
+    <#
+    .SYNOPSIS
+    Determines whether two files currently have identical content.
+
+    .DESCRIPTION
+    Compares the current length and SHA-256 hash of a source file and destination file.
+    Returns false when the destination file does not exist. This stateful filesystem helper
+    is intentionally defined at script scope rather than as a deterministic inline helper.
+
+    .PARAMETER SourcePath
+    Path to the source file whose current content is the reference.
+
+    .PARAMETER DestinationPath
+    Path to the destination file to compare with the source file.
+
+    .EXAMPLE
+    Test-FileContentEqual -SourcePath $source -DestinationPath $destination
+
+    Returns true when both files currently have the same length and SHA-256 hash.
+
+    .NOTES
+    File content is read from the filesystem each time the function is called.
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$SourcePath,
+
+        [Parameter(Mandatory)]
+        [string]$DestinationPath
+    )
+
+    if (-not (Test-Path -LiteralPath $DestinationPath -PathType Leaf)) {
+        return $false
+    }
+
+    $sourceInfo = Get-Item -LiteralPath $SourcePath -ErrorAction Stop
+    $destinationInfo = Get-Item -LiteralPath $DestinationPath -ErrorAction Stop
+    if ($sourceInfo.Length -ne $destinationInfo.Length) {
+        return $false
+    }
+
+    $sourceHash = (Get-FileHash -LiteralPath $SourcePath -Algorithm SHA256 -ErrorAction Stop).Hash
+    $destinationHash = (Get-FileHash -LiteralPath $DestinationPath -Algorithm SHA256 -ErrorAction Stop).Hash
+    return $sourceHash -eq $destinationHash
+}
+
+# SupportsShouldProcess is justified because this function can recursively replace target .agents trees.
 function Copy-GitTemplateSnapshot {
-    [CmdletBinding()]
+    <#
+    .SYNOPSIS
+    Distributes a filtered Git template snapshot to local destination directories.
+
+    .DESCRIPTION
+    Creates a shallow temporary clone of an HTTPS Git repository, selects files through a
+    whitelist, and overlays changed files onto each available destination. An optional strict
+    rollout removes and recreates each destination's complete .agents tree before copying.
+    ShouldProcess protects all destination mutations while still allowing WhatIf to inspect
+    the remote snapshot and report the planned operation.
+
+    .PARAMETER RepositoryUrl
+    HTTPS URL of the Git repository used as the template source.
+
+    .PARAMETER DestinationPaths
+    Absolute local directory paths that may receive the template snapshot.
+
+    .PARAMETER Whitelist
+    Glob patterns selecting repository-relative files from the cloned template.
+
+    .PARAMETER ForceSkillReplacement
+    Removes and recreates the complete .agents tree in each available destination before the
+    current template snapshot is distributed.
+
+    .EXAMPLE
+    Copy-GitTemplateSnapshot -RepositoryUrl $templateUrl -DestinationPaths $destinations
+
+    Overlays all files selected by the default whitelist onto the available destinations.
+
+    .EXAMPLE
+    $parameters = @{
+        RepositoryUrl        = $templateUrl
+        DestinationPaths     = $destinations
+        Whitelist            = $whitelist
+        ForceSkillReplacement = $true
+        WhatIf               = $true
+    }
+    Copy-GitTemplateSnapshot @parameters
+
+    Reads the remote snapshot and previews strict .agents replacement without changing a
+    destination.
+
+    .NOTES
+    The temporary clone is created and removed even during WhatIf because it is required for
+    read-only source discovery. The function does not commit or push destination changes.
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory)]
         [ValidatePattern('^https://')]
@@ -48,7 +144,9 @@ function Copy-GitTemplateSnapshot {
         [switch]$ForceSkillReplacement
     )
 
-    function Convert-GlobToRegex {
+    # Converts one whitelist glob into an anchored regular expression.
+    function local:_Convert-GlobToRegex {
+        [Diagnostics.CodeAnalysis.SuppressMessage("PSUseApprovedVerbs","")]
         param(
             [Parameter(Mandatory)]
             [string]$Pattern
@@ -98,7 +196,9 @@ function Copy-GitTemplateSnapshot {
         return '^' + $regex.ToString() + '$'
     }
 
-    function Test-WhitelistMatch {
+    # Tests whether one repository-relative path matches any whitelist pattern.
+    function local:_Test-WhitelistMatch {
+        [Diagnostics.CodeAnalysis.SuppressMessage("PSUseApprovedVerbs","")]
         param(
             [Parameter(Mandatory)]
             [string]$RelativePath,
@@ -110,37 +210,13 @@ function Copy-GitTemplateSnapshot {
         $normalizedPath = $RelativePath.Replace('\', '/')
 
         foreach ($pattern in $Patterns) {
-            $rx = Convert-GlobToRegex -Pattern $pattern
+            $rx = _Convert-GlobToRegex -Pattern $pattern
             if ($normalizedPath -imatch $rx) {
                 return $true
             }
         }
 
         return $false
-    }
-
-    function Test-FileContentEqual {
-        param(
-            [Parameter(Mandatory)]
-            [string]$SourcePath,
-
-            [Parameter(Mandatory)]
-            [string]$DestinationPath
-        )
-
-        if (-not (Test-Path -LiteralPath $DestinationPath -PathType Leaf)) {
-            return $false
-        }
-
-        $sourceInfo = Get-Item -LiteralPath $SourcePath -ErrorAction Stop
-        $destinationInfo = Get-Item -LiteralPath $DestinationPath -ErrorAction Stop
-        if ($sourceInfo.Length -ne $destinationInfo.Length) {
-            return $false
-        }
-
-        $sourceHash = (Get-FileHash -LiteralPath $SourcePath -Algorithm SHA256 -ErrorAction Stop).Hash
-        $destinationHash = (Get-FileHash -LiteralPath $DestinationPath -Algorithm SHA256 -ErrorAction Stop).Hash
-        return $sourceHash -eq $destinationHash
     }
 
     $destinations = @(
@@ -161,7 +237,8 @@ function Copy-GitTemplateSnapshot {
     $results   = [System.Collections.Generic.List[object]]::new()
 
     try {
-        New-Item -ItemType Directory -Path $tempRoot -Force -ErrorAction Stop | Out-Null
+        # The temporary snapshot is required for both real runs and WhatIf previews.
+        New-Item -ItemType Directory -Path $tempRoot -Force -ErrorAction Stop -WhatIf:$false | Out-Null
 
         Write-Host "Cloning $RepositoryUrl ..."
         git clone --depth 1 $RepositoryUrl $clonePath
@@ -181,7 +258,7 @@ function Copy-GitTemplateSnapshot {
                         RelativePath = $_.FullName.Substring($cloneRootPrefix.Length).Replace('\', '/')
                     }
                 } |
-                Where-Object { Test-WhitelistMatch -RelativePath $_.RelativePath -Patterns $Whitelist }
+                Where-Object { _Test-WhitelistMatch -RelativePath $_.RelativePath -Patterns $Whitelist }
         )
 
         Write-Host ("Whitelisted files: {0}" -f $sourceFiles.Count)
@@ -215,6 +292,30 @@ function Copy-GitTemplateSnapshot {
             $removedAgentsFileCount = 0
 
             try {
+                $action = if ($ForceSkillReplacement) {
+                    'Remove the complete .agents tree and distribute the current template snapshot'
+                }
+                else {
+                    'Overlay the current template snapshot'
+                }
+
+                if (-not $PSCmdlet.ShouldProcess($destinationPath, $action)) {
+                    [void]$results.Add([pscustomobject][ordered]@{
+                        Status       = $DistributionStatus.NotApplied
+                        Project      = $projectName
+                        Destination  = $destinationPath
+                        ChangedCount = 0
+                        ChangedFiles = @()
+                        Details      = if ($WhatIfPreference) {
+                            'WhatIf preview only; no files changed'
+                        }
+                        else {
+                            'Distribution was not approved'
+                        }
+                    })
+                    continue
+                }
+
                 if ($ForceSkillReplacement) {
                     $resolvedDestinationPath = (Resolve-Path -LiteralPath $destinationPath -ErrorAction Stop).Path
                     $destinationPrefix = $resolvedDestinationPath.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
@@ -271,7 +372,7 @@ function Copy-GitTemplateSnapshot {
                     Write-Host ("Distributed {0} changed files -> {1}" -f $changedFiles.Count, $destinationPath)
                     $details = 'Template changes successfully distributed'
                     if ($ForceSkillReplacement) {
-                        $details = 'Strict skill replacement completed; the existing .agents tree was removed before distribution'
+                        $details = 'Strict skill replacement completed; .agents was recreated from the current template'
                     }
 
                     [void]$results.Add([pscustomobject][ordered]@{
@@ -308,7 +409,7 @@ function Copy-GitTemplateSnapshot {
     finally {
         if (Test-Path -LiteralPath $tempRoot) {
             try {
-                Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction Stop
+                Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction Stop -WhatIf:$false
             }
             catch {
                 Write-Warning ("Could not remove temporary clone directory {0}: {1}" -f $tempRoot, $_.Exception.Message)
@@ -368,13 +469,15 @@ $destinations = @(
         ForEach-Object { Join-Path $WorkspaceRoot $_ }
 )
 
-$distributionResults = @(
-    Copy-GitTemplateSnapshot `
-        -RepositoryUrl $templateUrl `
-        -DestinationPaths $destinations `
-        -Whitelist $whitelist `
-        -ForceSkillReplacement:$ForceSkillReplacement
-)
+$copyTemplateParameters = @{
+    RepositoryUrl         = $templateUrl
+    DestinationPaths      = $destinations
+    Whitelist             = $whitelist
+    ForceSkillReplacement = $ForceSkillReplacement
+    WhatIf                = $WhatIfPreference
+}
+
+$distributionResults = @(Copy-GitTemplateSnapshot @copyTemplateParameters)
 
 $report = [System.Collections.Generic.List[object]]::new()
 foreach ($result in $distributionResults) {
@@ -419,6 +522,7 @@ $statusOrder = @(
     $DistributionStatus.UpToDate
     $DistributionStatus.Missing
     $DistributionStatus.CopyFailed
+    $DistributionStatus.NotApplied
     $DistributionStatus.Candidate
     $DistributionStatus.ExplicitlyIgnored
 )
