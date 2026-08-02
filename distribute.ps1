@@ -1,13 +1,17 @@
 # Overlays agent instruction files from Eigenverft.Template.Agents into sibling repos.
-# Copy-only (no deletes): paths removed or renamed in the template intentionally remain
-# in target repositories, so local additional, project-specific, or older skills can coexist.
-# Distribution only creates or updates paths present in the current template; matching
-# relative paths are overwritten only when their content differs.
+# Copy-only by default: paths removed or renamed in the template intentionally remain in
+# target repositories, so local additional, project-specific, or older skills can coexist.
+# -ForceSkillReplacement removes each available target's complete .agents tree before the
+# overlay, producing a strict rollout without retaining local or obsolete .agents content.
+# Distribution creates or updates paths present in the current template; matching relative
+# paths are overwritten only when their content differs.
 # You run this script; it does not commit.
 
 [CmdletBinding()]
 param(
-    [string]$WorkspaceRoot
+    [string]$WorkspaceRoot,
+
+    [switch]$ForceSkillReplacement
 )
 
 if ([string]::IsNullOrWhiteSpace($WorkspaceRoot)) {
@@ -39,7 +43,9 @@ function Copy-GitTemplateSnapshot {
         [Parameter(Mandatory)]
         [string[]]$DestinationPaths,
 
-        [string[]]$Whitelist = @('*')
+        [string[]]$Whitelist = @('*'),
+
+        [switch]$ForceSkillReplacement
     )
 
     function Convert-GlobToRegex {
@@ -180,6 +186,15 @@ function Copy-GitTemplateSnapshot {
 
         Write-Host ("Whitelisted files: {0}" -f $sourceFiles.Count)
 
+        $sourceAgentsFiles = @(
+            $sourceFiles |
+                Where-Object { $_.RelativePath -ilike '.agents/*' }
+        )
+
+        if ($ForceSkillReplacement -and $sourceAgentsFiles.Count -eq 0) {
+            throw 'Strict skill rollout requires at least one whitelisted .agents file in the template.'
+        }
+
         foreach ($destinationPath in $destinations) {
             $projectName = Split-Path -Path $destinationPath -Leaf
 
@@ -197,8 +212,35 @@ function Copy-GitTemplateSnapshot {
             }
 
             $changedFiles = [System.Collections.Generic.List[string]]::new()
+            $removedAgentsFileCount = 0
 
             try {
+                if ($ForceSkillReplacement) {
+                    $resolvedDestinationPath = (Resolve-Path -LiteralPath $destinationPath -ErrorAction Stop).Path
+                    $destinationPrefix = $resolvedDestinationPath.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+                    $targetAgentsPath = [System.IO.Path]::GetFullPath(
+                        (Join-Path $resolvedDestinationPath '.agents')
+                    )
+
+                    if (-not $targetAgentsPath.StartsWith(
+                        $destinationPrefix,
+                        [System.StringComparison]::OrdinalIgnoreCase
+                    )) {
+                        throw "Resolved .agents replacement path escaped its destination: $targetAgentsPath"
+                    }
+
+                    if (Test-Path -LiteralPath $targetAgentsPath) {
+                        $removedAgentsFileCount = @(
+                            Get-ChildItem -LiteralPath $targetAgentsPath -Recurse -File -Force -ErrorAction Stop
+                        ).Count
+
+                        Write-Host ("Removing existing .agents tree -> {0}" -f $targetAgentsPath)
+                        Remove-Item -LiteralPath $targetAgentsPath -Recurse -Force -ErrorAction Stop
+                    }
+
+                    New-Item -ItemType Directory -Path $targetAgentsPath -ErrorAction Stop | Out-Null
+                }
+
                 foreach ($source in $sourceFiles) {
                     $destinationFile = Join-Path $destinationPath $source.RelativePath
                     if (Test-FileContentEqual -SourcePath $source.FullName -DestinationPath $destinationFile) {
@@ -227,13 +269,18 @@ function Copy-GitTemplateSnapshot {
                 }
                 else {
                     Write-Host ("Distributed {0} changed files -> {1}" -f $changedFiles.Count, $destinationPath)
+                    $details = 'Template changes successfully distributed'
+                    if ($ForceSkillReplacement) {
+                        $details = 'Strict skill replacement completed; the existing .agents tree was removed before distribution'
+                    }
+
                     [void]$results.Add([pscustomobject][ordered]@{
                         Status       = $DistributionStatus.Distributed
                         Project      = $projectName
                         Destination  = $destinationPath
                         ChangedCount = $changedFiles.Count
                         ChangedFiles = $changedFiles.ToArray()
-                        Details      = 'Template changes successfully distributed'
+                        Details      = $details
                     })
                 }
             }
@@ -246,7 +293,12 @@ function Copy-GitTemplateSnapshot {
                     Destination  = $destinationPath
                     ChangedCount = $changedFiles.Count
                     ChangedFiles = $changedFiles.ToArray()
-                    Details      = "Template could not be fully distributed: $errorMessage"
+                    Details      = if ($ForceSkillReplacement) {
+                        "Strict skill replacement could not be completed after removing $removedAgentsFileCount existing .agents file(s): $errorMessage"
+                    }
+                    else {
+                        "Template could not be fully distributed: $errorMessage"
+                    }
                 })
             }
         }
@@ -320,7 +372,8 @@ $distributionResults = @(
     Copy-GitTemplateSnapshot `
         -RepositoryUrl $templateUrl `
         -DestinationPaths $destinations `
-        -Whitelist $whitelist
+        -Whitelist $whitelist `
+        -ForceSkillReplacement:$ForceSkillReplacement
 )
 
 $report = [System.Collections.Generic.List[object]]::new()
