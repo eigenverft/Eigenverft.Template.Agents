@@ -13,4 +13,4 @@ This file is the authoritative mapping from normalized, lowercase source-code fi
 | `.cs`, `.csx` | `csharp.md` |
 | `.ps1`, `.psm1` | `powershell.md` |
 
-Each selected language-specific rule file may contain one or more reportable stable-ID rules using the rule package contract in `SKILL.md`. Apply every selected language rule. Use `common.md` for shared processing and report only applicable language rules.
+Each selected language-specific rule file may contain one or more reportable stable-ID rules using the rule package contract in `SKILL.md`. Review every selected language rule. Use `common.md` for shared processing and report only concrete violations.

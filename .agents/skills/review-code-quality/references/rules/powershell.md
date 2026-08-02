@@ -43,7 +43,7 @@ The primary name of a PowerShell function should use a singular noun.
 
 ### `PS006`: ShouldProcess Is Not Implemented By Default
 
-PowerShell functions should not declare `SupportsShouldProcess` or implement `WhatIf` or `Confirm` behavior by default. When the function's behavior requires it, place a one-line comment immediately before the function declaration that explains why, then implement only the justified behavior.
+PowerShell functions should not declare `SupportsShouldProcess` or implement `WhatIf` or `Confirm` behavior by default. An exception is compliant only when the function's behavior requires it, a one-line comment immediately before the function declaration explains why, and the implementation contains only the justified behavior.
 
 ### `PS007`: Parameters Do Not Bind From The Pipeline
 
@@ -120,9 +120,9 @@ PowerShell syntax, identifiers, string literals, and other executable code must 
 
 PowerShell implementations must be lean, readable, and reviewer-friendly. Include inline comments when they help an external reviewer understand the code, and keep each inline comment brief.
 
-### `PS016`: Changes Stay Within The Requested Scope
+### `PS016`: Review Stays Within The Requested Scope
 
-Do not make changes to PowerShell code outside the current task's requested scope. Report untouched pre-existing errors encountered within that scope in the post-table list defined by `common.md` instead of changing them.
+Review only PowerShell code within the user-requested scope. Do not expand the review solely to search for unrelated pre-existing violations. Report qualifying violations found within that scope through `common.md`; do not create a separate pre-existing-issues list.
 
 ### `PS017`: C Style Ternary Operators Are Forbidden
 
