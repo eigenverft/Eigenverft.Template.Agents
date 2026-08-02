@@ -1,0 +1,4 @@
+interface:
+  display_name: "Execute Repo Workspace Sync and Publish"
+  short_description: "Discover, synchronize, and publish Git repositories"
+  default_prompt: "Use $execute-repo-workspace-sync-and-publish to discover the repository or workspace targets, proportionally assess the publication intent of their actual unpublished Git state: after safety and completeness checks, treat tracked modifications, renames, and deletions as positive publication candidates, and conventional safe project-scoped settings as positive candidates even without a prior tracked counterpart or explicit per-file policy; synchronize and publish it with normal pushes, verify every remote head, and do not add unrelated builds, tests, product work, or artifact publication."

@@ -1,7 +1,8 @@
 # Overlays agent instruction files from Eigenverft.Template.Agents into sibling repos.
-# Copy-only (no deletes): project-specific files under AGENTS/RUNBOOK/ etc. stay unless
-# the template ships the same relative path (then it overwrites).
-# Only missing or content-different template files are copied.
+# Copy-only (no deletes): paths removed or renamed in the template intentionally remain
+# in target repositories, so local additional, project-specific, or older skills can coexist.
+# Distribution only creates or updates paths present in the current template; matching
+# relative paths are overwritten only when their content differs.
 # You run this script; it does not commit.
 
 [CmdletBinding()]
