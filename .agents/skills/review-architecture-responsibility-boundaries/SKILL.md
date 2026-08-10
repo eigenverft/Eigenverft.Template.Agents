@@ -1,10 +1,27 @@
-Review the architecture with primary focus on **responsibility boundaries, separation of concerns, ownership, and lifecycle design**.
+---
+name: review-architecture-responsibility-boundaries
+description: Review implementation architecture for evidence-based responsibility, ownership, separation-of-concerns, and lifecycle-boundary concerns. Use when the user explicitly requests an architecture review focused on where responsibilities should remain together or be separated. Inspect actual source and behavior, report only concrete concerns, and keep repository state unchanged.
+---
 
-Do not assume that the current decomposition is either too large or too small.
+# Review Architecture Responsibility Boundaries
 
-Do not invent missing abstractions, responsibilities, or architectural problems merely because they are common in similar systems.
+## Overview
 
-Only report a concern when it is supported by concrete code structure, state ownership, control flow, lifecycle behavior, or dependency relationships in the implementation.
+Review the architecture with primary focus on responsibility boundaries, separation of concerns, ownership, and lifecycle design. Determine whether responsibilities are separated along meaningful boundaries while logic that protects one shared invariant remains together.
+
+This is a read-only review skill. Inspect the selected implementation and return the required report in chat. Do not edit files, change dependencies, modify Git state, or perform a refactoring.
+
+## Activation And Scope
+
+Use this skill only when the user explicitly requests an architecture review focused on responsibility, ownership, separation of concerns, or lifecycle boundaries.
+
+Resolve the requested project, subsystem, diff, or repository scope before reviewing. Read the actual implementation first. Consult tests, configuration, documentation, and history only where they materially establish an architectural contract, lifecycle, dependency, or behavior. State important exclusions instead of silently implying complete coverage.
+
+Do not assume that the current decomposition is either too large or too small. Do not invent missing abstractions, responsibilities, or architectural problems merely because they are common in similar systems.
+
+Only report a concern when it is supported by concrete code structure, state ownership, control flow, lifecycle behavior, or dependency relationships in the implementation. Zero findings is a valid result.
+
+## Review Principles
 
 The main question is:
 
@@ -18,15 +35,15 @@ Useful criteria include:
 - composition instead of unnecessary monolithic orchestration
 - distinct lifecycle ownership
 
-A class does not need to perform literally only one operation. It should instead have a **clear responsibility and a coherent reason to change**.
+A class does not need to perform literally only one operation. It should instead have a clear responsibility and a coherent reason to change.
 
-As a general heuristic:
+As general heuristics:
 
 > Separate components when they have meaningfully different lifecycles, failure semantics, ownership, consumers, or reasons to change.
 
 > Keep components together when they jointly implement or protect one invariant and separating them would mainly create forwarding layers or distributed state.
 
-When reviewing, look for concrete evidence of either direction.
+When reviewing, look for concrete evidence in either direction.
 
 Examples of potentially meaningful separation:
 
@@ -59,49 +76,37 @@ For every architectural concern, explain:
 
 1. the concrete code or behavior that creates the concern;
 2. which responsibilities or ownership boundaries are involved;
-3. why the current boundary causes an actual maintenance, correctness, lifecycle, or usability problem;
+3. why the current boundary causes an actual maintenance, correctness, lifecycle, or usability problem; and
 4. whether changing it is important or merely optional.
 
-If the current separation is appropriate, say so explicitly.
+If the current separation is appropriate, say so explicitly. If no meaningful responsibility-boundary issue exists, return no findings without inventing work.
 
-If no meaningful responsibility-boundary issue exists, it is completely acceptable to return no findings.
+## Required Review Output
 
-# Required review output
-
-## Review context
+### Review Context
 
 Begin the report with a compact review context.
-
-Use this format:
 
 | Item | Value |
 | --- | --- |
 | Project / subsystem | What was reviewed |
 | Branch | Current branch, if available |
 | Revision | Commit / HEAD reviewed, if available |
-| Comparison base | Base branch or revision, when the review is based on a diff; otherwise `Current state` |
+| Comparison base | Base branch or revision for a diff review; otherwise `Current state` |
 | Review mode | For example `Read-only architecture review` |
 | Scope exclusions | Important areas intentionally not reviewed in depth, or `None` |
 
-Keep this factual and short.
-
-Do not list every reviewed file, command, tool invocation, or repository path unless one of those details is necessary to understand the review.
-
-If branch or revision information is unavailable, state `Unknown` rather than guessing.
+Keep this factual and short. Do not list every reviewed file, command, tool invocation, or repository path unless needed to understand the review. If branch or revision information is unavailable, state `Unknown` rather than guessing.
 
 Then add one or two sentences describing the actual review scope in plain language.
 
 Example:
 
-> The review focused on the runtime architecture of the configuration subsystem, especially responsibility boundaries, state ownership and lifecycle interactions. Tests were consulted only where necessary to confirm an architectural contract; detailed test-quality review was outside scope.
+> The review focused on the runtime architecture of the configuration subsystem, especially responsibility boundaries, state ownership, and lifecycle interactions. Tests were consulted only where necessary to confirm an architectural contract; detailed test-quality review was outside scope.
 
----
-
-## 0. Architecture verdict
+### 0. Architecture Verdict
 
 Start the substantive review with the overall architecture before reporting individual findings.
-
-Answer these questions explicitly:
 
 | Question | Assessment |
 | --- | --- |
@@ -112,39 +117,25 @@ Answer these questions explicitly:
 
 Then provide a short explanation.
 
-If significant restructuring is recommended, describe that first.
+If significant restructuring is recommended, describe that first. Do not spend substantial effort on local findings that would become irrelevant under the recommended restructuring.
 
-Do not spend substantial effort on local findings that would become irrelevant under the recommended restructuring.
+The architecture verdict takes precedence over individual findings. If the current architecture is fundamentally sound, say so clearly before discussing local defects.
 
-The architecture verdict takes precedence over individual findings.
-
-If the current architecture is fundamentally sound, say so clearly before discussing local defects.
-
----
-
-## 1. Responsibility map
+### 1. Responsibility Map
 
 Briefly describe the major components and the responsibility each one owns.
-
-Use this format:
 
 | Component | Primary responsibility | Lifecycle / state owned | Assessment |
 | --- | --- | --- | --- |
 | ... | ... | ... | Appropriate / Questionable / Unclear |
 
-Keep this section concise.
-
-Its purpose is to demonstrate that the reviewer understood the actual architecture before criticizing it.
+Keep this section concise. Its purpose is to demonstrate that the reviewer understood the actual architecture before criticizing it.
 
 Do not list every class merely because it exists. Focus on components that represent meaningful responsibility or lifecycle boundaries.
 
----
-
-## 2. Findings
+### 2. Findings
 
 Only report findings supported by concrete implementation evidence.
-
-Use numbered IDs and this format:
 
 | ID | Severity | Area | Finding | Concrete impact | Architecture-dependent |
 | --- | --- | --- | --- | --- | --- |
@@ -152,43 +143,35 @@ Use numbered IDs and this format:
 
 Allowed severity levels:
 
-- **Blocker** — architecture or correctness issue that should prevent merge or release.
-- **Important** — real issue that should normally be corrected before merge or release.
-- **Moderate** — real issue worth correcting, but not necessarily release-blocking.
-- **Minor** — small concrete improvement; omit these unless they meaningfully improve the reviewed responsibility boundaries.
+- **Blocker** - architecture or correctness issue that should prevent merge or release.
+- **Important** - real issue that should normally be corrected before merge or release.
+- **Moderate** - real issue worth correcting, but not necessarily release-blocking.
+- **Minor** - small concrete improvement; omit these unless they meaningfully improve the reviewed responsibility boundaries.
 
-Do not create findings solely to populate every severity level.
-
-Zero findings is a valid result.
+Do not create findings solely to populate every severity level. Zero findings is a valid result.
 
 For each finding, explain:
 
-### F1 — Short descriptive title
+#### F1 - Short Descriptive Title
 
 **Evidence**
 
-Describe the concrete implementation behavior, ownership relationship, state transition, dependency, or lifecycle sequence that demonstrates the issue.
-
-Reference specific classes, methods, fields, or control flow where useful.
+Describe the concrete implementation behavior, ownership relationship, state transition, dependency, or lifecycle sequence that demonstrates the issue. Reference specific classes, methods, fields, or control flow where useful.
 
 **Responsibility boundary**
 
-Explain which responsibilities or ownership boundaries are involved.
-
-State whether the problem is caused by:
+Explain which responsibilities or ownership boundaries are involved. State whether the problem is caused by:
 
 - responsibilities that should be separated but are mixed;
 - responsibilities that should remain together but are fragmented;
 - unclear ownership;
 - incomplete lifecycle ownership;
-- inappropriate layer coupling;
-- or another concrete boundary problem.
+- inappropriate layer coupling; or
+- another concrete boundary problem.
 
 **Concrete impact**
 
-Explain the real consequence.
-
-Examples include:
+Explain the real consequence, such as:
 
 - correctness failure
 - invalid runtime state
@@ -203,39 +186,25 @@ Do not use hypothetical impact without a concrete path from the current implemen
 
 **Smallest reasonable correction**
 
-Recommend the smallest change that repairs the responsibility or lifecycle boundary.
-
-Do not propose broader restructuring when a local correction is sufficient.
+Recommend the smallest change that repairs the responsibility or lifecycle boundary. Do not propose broader restructuring when a local correction is sufficient.
 
 If the finding depends on keeping the current architecture, explicitly mark it as architecture-dependent.
 
----
+### 3. Positive Architectural Observations
 
-## 3. Positive architectural observations
-
-Briefly identify responsibility boundaries that are particularly well chosen.
-
-Only include observations that are useful for future maintenance.
-
-Examples:
+Briefly identify responsibility boundaries that are particularly well chosen. Only include observations that are useful for future maintenance, such as:
 
 - responsibilities that should remain together because they protect one invariant;
 - components that should remain separate because they have distinct lifecycles;
 - abstractions that may look small but own a meaningful lifecycle boundary;
-- lower-level primitives that are reusable independently of higher-level orchestration;
+- lower-level primitives that are reusable independently of higher-level orchestration; or
 - clean separation between persistence, mutation, observation, and runtime control.
 
-For every positive observation, briefly explain **why the boundary is meaningful**.
+For every positive observation, briefly explain why the boundary is meaningful. This section should help prevent a later reviewer from accidentally undoing intentional architecture. Do not add generic praise.
 
-This section should help prevent a later reviewer from accidentally undoing intentional architecture.
+### 4. Final Architecture Assessment
 
-Do not add generic praise.
-
----
-
-## 4. Final architecture assessment
-
-Classify the overall architecture using one of the following:
+Classify the overall architecture using exactly one of:
 
 - **Appropriately separated**
 - **Mostly appropriately separated**
@@ -244,21 +213,15 @@ Classify the overall architecture using one of the following:
 - **Mixed**
 - **Insufficient evidence**
 
-Base this classification only on evidence present in the reviewed implementation.
+Base this classification only on evidence present in the reviewed implementation and briefly explain it. The number of classes, interfaces, files, or lines of code is not evidence by itself.
 
-Briefly explain the classification.
-
-The number of classes, interfaces, files, or lines of code is not evidence by itself.
-
----
-
-## 5. Final decision
+### 5. Final Decision
 
 Finish with exactly one overall decision:
 
-- **Architecture sound — no restructuring needed**
-- **Architecture sound — local fixes recommended**
-- **Architecture mostly sound — targeted boundary changes recommended**
+- **Architecture sound - no restructuring needed**
+- **Architecture sound - local fixes recommended**
+- **Architecture mostly sound - targeted boundary changes recommended**
 - **Architecture requires restructuring before local fixes**
 - **Insufficient evidence**
 
