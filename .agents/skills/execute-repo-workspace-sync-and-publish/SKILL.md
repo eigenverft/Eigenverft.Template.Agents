@@ -404,6 +404,8 @@ When every condition is proven, remove the local branch with an expected-OID gua
 
 If any commit is reachable only from the retained local branch, if it has moved since the baseline, or if any other condition is unresolved, keep it. Report the number and short OIDs of locally unique commits, whether it is checked out, and the exact reason retirement was blocked. Do not publish it merely to restore symmetry. A retained unresolved remote-deleted branch blocks complete synchronization unless concrete evidence classifies it as deliberately local.
 
+Do not perform a broader content-relocation or equivalence investigation by default when the automatic retirement proof fails. When repository evidence suggests that a deeper read-only analysis could determine whether the retained branch's work is preserved elsewhere, offer an optional follow-up action for that branch. If selected, the analysis may inspect commit ancestry, unique commits, complete reflog reachability, and exact Git-blob matches in surviving branches or relocated repository-owned paths. Report a short evidence-based recommendation to remove the branch, keep it, or leave the result unresolved. This follow-up analysis must not switch a checkout, delete a ref, change branch configuration, publish anything, or otherwise mutate state.
+
 #### Ambiguous Or Blocked
 
 Perform no branch mutation or publication. Record the exact ambiguity or safety condition. Under the default all-or-nothing preparation gate, one unresolved relevant branch blocks publication for the repository; best-effort branch publication requires explicit user authority and must be reported as partial.
@@ -594,5 +596,9 @@ Across the tables, a short target-resolution preface, and any necessary follow-u
 - preservation result for every selected checkout and pre-existing worktree
 - remote-deleted local branches retired or retained with reasons, confirmation that no remote branch was deleted by the workflow, and that tags were outside the run
 - per-repository result in the table and the overall selected-workspace result outside it
+
+When at least one retained remote-deleted branch qualifies for the optional deeper analysis from step 6, append a concise `## Suggested Follow-up Actions` section. Group the actions dynamically by repository and branch, assign letters and numbers only as convenient references, and describe each action as an analysis that will return a removal recommendation without changing repository state. Do not perform the analysis merely because it is listed.
+
+Accept any unambiguous user selection of those actions. References such as `A1`, branch or repository names, and natural-language replies such as `yes, all`, `both`, or `analyze the first one` are equally valid when their meaning is clear. Do not require the user to reproduce the displayed identifier syntax; ask only when the requested selection is genuinely ambiguous.
 
 Do not repeat facts in prose when the table already communicates them clearly. Do not emit a full branch inventory, repeat identical fetch or verification actions in every repository row, list unchanged OIDs, or create detail rows for routine synchronized branches. Add detail after the table only when it is needed for surprising discovery, branch retirement, divergence, conflicts, safety-stash or safety-branch recovery, partial publication, authentication problems, remaining work, failed validation, failed push, or a concrete next action. Never reproduce secret values in the report.
