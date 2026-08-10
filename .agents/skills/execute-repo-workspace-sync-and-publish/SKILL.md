@@ -1,6 +1,6 @@
 ---
 name: execute-repo-workspace-sync-and-publish
-description: Discover one or more Git repositories from explicit targets, container directories, current context, workspace roots, or equivalent workspace interfaces, then safely synchronize and publish their complete intended shareable state across every relevant local and remote branch. Explicit activation authorizes proportional intent assessment, complete branch inventory, unambiguous tracking-branch creation, safe integration without history rewriting, commits for understood publishable work, normal branch pushes, and independent verification of actual remote heads while preserving every checkout and working change. Use for single-repository, multi-repository, workspace handoff, or sync-everything-and-push requests; do not use for local-only commits, branch-to-main promotion, tag publication, or force-push workflows.
+description: Discover one or more Git repositories from explicit targets, container directories, current context, workspace roots, or equivalent workspace interfaces, then safely synchronize and publish their complete intended shareable state across every relevant local and remote branch. Explicit activation authorizes proportional intent assessment, complete branch inventory, unambiguous tracking-branch creation, safe retirement of strictly proven redundant local branches after confirmed remote deletion, integration without history rewriting, commits for understood publishable work, normal branch pushes, and independent verification of actual remote heads while preserving every checkout and working change. Use for single-repository, multi-repository, workspace handoff, or sync-everything-and-push requests; do not use for local-only commits, branch-to-main promotion, tag publication, or force-push workflows.
 ---
 
 # Execute Repo Workspace Sync and Publish
@@ -34,12 +34,12 @@ Do not use this skill for:
 - cloning or creating a local checkout from a remote-only repository unless separately requested
 - an unresolved target set
 
-Explicit activation authorizes read-only discovery, complete branch/ref inventory, all-heads fetch with prune, unambiguous same-named local tracking-branch creation and upstream configuration, safe branch integration without history rewriting, local commits for understood in-scope work, normal pushes of positively classified branches to unambiguous destinations, and branch-by-branch verification. It does not authorize:
+Explicit activation authorizes read-only discovery, complete branch/ref inventory, all-heads fetch with prune, unambiguous same-named local tracking-branch creation and upstream configuration, safe retirement of a strictly proven redundant remote-deleted local branch, safe branch integration without history rewriting, local commits for understood in-scope work, normal pushes of positively classified branches to unambiguous destinations, and branch-by-branch verification. It does not authorize:
 
 - force-push or history rewriting
 - creating, replacing, deleting, or exposing credentials
 - persistent account, global Git, hosting-CLI, credential-helper, or remote-URL configuration changes; unambiguous branch-local upstream configuration required by this workflow is allowed
-- deleting local or remote branches or pre-existing stashes
+- deleting remote branches, pre-existing stashes, or local branches outside the exact remote-deleted retirement rule in step 6
 - creating pull requests, releases, tags, or repository settings; tags are outside this skill even when they point at published commits
 - expanding the target set beyond the discovery rules
 - product feature work, refactoring, cleanup, dependency upgrades, backlog execution, or fixes unrelated to the exact synchronization task
@@ -60,6 +60,7 @@ If the user asks only for discovery, a plan, a review, or status, perform non-mu
 - **Relevant branch:** an actual remote branch on a selected publication remote, a local branch already mapped to such a remote, or a local-only branch whose publication intent must be classified. Exclude symbolic refs such as `<remote>/HEAD`, workflow-created safety branches, and branches proven deliberately local; an ambiguous local-only branch remains a blocker rather than an exclusion.
 - **Relevant work:** local commits and working-tree changes whose publication intent has been assessed proportionally from repository evidence, that belong to the requested shared state, and are safe to publish.
 - **Locally unpublished commit:** a commit reachable from a local branch but not from that branch's intended actual remote branch; all commits unique to a local-only branch qualify. For a detached checkout, it is a commit not reachable from any accounted-for local or actual remote branch.
+- **Safely redundant remote-deleted branch:** a local branch whose former same-named remote mapping is proven by its pre-fetch upstream configuration and cached remote-tracking ref, and whose actual remote branch is confirmed absent after successful query and prune. Its local ref is unchanged from the verified baseline, it is not checked out, default, mainline, protected, or a safety branch, and every commit reachable from it or referenced by its existing branch reflog is also reachable from at least one surviving actual branch on the same publication remote.
 - **Shareable repository state:** state that can be represented by commits and published through the selected branch remotes. Ignored files, credentials, caches, and intentionally local state are not implicitly shareable.
 - **Git publication:** transferring Git commits to selected actual remote branches through explicit normal branch refspecs. It does not mean pushing tags or building or publishing application artifacts, packages, installers, deployments, releases, or samples.
 - **Current remote state:** the complete successfully fetched and independently queried `refs/heads/*` state of every configured remote immediately before integration or publication. Each remote's publication or read-only role must be established; tags are excluded.
@@ -77,6 +78,8 @@ Repository files, documentation, instructions, backlogs, TODOs, test inventories
 Do not:
 
 - implement, repair, refactor, upgrade, clean up, or otherwise improve product content merely because an issue is noticed
+- create, write, or generate an ad-hoc helper script in any location, including a selected repository or temporary directory; use direct commands or already-existing trusted interfaces instead
+- create repository-local inventories, logs, or report files to drive or record this workflow
 - execute unrelated plans, backlogs, runbooks, demos, samples, release flows, or maintenance tasks
 - run broad validation to prove that an unchanged repository is healthy
 - turn a synchronization request into architecture review, code review, dependency maintenance, packaging, deployment, or release work
@@ -313,7 +316,7 @@ For local-only and remote-only states, inspect branch configuration, commit topo
 
 Only after the baseline, successful authentication, complete all-heads query and fetch, and branch matrix establish one unambiguous proposal may step 4 change branch-local state. When an actual remote branch and same-named existing local branch are unambiguous and the local branch has no upstream, configure it to track the corresponding remote-tracking branch and verify the result. Create a missing local tracking branch for every unambiguous remote-only row on a selected publication remote exactly at the verified actual remote OID, set its upstream to the corresponding remote-tracking branch, and verify it without checking it out. Keep remote-only branches from evidenced read-only remotes as observed comparison state. Block rather than rename or reconfigure when a local ref already exists with incompatible casing, a prefix collision such as `name` versus `name/topic`, a different upstream, or another remote mapping.
 
-When prune reveals a remote-deleted branch, never delete the retained local branch and never republish it automatically. Treat remote deletion as strong contrary evidence to publication. Require explicit user intent or unambiguous repository evidence before recreating the actual remote branch; otherwise report the local branch as held or blocked.
+When prune reveals a remote-deleted branch, never republish it automatically. Treat remote deletion as strong evidence that the branch was completed or intentionally closed elsewhere. Preserve its former mapping and local OID for the step 6 retirement decision; do not delete it during fetch or classification.
 
 ### 5. Preserve Working Changes When Integration Requires A Clean Tree
 
@@ -388,7 +391,18 @@ After the verified local tracking branch has been created in step 4, reclassify 
 
 #### Remote Deleted
 
-Keep every local branch. Do not recreate the deleted actual remote branch without explicit intent or unambiguous repository evidence, and never delete the local branch automatically. Report its prior upstream, retained local OID, unpublished commits, and required user decision when it cannot be positively classified as deliberately local.
+Never recreate the deleted actual remote branch automatically. Determine whether the retained local branch is safely redundant by checking all of the following against the refreshed complete remote branch set:
+
+- the pre-fetch baseline proves a same-named upstream mapping and records its cached remote-tracking OID; do not misstate that cached OID as a previously verified actual remote head
+- a successful independent query and prune confirm that exact actual remote branch is absent
+- the local branch ref still has its expected OID and is not checked out in any worktree
+- it is not the repository default, a mainline or protected branch, or a workflow-created safety branch
+- no merge, rebase, cherry-pick, revert, bisect, stash restoration, or other operation depends on it
+- inspect the local branch's complete reflog when one exists; every commit reachable from the branch or referenced by that reflog is also reachable from at least one surviving actual branch on the same publication remote
+
+When every condition is proven, remove the local branch with an expected-OID guard and remove only its corresponding stale branch-local upstream configuration. Do not use force deletion to bypass a failed proof. Record the removed branch name and final local OID, then classify the row as **retired**. This is normal cross-computer cleanup of a branch whose work is already preserved by surviving remote history.
+
+If any commit is reachable only from the retained local branch, if it has moved since the baseline, or if any other condition is unresolved, keep it. Report the number and short OIDs of locally unique commits, whether it is checked out, and the exact reason retirement was blocked. Do not publish it merely to restore symmetry. A retained unresolved remote-deleted branch blocks complete synchronization unless concrete evidence classifies it as deliberately local.
 
 #### Ambiguous Or Blocked
 
@@ -492,6 +506,7 @@ Confirm:
 
 - every relevant actual remote branch has the required same-named local tracking branch with the intended upstream
 - every relevant local branch has the intended actual remote counterpart
+- every confirmed remote-deleted branch was either safely retired, positively classified as deliberately local, or remains an explicit blocker
 - for every relevant mapping, local, refreshed remote-tracking, and actual remote OIDs are identical and ahead and behind are both zero
 - no unexpected new remote branch, stale unaccounted remote-tracking ref, divergence, ambiguous mapping, or unexplained local-only branch remains
 - every deliberately local branch has concrete classification evidence and is reported without publication
@@ -516,19 +531,22 @@ Only then mark this repository fully synchronized. Verification of only the curr
 - If a branch is divergent and a normal evidence-supported merge cannot be completed without changing another checkout or guessing at behavior, preserve the original local branch head through the safety branch and block that branch.
 - If a required branch is checked out in an unselected or unsafe worktree, do not update its ref underneath that checkout.
 - If local-only branch publication intent or privacy is unresolved, do not push it and do not call the repository fully synchronized.
-- If a previously remote branch is deleted, prune the stale remote-tracking ref but neither delete its local branch nor recreate the actual remote branch automatically.
-- If tracking-branch creation cannot place the exact same-named local branch at the verified actual remote OID with the intended upstream, preserve and report any partially created local ref and its exact state; never delete or overwrite a local branch automatically.
+- If a previously remote branch is deleted, never recreate the actual remote branch automatically; retire its local branch only when every step 6 proof succeeds.
+- If a remote-deleted local branch changes during retirement checks or expected-OID deletion fails, preserve it, re-inventory, and report the blocker.
+- If tracking-branch creation cannot place the exact same-named local branch at the verified actual remote OID with the intended upstream, preserve and report any partially created local ref and its exact state; never delete or overwrite a local branch as recovery from tracking-branch creation.
 - If integration fails, preserve the original local branch head through the safety branch and abort only operations started by this workflow when safe.
 - If stash restoration fails, keep the stash and do not claim that local work was fully restored.
 - If validation fails, report the exact failed check and do not hide it behind a successful push.
 - If push fails, never force it; preserve local commits and report the visible reason.
 - If account selection is ambiguous or persistent shared configuration would be required, ask before switching.
-- If a required operation would need branch deletion, checkout switching, rebase, destructive reset, history rewriting, force-push, or tag handling, do not perform it under this skill.
+- If a required operation would need remote-branch deletion, local-branch deletion outside the exact step 6 retirement rule, checkout switching, rebase, destructive reset, history rewriting, force-push, or tag handling, do not perform it under this skill.
 - In a multi-repository run, never imply atomic rollback after any repository has been published.
 
 ## Final Report
 
-For one repository, keep a successful report compact. For a multi-repository run, start with a concise result table containing one row for every selected repository and every resolved repository candidate that was skipped or blocked. The table must contain at least these columns:
+Compose the final report directly from the verified workflow facts and this reporting contract. Do not delegate its structure to a helper script, copy a tool-native table as the result, or let raw command output determine the layout.
+
+For one repository, keep a successful report compact. For a multi-repository run, start with a concise result table containing one row for every selected repository and every exceptional resolved candidate that was skipped or blocked. Group ordinary non-repository or unsupported immediate children by reason and count outside the table instead of adding one row per path; list individual paths only when needed to explain an unexpected, ambiguous, or actionable case. The table must contain at least these columns:
 
 | Repository | Status vorher | Maßnahme | Status nachher | Ergebnis |
 | --- | --- | --- | --- | --- |
@@ -536,30 +554,36 @@ For one repository, keep a successful report compact. For a multi-repository run
 Use the columns as follows:
 
 - **Repository:** identify the repository unambiguously; add compact branch-coverage counts when useful.
-- **Status vorher:** record the initial branch-matrix summary across all relevant local, remote-tracking, and actual remote branches, concise status for every selected worktree, and initial branch or `HEAD` values needed to explain changes.
-- **Maßnahme:** state only actions actually performed, such as `keine`, `Fetch all heads`, `Tracking-Branch erstellt`, `Fast-forward`, `Merge`, `Commit erstellt`, `Push`, or `blockiert`; list multiple actions in execution order when necessary.
-- **Status nachher:** record the final all-branch ahead/behind and mapping summary, concise worktree status, independent all-heads remote-verification result, and final branch or `HEAD` values when relevant.
-- **Ergebnis:** use exactly one of `vollständig synchronisiert`, `teilweise veröffentlicht`, `blockiert`, or `übersprungen`. Use `vollständig synchronisiert` only after the existing verification criteria are satisfied; the other labels summarize incomplete, blocked, or intentionally skipped outcomes without changing those criteria.
+- **Status vorher:** give one compact branch synopsis. Use `L<n>/R<n>` for the counts of relevant local branches and relevant actual remote branches on publication remotes. For a routine repository use `L4/R4; alle 0/0; sauber`, where `alle 0/0` means every mapped branch is zero ahead and zero behind rather than an aggregate commit count. Name only branches that differ, for example `L2/R1; main 0/0; feature/x lokal vorhanden, Remote fehlt (+2)`. Add initial branch or `HEAD` values only when they explain a change.
+- **Maßnahme:** state only material changes such as `keine Änderung`, `Tracking-Branch erstellt`, `lokalen Branch entfernt`, `Fast-forward`, `Merge`, `Commit erstellt`, `Push`, or `blockiert`. Routine all-head queries, fetches, authentication checks, and verification are execution evidence, not separate per-repository measures; summarize them once outside the table when useful.
+- **Status nachher:** use the same compact branch synopsis and add concise worktree and independent remote-verification state. Name individual branches only when they changed or remain exceptional.
+- **Ergebnis:** for an end-to-end execution run, use exactly one of `vollständig synchronisiert`, `teilweise veröffentlicht`, `blockiert`, or `übersprungen`. Use `vollständig synchronisiert` only after the existing verification criteria are satisfied; the other labels summarize incomplete, blocked, or intentionally skipped outcomes without changing those criteria. For an explicitly non-mutating discovery, status, planning, or simulation run, use the following exact meanings:
+  - `kein Handlungsbedarf`: an independent live query covered the complete actual `refs/heads/*` namespace of every publication remote; all relevant local branch heads, remote-tracking refs, and actual remote heads match, every mapped branch is zero ahead and zero behind, and no working change or branch classification requires a synchronization action
+  - `Handlungsbedarf`: at least one concrete fetch, tracking, integration, commit, publication, retirement, or other synchronization action is required; state it in **Maßnahme**
+  - `blockiert`: a required or potentially required synchronization action cannot be selected safely because scope, intent, mapping, privacy, authentication, or another safety condition remains ambiguous
+  - `nicht vollständig ermittelbar`: the complete live actual-remote state or another required fact could not be obtained, so the run cannot determine whether action is required
+
+  Cached remote-tracking refs such as `origin/*` record only an earlier observation and cannot by themselves establish `kein Handlungsbedarf`; another machine may have changed the actual remote branches since the last fetch.
 
 When a status value was not obtained because a repository was skipped or blocked before that workflow stage, write `nicht ermittelt` with a concise reason instead of guessing.
 
-The repository table is the primary workspace summary. For every repository with more than one relevant branch, or with any local-only, remote-only, remote-deleted, divergent, ambiguous, held, or blocked branch, follow it with a compact branch table containing at least:
+The repository table is the primary workspace summary. Add a branch table only for branches that changed, were created or retired, were published, or remain local-only, remote-only, remote-deleted, divergent, ambiguous, held, or blocked. Multiple routine synchronized branches alone never justify a branch table.
 
 | Branch | Local | Upstream | Actual remote | Status vorher | Maßnahme | Status nachher | Ergebnis |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 
-Use one row per branch mapping and identify the remote in `Upstream` or `Actual remote`. Distinguish `origin/feature-x` as a remote-tracking ref from local `feature-x` as a local tracking branch. Include pruned stale refs and deliberately local branches with their terminal classification. Omit a redundant branch table only for a routine one-branch repository whose complete state is already clear in the repository row.
+Use one row per exceptional or actioned branch, not one row for every mapping. Identify the remote in `Upstream` or `Actual remote`. Distinguish `origin/feature-x` as a remote-tracking ref from local `feature-x` as a local tracking branch. Include retired branches, pruned stale refs, and deliberately local branches with their terminal classification. Keep routine synchronized mappings summarized by count in the repository row.
 
-Use branch-level `Ergebnis` values `synchronisiert`, `lokal belassen`, `blockiert`, or `übersprungen`. A read-only-remote observation may be `übersprungen` with its established remote role. These branch labels do not replace the required repository-level result.
+Use branch-level `Ergebnis` values `synchronisiert`, `entfernt`, `lokal belassen`, `blockiert`, or `übersprungen`. A read-only-remote observation may be `übersprungen` with its established remote role. These branch labels do not replace the required repository-level result.
 
 Across the tables, a short target-resolution preface, and any necessary follow-up details, include:
 
 - requested target and how it resolved
 - selected repositories and skipped or blocked candidates
-- complete local-branch, upstream, remote-tracking, and actual-remote branch coverage for each repository
+- complete local-branch, upstream, remote-tracking, and actual-remote coverage summarized by counts for each repository
 - fetched remotes, newly discovered actual remote branches, and pruned stale remote-tracking refs
 - initial authentication context and any isolated context selection
-- initial and final local, remote-tracking, and actual remote heads and ahead/behind state for every relevant branch
+- initial and final OIDs and ahead/behind state for changed, exceptional, or blocked branches; routine branches stay count-compressed
 - tracking branches created and whether fast-forward, merge, or no integration was used per branch
 - local-only branches published, deliberately retained locally, or blocked, with non-sensitive reasons
 - safety stash, safety branch, or temporary worktree created and its final state
@@ -568,7 +592,7 @@ Across the tables, a short target-resolution preface, and any necessary follow-u
 - explicit branch refspec pushes and independent all-heads remote-verification result
 - remaining local, excluded, incomplete, sensitive, or stashed work
 - preservation result for every selected checkout and pre-existing worktree
-- confirmation that no local or remote branch was deleted and tags were outside the run
+- remote-deleted local branches retired or retained with reasons, confirmation that no remote branch was deleted by the workflow, and that tags were outside the run
 - per-repository result in the table and the overall selected-workspace result outside it
 
-Do not repeat facts in prose when the table already communicates them clearly. Add detail after the table only when it is needed for surprising discovery, divergence, conflicts, safety-stash or safety-branch recovery, partial publication, authentication problems, remaining work, failed validation, failed push, or a concrete next action. Never reproduce secret values in the report.
+Do not repeat facts in prose when the table already communicates them clearly. Do not emit a full branch inventory, repeat identical fetch or verification actions in every repository row, list unchanged OIDs, or create detail rows for routine synchronized branches. Add detail after the table only when it is needed for surprising discovery, branch retirement, divergence, conflicts, safety-stash or safety-branch recovery, partial publication, authentication problems, remaining work, failed validation, failed push, or a concrete next action. Never reproduce secret values in the report.
