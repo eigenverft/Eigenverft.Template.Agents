@@ -1,27 +1,27 @@
 ---
-name: review-repository-intent-archaeology
-description: Read-only, source-first discovery of implemented capabilities, underlying design ideas, likely purposes, useful applications, constraints, and related intent hypotheses from an existing codebase. Start with repository-wide capability coverage, connect implementation details to design concepts, and keep observed behavior separate from inferred or historical intent.
+name: analyze-code-design-intent
+description: Read-only, source-first reconstruction of capabilities, design ideas, decision logic, trade-offs, interactions, likely purpose, and useful applications from code at any scale, from a fragment or component to combined targets or an entire codebase. Keep observed behavior separate from inferred reasoning and historical intent.
 ---
 
-# Review Repository Intent Archaeology
+# Analyze Code Design Intent
 
 ## Purpose
 
-Use this softskill to inspect an existing codebase and answer the more interesting question behind ordinary code comprehension:
+Use this softskill to inspect any selected code scope, from a single fragment, function, class, subsystem, or interaction path to several combined targets or a complete codebase, and answer the more interesting questions behind ordinary code comprehension:
 
-> What ideas are embodied by this implementation, what capabilities does it provide, why might those capabilities exist, and what are they useful for?
+> What does this implementation provide, what design ideas does it embody, what problem does it appear to solve, what reasoning and trade-offs may explain its shape, how does it behave in use, and what is it useful for?
 
 The skill is not primarily an evidence report and not primarily a code-quality review. Evidence is necessary, but it supports the explanation rather than becoming the explanation itself.
 
 The preferred reasoning chain is:
 
-`implementation area -> implemented capabilities -> problem / need -> underlying design idea -> practical utility -> related hypotheses -> broader design concepts`
+`selected code target -> implemented capabilities -> usage / interactions -> problem / need -> underlying design idea -> decision logic / trade-offs -> practical utility -> related hypotheses -> broader design concepts`
 
 For historical questions, add a separate branch:
 
 `design idea -> historical evidence -> possible original motivation`
 
-The result should help a reader look at a codebase and say things such as:
+The result should help a reader look at the selected code and say things such as:
 
 - this implementation provides these concrete capabilities;
 - these capabilities seem to embody this design idea;
@@ -29,11 +29,11 @@ The result should help a reader look at a codebase and say things such as:
 - several otherwise separate subsystems appear to express the same larger principle;
 - this broader interpretation is strongly supported, while this historical origin remains speculative.
 
-## Repository-State Contract
+## Analysis-State Contract
 
 This is a read-only analysis skill.
 
-- Keep source files, tests, configuration, documentation, generated files, dependencies, handoffs, and Git state unchanged.
+- Keep source files, tests, configuration, documentation, generated files, dependencies, handoffs, and Git state unchanged when a repository or workspace is involved.
 - Do not create, edit, delete, rename, stage, commit, merge, rebase, push, restore, or format repository files.
 - Do not run commands whose purpose is to mutate repository or application state.
 - Build, test, or execute only when the user explicitly asks for runtime evidence and the operation is known to be non-destructive in the current environment.
@@ -54,9 +54,41 @@ The analysis should actively try to answer these questions:
 6. Which implementation areas express the same idea in different ways?
 7. Which ideas combine into a larger architectural or product concept?
 8. Which alternative explanations remain plausible?
-9. Is there historical evidence for why the idea was originally introduced?
+9. What interactions or execution flow make the design idea visible in actual use?
+10. Which trade-offs, rejected alternatives, or competing concerns are suggested by the implementation shape?
+11. Is there historical evidence for why the idea was originally introduced?
 
 Do not force every answer into a user-facing product feature. Infrastructure can have meaningful features and design ideas of its own.
+
+## Scope Model
+
+This skill is intentionally not repository-bound.
+
+The selected scope may be:
+
+- a pasted code fragment or diff;
+- one function, method, class, type, or file;
+- a cooperating set of classes or functions;
+- one feature, endpoint, command, lifecycle, data flow, or call path;
+- a subsystem, package, library, or application;
+- several code targets selected because the user wants them compared or understood together;
+- a whole repository or multiple repositories when that breadth is materially useful.
+
+Use the narrowest scope that answers the user's question. Do not widen from a fragment to a repository merely because more code is available.
+
+If the target was established in the immediately preceding conversation, inherit that target automatically. Do not ask the user to restate it merely because the skill invocation itself contains no explicit path or scope.
+
+Examples:
+
+- user asks to locate `WebLib`, the workspace lookup identifies that project, then the skill is invoked -> analyze the identified `WebLib` project;
+- user pastes a class, discusses it, then invokes the skill -> analyze that class and only the nearby context needed to understand it;
+- user names two implementations to compare, then invokes the skill -> keep those two implementations as the combined scope.
+
+Only resolve ambiguity when multiple plausible targets remain after considering the immediate conversation context.
+
+For combined targets, explicitly state why they are being analyzed together, for example shared responsibility, interaction, common state, similar mechanism, competing implementations, or a suspected common design idea.
+
+Repository-wide breadth mapping is required only when the requested scope is actually repository-wide.
 
 ## Core Concept Types
 
@@ -125,9 +157,9 @@ Examples:
 
 Distinguish three forms of utility:
 
-- `observed use`: a concrete repository consumer or tested scenario exists;
+- `observed use`: a concrete caller, consumer, integration, or tested scenario exists;
 - `strongly implied use`: behavior makes the utility close to self-evident even if no external consumer was inspected;
-- `possible use`: a plausible application of the capability that is not shown as an actual repository requirement.
+- `possible use`: a plausible application of the capability that is not shown as an actual requirement or observed consumer behavior.
 
 Never present a merely possible use as an existing feature requirement.
 
@@ -141,6 +173,31 @@ Examples:
 - intermittent connectivity is an expected operating condition;
 - the application intentionally favors availability of the current good certificate over immediate acceptance of a replacement;
 - launch-environment differences previously caused filesystem ambiguity.
+
+### Decision-reasoning hypothesis
+
+A bounded reconstruction of the decision logic that may explain why the implementation has its current shape.
+
+Examples:
+
+- preserving an already working runtime state appears to have been favored over applying the newest candidate immediately;
+- explicit partial-commit state suggests the design accepts that true cross-resource atomicity is unavailable and chooses visible inconsistency over pretending rollback succeeded;
+- executable-relative paths suggest predictability across launch contexts was favored over allowing arbitrary path flexibility;
+- observer failures being unable to alter commit outcome suggests mutation authority was deliberately separated from notification extensibility.
+
+A decision-reasoning hypothesis is not a claim about the developer's private chain of thought. Reconstruct only decision logic supported by implementation structure, alternatives visible in the code, tests, history, or documented constraints.
+
+### Interaction / usage model
+
+A compact description of how relevant participants behave together over time.
+
+Examples:
+
+- caller requests switch -> coordinator prepares every participant -> commits accepted candidates -> publishes notifications;
+- file watcher notices change -> candidate is parsed and validated -> good candidate replaces snapshot -> bad candidate leaves last-known-good active;
+- startup code creates bootstrap diagnostics -> loads configuration -> configures normal logging -> hands control to runtime host.
+
+Use interaction models to explain why a design matters in actual use rather than describing components in isolation.
 
 ### Synthesis concept
 
@@ -178,9 +235,9 @@ Use wording such as:
 
 Do not silently turn present design meaning into historical fact.
 
-## Repository Coverage Rule
+## Scope Coverage Rule
 
-A whole-repository request must not begin by arbitrarily selecting only two or three interesting subsystems and treating them as the repository.
+For a whole-repository request, do not begin by arbitrarily selecting only two or three interesting subsystems and treating them as the repository.
 
 First create a breadth map of meaningful implementation areas.
 
@@ -212,7 +269,7 @@ For a large repository, the report should include a compact coverage table such 
 | Protection | skimmed | local secret/data protection |
 | Logging | discovered only | bootstrap/runtime logging |
 
-This prevents a three-area deep dive from looking like a complete repository interpretation.
+This prevents a three-area deep dive from looking like a complete repository interpretation. For fragment, component, subsystem, or combined-target requests, omit repository breadth work unless it is necessary to understand dependencies or consumers.
 
 ## Capability Extraction Rule
 
@@ -244,6 +301,76 @@ Then explain utility:
 `Useful for: changing coherent application operating profiles while making failed or restart-required convergence explicit.`
 
 This capability -> idea -> utility chain is mandatory for material areas.
+
+## Essence Rule
+
+Every material implementation area or design idea must have a concise 1 to 3 line **Essence** statement before its detailed explanation.
+
+The essence should answer, in ordinary language:
+
+- what this code does or makes possible;
+- the central reason or purpose it appears to serve;
+- the practical effect, benefit, or operating property it creates.
+
+A useful mental form is:
+
+`This part does / enables X so that Y becomes possible or Z is protected.`
+
+Do not make this a rigid sentence template, but keep the result sharp enough to stand alone without the rest of the report.
+
+Good example:
+
+`ConfigurationSets lets several configuration sources move toward one named desired state as a coordinated unit. This makes runtime profile changes possible without hiding mixed state, rejected candidates, or changes that require a restart.`
+
+Bad example:
+
+`ConfigurationSets manages configuration and has a coordinator.`
+
+Also produce one scope-level essence near the top when the selected target contains more than one material idea.
+
+## Reasoning And Trade-off Reconstruction Rule
+
+For each material design idea, ask what decision pressure can be inferred from the code shape.
+
+Look for evidence of choices such as:
+
+- correctness versus availability;
+- immediacy versus last-known-good continuity;
+- flexibility versus predictability;
+- central authority versus extensibility;
+- atomicity versus explicit partial failure;
+- runtime mutability versus restart-only safety;
+- convenience versus security boundary clarity;
+- abstraction reuse versus local ownership;
+- backward compatibility versus simplification;
+- performance versus observability or validation cost.
+
+Then reconstruct the smallest defensible decision logic, for example:
+
+`The design appears to accept delayed convergence because keeping the current valid runtime state is safer than publishing an invalid replacement.`
+
+When an alternative implementation is visible or strongly implied, state it and explain why the current design may have favored one side of the trade-off.
+
+Never claim access to an exact hidden thought sequence. Use terms such as `appears to favor`, `suggests an explicit trade-off`, `likely design pressure`, or `a plausible decision rationale`.
+
+## Interaction And Runtime-Behavior Rule
+
+Do not analyze design ideas only as static structures. When the code has meaningful sequencing, state, consumers, or cooperating participants, reconstruct the interaction flow.
+
+Ask:
+
+- who initiates the behavior;
+- which participants interact;
+- what state exists before the operation;
+- what preparation, validation, mutation, commit, publication, retry, fallback, or cleanup steps happen;
+- what happens on success;
+- what happens on partial or total failure;
+- what a caller, consumer, operator, or user observes;
+- where ownership or lifecycle boundaries become visible.
+
+Prefer a compact sequence or prose flow over a class inventory.
+
+Interaction analysis may reveal design intent that no single class exposes by itself.
 
 ## Design-Idea Discovery Heuristics
 
@@ -404,9 +531,11 @@ Do not keep weak alternatives merely for symmetry. Keep them when they materiall
 
 ## Workflow
 
-### Phase 1: Map the repository surface
+### Phase 1: Resolve and map the selected scope
 
-Before deep analysis, identify the meaningful implementation areas across the requested scope.
+First resolve what the user actually wants analyzed from the current request and immediately preceding conversation context: fragment, component, interaction path, combined targets, subsystem, application, or repository. Reuse an already-established target instead of asking for it again.
+
+Before deep analysis, identify the meaningful implementation areas inside that selected scope. Only perform repository-wide breadth mapping when the scope is repository-wide.
 
 For a library, pay particular attention to:
 
@@ -427,7 +556,7 @@ For an application, pay particular attention to:
 - persistence;
 - operational surfaces.
 
-Produce an internal or visible coverage map before deciding what to deepen.
+For broad scopes, produce an internal or visible coverage map before deciding what to deepen. For narrow scopes, map only the immediate dependencies, callers, state, and interactions needed to understand the target.
 
 ### Phase 2: Extract capabilities per area
 
@@ -474,7 +603,13 @@ over:
 
 The code name may be included as evidence, but the idea should explain why the code has that shape.
 
-### Phase 5: Explain practical utility
+### Phase 5: Reconstruct interaction and decision logic
+
+Describe how the relevant parts behave together in use. Then ask what trade-off or design pressure best explains the chosen flow, boundaries, fallback behavior, and ownership.
+
+When alternatives are visible, compare them. Keep the reasoning bounded and evidence-based rather than inventing a developer thought process.
+
+### Phase 6: Explain practical utility
 
 For each material design idea, state what it is useful for.
 
@@ -491,20 +626,20 @@ Include concrete consequences such as:
 
 Label utility as observed, strongly implied, or possible when ambiguity matters.
 
-### Phase 6: Inspect consumers and manifestations
+### Phase 7: Inspect consumers and manifestations
 
 When possible, trace a design idea into consumers.
 
 Ask:
 
-- Which applications use this library feature?
+- Which callers, applications, services, or integrations use this capability?
 - Which endpoints, commands, services, or UI flows expose it?
-- Is this a reusable infrastructure capability or part of one concrete product feature?
+- Is this a local implementation mechanism, a reusable capability, or part of one concrete application/product feature?
 - Are test names the only place where a scenario appears, or does a real consumer use it?
 
 This step is especially important before calling an infrastructure capability a product feature.
 
-### Phase 7: Find recurring design principles
+### Phase 8: Find recurring design principles
 
 Compare independent areas and ask whether they embody the same larger idea.
 
@@ -516,7 +651,7 @@ Examples:
 
 Only promote a synthesis when it explains multiple independently evidenced capabilities.
 
-### Phase 8: Check historical origin where valuable
+### Phase 9: Check historical origin where valuable
 
 For the strongest or most surprising design ideas, inspect introduction history when available.
 
@@ -529,7 +664,7 @@ Prefer history that can answer:
 
 Historical archaeology should deepen the design story, not replace current source analysis.
 
-### Phase 9: Build interrelationships
+### Phase 10: Build interrelationships
 
 Use relationships when they add understanding:
 
@@ -574,6 +709,14 @@ Technical features are still capabilities. Distinguish:
 
 Always ask what the capability enables and why that may matter.
 
+### Do not pretend inferred reasoning is known thought
+
+Reconstruct decision logic and trade-offs, not a verbatim or exact private chain of thought. If the evidence only supports several plausible rationales, keep them as alternatives.
+
+### Do not ignore interactions
+
+A design idea often appears in the sequence between components rather than inside one class. Trace the relevant use or runtime flow when it changes the interpretation.
+
 ### Do not write a grand story first
 
 Broader concepts must emerge from independently supported local design ideas.
@@ -586,23 +729,27 @@ Historical intent needs historical evidence.
 
 The default output should be useful to a human before it is exhaustive.
 
-### 1. Design ideas at a glance
+### 1. Scope essence and design ideas at a glance
 
-Start with the most important discovered ideas, normally 3 to 7 for a non-trivial repository.
+Begin with a 1 to 3 line **Scope essence** when more than one material idea is present. It should summarize what the selected code provides, its apparent central purpose, and the practical property or use it creates.
+
+Then list the most important discovered ideas, normally 3 to 7 for a non-trivial broad scope and fewer for a narrow fragment or component.
 
 For each, give one compact line:
 
 `D1 - Controlled desired-state reconfiguration: several runtime configuration participants can move together between named states while failed or restart-required convergence remains explicit.`
 
+Each idea line should itself function as a mini-essence: what it does, why it exists, and what it enables.
+
 This section is the fastest answer to:
 
-> What ideas are actually inside this codebase?
+> What is this code really doing, and what is the point of that design?
 
 If the analysis is still too shallow to name design ideas, say so and begin with the capability map instead.
 
-### 2. Repository capability map
+### 2. Capability map
 
-Show the meaningful implementation areas and what they provide.
+Show the meaningful implementation areas in the selected scope and what they provide. For a tiny fragment, this may be a short bullet list instead of a table.
 
 Preferred shape:
 
@@ -612,7 +759,7 @@ Preferred shape:
 | Kestrel certificates | generation reload; last-known-good; recovery policy; path containment | certificate rotation without unnecessarily destabilizing a healthy HTTPS endpoint | D2 Preserve known-good operation during replacement | deep |
 | DirectoryLayout | executable-relative paths; writable-directory validation; web-root normalization | predictable packaged runtime behavior across launch contexts | D3 Environment-independent deployment contract | deep |
 
-For large repositories, include discovered but shallow areas too, marked `skimmed` or `discovered only`.
+For large repository scopes, include discovered but shallow areas too, marked `skimmed` or `discovered only`. For narrow scopes, omit the Coverage column when it adds no value.
 
 ### 3. Design idea deep dives
 
@@ -620,16 +767,20 @@ For each material design idea, include:
 
 **D1 - Short idea name**
 
+- **Essence:** 1 to 3 lines that stand alone and state what the design does, why, and what it enables.
+
 - **Embodied by:** implementation areas and concrete capabilities.
 - **Core idea:** explain the concept in implementation-independent language.
 - **Problem it appears to solve:** why the capability is useful.
+- **Interaction / behavior:** the relevant runtime or usage sequence when sequencing matters.
+- **Decision logic / trade-offs:** the smallest defensible reconstruction of what the design appears to favor and what alternative pressure it balances.
 - **What it enables:** observed or strongly implied practical utility.
 - **Evidence:** concise source references, tests, consumers, history where relevant.
 - **Confidence:** strong / moderate / weak.
 - **Historical origin:** supported explanation or `uncertain`.
 - **Alternative explanation:** only when material.
 
-The `What it enables` line is mandatory for every material design idea.
+The `Essence`, `What it enables`, and, when relevant, `Interaction / behavior` and `Decision logic / trade-offs` lines are mandatory for every material design idea.
 
 ### 4. Cross-cutting design principles
 
@@ -665,9 +816,9 @@ Examples:
 - `H3 alternative_to H4: the path model may be primarily packaging-driven rather than IDE-normalization-driven.`
 - `D1 shares evidence with H1, so they are not independent support for a broader synthesis.`
 
-### 7. Coverage and important gaps
+### 7. Scope coverage and important gaps
 
-State which meaningful repository areas were:
+For broad scopes, state which meaningful areas were:
 
 - deeply inspected;
 - skimmed for capability identification;
@@ -680,8 +831,8 @@ Then list only the smallest read-only probes that could materially change the de
 
 Finish with three compact parts:
 
-- **What this codebase provides:** main capability themes.
-- **What design ideas appear to sit behind it:** strongest concepts.
+- **What this selected code provides:** main capability themes.
+- **What design ideas and decision logic appear to sit behind it:** strongest concepts and trade-offs.
 - **What remains uncertain:** especially historical origin or uninspected consumers.
 
 ## Optional Evidence Appendix
@@ -725,9 +876,9 @@ Inspect introduction commits and evolution to distinguish original motivation fr
 
 Compare design ideas and test whether a broader synthesis genuinely explains several independent areas.
 
-### Repository breadth pass
+### Scope breadth pass
 
-Expand shallow/discovered areas into capability summaries without deep-diving every implementation detail.
+For broad codebase or repository scopes, expand shallow/discovered areas into capability summaries without deep-diving every implementation detail.
 
 ## Source Referencing
 
@@ -755,13 +906,15 @@ Prefer language such as:
 
 Avoid making the report sound like a forensic ledger unless the user asks for that style.
 
-The skill succeeds when the reader comes away understanding not just the code structure, but the capabilities, design ideas, usefulness, and relationships that give the implementation its shape.
+The skill succeeds when the reader comes away understanding not just the code structure, but the capabilities, interaction flow, design ideas, likely decision logic, trade-offs, usefulness, and relationships that give the implementation its shape.
 
 ## Typical Invocation Phrases
 
-- `[$review-repository-intent-archaeology] inspect this codebase and tell me what capabilities and design ideas are hidden in the implementation`
-- `use repository intent archaeology and explain what the implementation provides, why those features might exist, and what they are useful for`
-- `map the technical features in this library to the underlying design ideas`
+- `[$analyze-code-design-intent] inspect this code and tell me what capabilities, design ideas, and decision trade-offs are embodied in it`
+- `analyze this code fragment and reconstruct what problem it seems designed to solve`
+- `compare these two components and infer the design reasoning behind their different approaches`
+- `trace this interaction and explain why the sequence, ownership, and failure behavior may be designed this way`
+- `map the technical features in this library to the underlying design ideas and practical uses`
 - `read this repository and reconstruct the concepts behind the implementation without changing anything`
 - `show me which independent subsystems express the same design principle`
 - `find where this library capability becomes an actual application or user-facing feature`
