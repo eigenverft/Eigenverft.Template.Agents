@@ -1,43 +1,48 @@
 ---
 name: analyze-design-intent
-description: Read-only reconstruction of the design intent behind a selected technical target. Discover what it does or expresses, how it fits into its surroundings, how interactions and data/state matter when relevant, what problem or constraint it addresses, what trade-offs may explain its shape, and what it enables. Treat the user's target as the question boundary rather than the evidence boundary, expand context only when it can materially change the interpretation, and explain the result independently of local project vocabulary.
+description: Read-only reconstruction of why a selected technical target likely exists, what situation or need makes it useful, what role and consequences it has, which assumptions and trade-offs shaped it, and what broader or future uses the same design could plausibly support. Use any relevant evidence without privileging code, treat the selected target as the question boundary rather than the evidence boundary, abstract away from local vocabulary, and clearly separate observed use, inferred rationale, plausible wider use, and historical fact.
 ---
 
 # Analyze Design Intent
 
 ## Purpose
 
-Use this softskill when a user has a technical target they do not yet understand and wants to discover what is really behind it.
+Use this softskill when a user points at something they do not yet understand and wants to get behind the surface description.
 
-The target may be any technically meaningful material available for inspection: a small fragment, configuration, documentation, workflow definition, data representation, script, group of related materials, behavior, subsystem, or a much broader body of work.
+The central question is:
 
-Do not begin by forcing the target into a predefined artifact category. First determine what role it appears to play.
+> Why did someone likely consider this worth creating in the first place?
 
-The central questions are:
+That does **not** mean inventing a developer's private thought process. It means reconstructing the smallest plausible design rationale supported by the available evidence.
 
-> What is this thing actually doing or expressing?
->
-> What role does it play in its surroundings?
->
-> Why might it be designed this way?
->
-> Which constraints, assumptions, decisions, and trade-offs are visible?
->
-> How does it behave when used or combined with other parts?
->
-> What does that make possible, easier, safer, more predictable, or intentionally constrained?
+The target can be represented by any technical material: behavior, source, configuration, documentation, data, schemas, workflows, automation, metadata, tests, examples, history, or combinations of these.
 
-The internal reasoning may move through:
+Do not begin by assigning the target to a predefined artifact category. First discover what role it appears to play.
 
-`target -> evidence -> meaning / behavior -> interactions / state -> capabilities -> problem / pressure -> design idea -> trade-offs -> practical purpose`
+The analysis should try to answer:
 
-This is a reasoning chain, not the required report structure.
+- What is this really for?
+- What situation makes it useful or necessary?
+- What problem, repeated burden, risk, ambiguity, coordination need, or desired property does it appear to address?
+- Who or what benefits from it?
+- What becomes easier, safer, clearer, more predictable, more reusable, more recoverable, or more controllable because it exists?
+- What would likely be worse, harder, or impossible without it?
+- Why might this shape have been chosen instead of an obvious simpler alternative?
+- What assumptions and trade-offs does the design reveal?
+- How does it fit into a larger process, workflow, lifecycle, or body of work?
+- What broader or future situations could the same design plausibly support, even if those uses are not yet directly observed?
+
+The internal reasoning may look like:
+
+`target -> role -> situation -> need / pressure -> design choice -> consequence -> trade-off -> broader intent`
+
+This is an internal reasoning path, not a required report structure.
 
 ## Read-Only Contract
 
 This is a read-only analysis skill.
 
-- Keep all available source material and repository/workspace state unchanged.
+- Keep all available material and repository/workspace state unchanged.
 - Do not create, edit, delete, rename, stage, commit, merge, rebase, push, restore, or format files.
 - Do not run commands whose purpose is to mutate application, repository, workspace, or external state.
 - Build, test, or execute only when the user explicitly asks for runtime evidence and the action is known to be non-destructive.
@@ -46,27 +51,60 @@ This is a read-only analysis skill.
 
 If a useful probe would require mutation, describe the probe instead of performing it.
 
+## Core Principle: Explain Existence, Not Inventory
+
+Finding a mechanism is not the same as understanding why it exists.
+
+Examples:
+
+- finding three retries is not yet an insight;
+- finding persisted state is not yet an insight;
+- finding an index, cache, lock, watcher, queue, timeout, schema, or validation stage is not yet an insight.
+
+These are clues.
+
+The useful questions are:
+
+- Why is retry needed at all?
+- Why must this information survive beyond the immediate moment?
+- Why is this distinction stored explicitly?
+- Why is this value versioned?
+- Why is this decision centralized?
+- Why does this process retain history?
+- Why is this failure tolerated while another is terminal?
+- Why is this operation split into stages?
+- Why is this information deliberately not retained or exposed?
+
+Only surface a low-level mechanism when it materially helps explain the design intent, situation, trade-off, or consequence.
+
+Prefer:
+
+`This retains the last accepted state because temporary bad input is treated as recoverable and should not destroy a working situation.`
+
+Over:
+
+`This has a cache and three retries.`
+
 ## Scope Principle
 
-### The target is the question boundary, not automatically the evidence boundary
+### The selected target is the question boundary, not the evidence boundary
 
-The selected target defines what the answer is about.
+The user's target defines what the answer is about.
 
-It does **not** mean all evidence must come from inside the target.
+It does not mean all evidence must come from inside that target.
 
-Use the narrowest answer scope that satisfies the user's question, while allowing the evidence scope to expand when surrounding material can materially change the interpretation.
+Use the narrowest answer scope that satisfies the question, but inspect surrounding material when it can materially change the explanation.
 
-Surrounding evidence may reveal:
+Useful surrounding evidence may reveal:
 
-- who or what uses the target;
-- what the target uses or depends on;
-- what happens before and after it;
-- how it is configured, generated, transformed, stored, composed, published, invoked, loaded, tested, documented, automated, or evolved;
-- whether it is one part of a larger capability;
-- whether its apparent purpose changes when seen in actual use;
-- whether nearby material establishes a contract, lifecycle, compatibility expectation, data model, operational expectation, or intended audience that is not visible locally.
-
-These are possible discoveries, not categories the target must fit into.
+- who or what relies on the target;
+- what happens before or after it;
+- what larger process it participates in;
+- what information it creates, preserves, consumes, or transforms;
+- what assumptions or promises exist around it;
+- how it is documented, configured, generated, tested, automated, delivered, maintained, or evolved;
+- whether the apparent local purpose is actually part of a larger design;
+- whether an intended use is visible only outside the selected files or fragment.
 
 ### Scope inheritance
 
@@ -76,18 +114,18 @@ Do not ask the user to restate something that was just located, pasted, named, o
 
 Only resolve ambiguity when multiple plausible targets remain after considering the immediate conversation.
 
-### Scope reflection
+### Reflect on the scope itself
 
-Before deep analysis, reflect on the target itself:
+Before deep analysis, ask internally:
 
-- What appears to be the semantic boundary of what the user pointed at?
-- Which visible boundaries may be merely organizational rather than conceptual?
-- Does the target make sense on its own, or is it obviously one participant in a larger behavior?
-- Which nearby evidence could materially change the answer to "what is this for?"
-- Is the user's target wording a transferable concept, or merely a local label?
-- Could the target's intended role only become visible through how it is consumed, produced, configured, documented, automated, stored, or evolved?
+- What exactly is the user trying to understand?
+- Is the visible boundary also the meaningful boundary?
+- Is the local name a real concept or just project vocabulary?
+- Does this target make sense on its own?
+- What nearby evidence could change the answer to “why does this exist?”
+- Is there evidence about intended use, maintenance, lifecycle, delivery, future evolution, or surrounding people/processes that matters more than the local mechanics?
 
-Use this reflection to choose probes. Do not dump it as a checklist in the final answer.
+Do not dump this checklist in the final answer.
 
 ## Context Expansion By Information Gain
 
@@ -95,266 +133,215 @@ Do not zoom out merely because more material exists.
 
 Expand context only when the next probe could plausibly change at least one of these:
 
-- what the target does or represents;
-- what role it plays;
-- what problem it solves;
-- who or what it serves;
-- how it is used;
-- how its state or data behaves;
-- which constraints shape it;
-- which design trade-off it represents;
-- whether an apparent capability is real, incidental, incomplete, or broader than it first looked;
-- whether the target is meant to be reused, composed, generated, configured, distributed, operated, replaced, migrated, versioned, or evolved in a particular way;
-- whether the target is primarily behavior, contract, policy, representation, automation, glue, generated output, or evidence of a larger design.
+- what the target is for;
+- when it becomes useful;
+- who or what benefits;
+- the problem it addresses;
+- the consequences of using it;
+- the assumptions behind it;
+- the trade-off it embodies;
+- the meaning of its information or state;
+- whether an apparent purpose is local, shared, incomplete, or part of something broader;
+- how it is expected to be used, maintained, changed, delivered, operated, or evolved.
 
 Use this test:
 
-> If this surrounding evidence came out differently, would I explain the target differently?
+> If this surrounding evidence came out differently, would I explain why the target exists differently?
 
-If not, do not expand into it merely for completeness.
+If not, do not inspect it merely for completeness.
 
 Prefer a few high-information probes over exhaustive traversal.
 
 ## Vocabulary Independence
 
-The common use case is unfamiliarity. Therefore the target's own wording must not become the explanation.
-
-Do not merely paraphrase names.
+The common use case is unfamiliarity. Therefore the target's own terminology must not become the explanation.
 
 Bad:
 
-`The FooCoordinator coordinates Foos and maintains Foo state.`
+`The FooCoordinator coordinates Foo state.`
 
 Better:
 
-`This part gives one authority control over several independent participants so their state changes can be treated as one logical operation.`
+`This creates one authority for a shared decision so several independent participants do not drift into incompatible states.`
 
 Move through:
 
-`local wording -> observed meaning / behavior -> neutral description -> broader concept -> purpose`
+`local wording -> observed role -> neutral meaning -> situation -> purpose`
 
 Rules:
 
-- Explain behavior or role before relying on local labels.
+- Explain role, consequence, and purpose before relying on local labels.
 - Prefer ordinary or transferable concepts over project-specific nouns.
-- Introduce the local term after the concept when useful: `the project calls this ...`.
+- Introduce the local term only when it helps reconnect the explanation to the material.
 - Treat naming as evidence, not proof.
-- If documentation repeats the same local wording, do not mistake repetition for independent understanding.
-- For unfamiliar domain terms, explain them through inputs, outputs, relationships, state, constraints, consequences, and usage.
-- The explanation should still make sense if the local names were changed tomorrow.
+- Documentation repeating the same local wording is not independent understanding.
+- The explanation should still make sense if the local names were renamed tomorrow.
 
-## Mechanism Versus Intent
+## Use-Situation Reconstruction
 
-Low-level mechanisms are usually **analysis evidence**, not automatically user-facing findings.
-
-Examples:
-
-- a retry count;
-- a timeout value;
-- a cache;
-- persistence;
-- an index;
-- a queue;
-- a serialization format;
-- a lock;
-- a validation step;
-- a watcher;
-- a fallback;
-- a particular number of stages.
-
-Do not report such details merely because they were found.
-
-Instead ask what they imply:
-
-- Why is retry needed at all?
-- Why is this information stored at all?
-- Why must it survive process lifetime?
-- Why cache rather than recompute?
-- Why is this field versioned?
-- Why is failure retried here but rejected elsewhere?
-- Why is state copied, normalized, retained, or discarded?
-- What property does this mechanism protect or enable?
-
-Only surface the mechanism when it is needed to support the explanation, distinguish alternatives, or clarify a materially relevant behavior.
-
-The default output should emphasize **reason and consequence**, not inventory.
-
-## Core Reasoning Dimensions
-
-These are internal dimensions. They are not mandatory headings.
-
-### Meaning / Behavior
-
-Determine what the target actually does, declares, constrains, describes, or makes possible.
-
-Depending on the target, useful questions include:
-
-- What goes in and what comes out?
-- What triggers or consumes it?
-- What does it declare, select, constrain, transform, generate, persist, publish, or promise?
-- What state or assumptions exist before and after?
-- What happens on success, failure, or partial failure?
-- What would become impossible, ambiguous, unsafe, inconsistent, or inconvenient if it did not exist?
-
-Do not force runtime-behavior language onto material that is primarily descriptive or declarative. Interpret it according to what it contributes.
-
-### Capabilities
-
-Group low-level facts into useful statements of ability.
-
-A capability answers:
-
-> What can this design make happen, guarantee, prevent, preserve, expose, coordinate, describe, automate, or constrain?
-
-Capabilities may belong to one target or emerge only from several pieces working together.
-
-### Interaction / Usage
-
-When sequencing or relationships matter, reconstruct the flow.
+For every material topic, try to reconstruct the situation in which the design earns its complexity.
 
 Ask:
 
-- who or what initiates;
-- which participants interact;
-- what is passed or shared;
-- what happens before and after;
-- where validation, decision, mutation, publication, retry, fallback, handoff, or cleanup occurs;
-- what another participant sees;
-- where authority or lifecycle boundaries become visible.
+- Under what conditions does this become valuable?
+- What event, change, decision, failure, scale, coordination problem, handoff, or lifecycle transition makes it relevant?
+- Who or what experiences the benefit?
+- What task becomes easier?
+- What risk or confusion becomes less likely?
+- What repeated manual work might disappear?
+- What future change or operating condition appears anticipated?
+- What would happen if this target did not exist?
+- What simpler arrangement would probably be used instead, and what would its limitations be?
 
-Prefer a compact flow such as:
+Useful internal form:
 
-`input -> interpretation -> decision -> effect -> observable result`
+`When <situation>, this helps <beneficiary / surrounding process> achieve <outcome> without <problem / risk / repeated burden>.`
 
-rather than a list of filenames or symbols.
+Do not force this exact wording into the final response.
 
-### Data / State Semantics
+### Beneficiaries are discovered, not predefined
 
-When the target creates, carries, stores, transforms, synchronizes, or interprets information, treat the data design itself as first-class evidence.
+Do not force every interpretation into fixed personas such as user, developer, operator, administrator, or system.
 
-The primary question is not merely **how data is stored**, but **why this information needs to exist in this form and lifecycle at all**.
+The beneficiary may be:
+
+- a person performing a task;
+- another part of the system;
+- an automated process;
+- a maintenance workflow;
+- a future migration;
+- a support/debugging situation;
+- a deployment or operation process;
+- a team maintaining the system later;
+- several of these at once.
+
+Infer the relevant beneficiary from evidence.
+
+## Think Beyond The Immediately Observed Use
+
+Do not stop at the first directly visible usage.
+
+Once the present role is understood, ask whether the same design naturally generalizes to other situations.
+
+Explore, when useful:
+
+- adjacent use cases that require the same property;
+- future changes the design seems prepared to accommodate;
+- broader classes of problems the same mechanism solves;
+- situations that are not currently exercised but are made possible by the design;
+- combinations with other parts that could produce a higher-level capability;
+- whether the design seems intentionally more general than the currently observed consumer needs.
+
+Examples of the level of reasoning:
+
+- a mechanism currently used for one configuration switch may really be a generic way to coordinate several state changes;
+- retained history used for recovery may also support auditing or explainability;
+- a stable boundary used by one consumer may indicate intended reuse by other consumers;
+- explicit versioning may suggest anticipated evolution even if only one version currently exists.
+
+### Keep speculative expansion disciplined
+
+Separate:
+
+- **observed use**: directly shown by surrounding evidence;
+- **strongly implied use**: follows closely from the current design;
+- **plausible wider use**: a reasonable application of the same idea that is not demonstrated;
+- **historical intent**: requires historical evidence.
+
+Never present a plausible wider use as an existing requirement or as proof of what the original author intended.
+
+The purpose of wider thinking is to understand the **generality and design space** of the target, not to invent a product roadmap.
+
+## Information And Data As Intent Evidence
+
+When information is created, stored, transformed, copied, synchronized, versioned, or deleted, ask why that information needs to exist in that form and lifecycle at all.
+
+Do not stop at “how is it stored?”.
 
 Ask:
 
-- Why is this information represented or stored at all?
-- What decision or behavior needs it later?
-- Why must it outlive the current operation, process, session, or source input?
-- Which parts are source-of-truth, derived, cached, transient, persisted, replicated, or reconstructable?
-- Who owns the information and who may change it?
-- What identities, keys, relationships, invariants, and boundaries exist, and why?
-- How are absence, defaults, unknown values, invalid values, conflicts, or partial state represented?
-- Why does data move between these representations or layers?
-- Why is something serialized, encoded, encrypted, normalized, indexed, grouped, denormalized, copied, or retained?
-- What intent is suggested by versioning, migration, retention, deletion, expiry, recovery, synchronization, or conflict handling?
-- Which information is intentionally not stored, exposed, copied, or retained?
+- What later decision or behavior needs this information?
+- Why must it survive beyond the current operation?
+- Who or what relies on it later?
+- What is authoritative, derived, temporary, reconstructable, or historical?
+- Why are absence, uncertainty, conflict, history, versions, or transitions represented explicitly?
+- What becomes impossible if the information is not retained?
+- Why are some values retained while others are recalculated or discarded?
+- What does migration, expiry, retention, deletion, recovery, synchronization, or conflict handling suggest about expected use?
+- Which information is intentionally not stored or exposed, and why might that matter?
 
-Details such as exact column counts, retry counts, field layouts, or storage syntax are normally internal evidence unless they materially explain the design intent.
+Storage syntax, field counts, table layouts, formats, and serialization details are normally internal evidence unless they materially explain the purpose.
 
-### Problem / Design Pressure
+## Process And Interaction As Intent Evidence
+
+When the meaning lives in a sequence or relationship, reconstruct the meaningful flow.
 
 Ask:
 
-> What problem, constraint, risk, ambiguity, cost, or desired property would make this design worth having?
+- What starts the situation?
+- What participants, decisions, sources, or handoffs matter?
+- What changes from before to after?
+- Where is authority located?
+- Where can the process fail, wait, retry, branch, recover, or fall back?
+- What does another participant observe?
+- Why might the sequence be arranged this way?
 
-Keep alternative explanations alive when the evidence supports more than one.
+Prefer describing the meaningful process over listing components.
 
-### Design Idea
+## Design Choice And Trade-off Reconstruction
 
-Abstract the local mechanism into a transferable concept.
-
-Examples of the **level** of abstraction, not labels to search for:
-
-- preserve a known-good state while evaluating replacement;
-- separate decision authority from observers;
-- make partial failure explicit instead of pretending atomicity;
-- isolate one failure domain from another;
-- delay irreversible work until validation succeeds;
-- centralize ownership of a shared lifecycle;
-- make implicit assumptions explicit;
-- separate persisted representation from semantic meaning;
-- keep one layer independent from another layer's failure;
-- represent desired state separately from observed state;
-- retain history to make change explainable or recoverable.
-
-Do not apply familiar pattern names merely because the shape resembles them.
-
-### Decision Logic / Trade-offs
-
-Reconstruct the smallest defensible decision rationale visible in the material.
+Reconstruct the smallest defensible rationale for the observed shape.
 
 Ask:
 
 - What does the design appear to favor?
-- What cost, complexity, restriction, delay, duplication, or storage does it accept to get that property?
-- Which simpler or more obvious alternative is not being used?
-- Which failure mode is tolerated and which is prevented?
-- Where does flexibility stop?
-- What is deliberately made explicit?
-- What is isolated, validated, delayed, duplicated, cached, persisted, versioned, indexed, normalized, or constrained, and why might that be useful?
+- What cost, complexity, restriction, delay, duplication, storage, or maintenance burden does it accept to gain that benefit?
+- What simpler alternative seems possible but was not chosen?
+- Which failure or inconvenience is tolerated, and which is actively prevented?
+- Where is flexibility deliberately limited?
+- What assumption is made explicit instead of being left implicit?
 
-Phrase this as design reasoning, not access to a developer's private chain of thought.
-
-Use language such as:
+Useful language:
 
 - `The design appears to favor ... over ...`
-- `This suggests a trade-off between ... and ...`
+- `This makes sense if ... was an important condition.`
 - `A plausible rationale is ...`
-- `The shape makes sense if ... was an important constraint.`
+- `The extra complexity buys ...`
+- `A simpler design could have ..., but would lose ...`
 
-### Practical Utility
+Do not claim access to a developer's private chain of thought.
 
-Explain why the design matters in practice.
+## Present Meaning Versus Historical Origin
 
-Distinguish when useful:
+Current material can strongly support why a design makes sense **now** without proving why it was originally introduced.
 
-- **observed use**: surrounding evidence shows an actual use, consumer, workflow, integration, or outcome;
-- **strongly implied use**: the practical effect follows closely from the observed design;
-- **possible use**: plausible but not demonstrated.
+Distinguish:
 
-Do not present possible use as known intent.
+- present role;
+- present design rationale;
+- observed or implied use;
+- plausible wider use;
+- historical origin.
 
-### Embedding / Role
+When historical origin matters, inspect evidence such as introduction changes, history, old documentation, discussions, or migration notes if available.
 
-Ask how the target participates in its surroundings without assuming a predefined technical category.
+It is valid to conclude:
 
-Questions include:
+`The current design rationale is clear, but the original historical motivation is not established.`
 
-- What consumes, invokes, includes, configures, generates, publishes, wraps, documents, tests, stores, or depends on it?
-- What does it consume or depend on?
-- Which surrounding material establishes its intended role?
-- Is it an endpoint of behavior or a building block inside something larger?
-- Does context reveal a purpose invisible from the target alone?
-- Does another part treat it as stable surface, internal detail, generated representation, policy, reusable mechanism, integration contract, state store, or something else?
+## Relationships And Higher-Level Ideas
 
-Use whichever evidence answers these questions. Do not privilege code over other technical material by default.
+When several topics are present, look for relationships only when they add understanding.
 
-### Historical Origin
+Ask whether:
 
-Current material can support present design meaning without proving original motivation.
+- several local choices solve different parts of the same larger problem;
+- one idea is a prerequisite for another;
+- two explanations compete;
+- several independently observed choices suggest a broader design principle;
+- several apparent findings merely repeat the same underlying evidence.
 
-When historical origin matters, distinguish:
-
-- what the design means now;
-- what appears to have existed at introduction;
-- what was added later as hardening, generalization, workaround, migration, compatibility, or evolution;
-- what remains unknown.
-
-Never silently convert present design meaning into historical fact.
-
-### Relationships
-
-When multiple topics or hypotheses exist, consider useful relationships such as:
-
-- supports;
-- contradicts;
-- alternative explanation;
-- depends on;
-- part of;
-- jointly explains;
-- shares evidence with;
-- narrows.
-
-Do not create a graph for its own sake.
+A broader concept should emerge from supported local interpretations, not be imposed first.
 
 ## Evidence Selection
 
@@ -363,61 +350,37 @@ Any material that can change the interpretation may be useful evidence.
 Possible evidence includes, without priority:
 
 - implementation;
-- data shapes and stored representations;
-- configuration;
 - documentation and READMEs;
 - examples;
+- configuration;
+- data representations;
+- schemas and contracts;
 - tests;
 - comments;
-- schemas and contracts;
-- scripts;
+- scripts and workflows;
 - automation definitions;
 - metadata;
 - dependency declarations;
 - generated material;
 - usage sites;
-- callers and consumers;
-- surrounding workflows;
+- surrounding processes;
 - history and diffs;
 - neighboring technical material.
 
-This list is intentionally non-hierarchical and non-exhaustive.
-
 Choose evidence by information value, not file type.
+
+Do not privilege source code merely because it is available.
 
 ### Evidence discipline
 
-- Behavior and actual usage can outweigh naming.
-- Data shape and persistence choices can reveal ownership, lifecycle, invariants, compatibility, and expected future use.
-- Documentation can reveal intended role that local implementation does not show.
-- Automation, metadata, or surrounding definitions can reveal lifecycle and embedding.
-- Tests can expose intended semantics but may share the same source of intent as nearby code or docs.
-- Historical evidence is stronger for historical-origin claims than present material alone.
-- Missing expected evidence can narrow or weaken a hypothesis.
-- Several repetitions of the same underlying statement are not independent confirmation.
-
-## Hypothesis Discipline
-
-For important interpretations, consider:
-
-- supporting evidence;
-- alternative explanations;
-- expected evidence if the interpretation were true;
-- missing expected evidence;
-- evidence pointing another way;
-- whether the claim concerns present meaning, design reasoning, practical use, or historical origin.
-
-Use qualitative confidence only when it adds value:
-
-- strong;
-- moderate;
-- weak.
-
-Avoid fake numerical precision.
-
-It is acceptable to conclude:
-
-`The role is clear, but no defensible design rationale is visible yet.`
+- Actual use can outweigh naming.
+- Documentation can reveal intended role that local mechanics do not show.
+- Data retention can reveal future needs, lifecycle, auditability, recovery, or coordination intent.
+- Automation and metadata can reveal how something is expected to be delivered, maintained, or evolved.
+- Tests can reveal intended semantics but are not automatically independent confirmation.
+- Historical evidence is stronger for historical claims than current material alone.
+- Missing expected evidence can weaken a hypothesis.
+- Repetition of the same idea across files is not necessarily independent support.
 
 ## Internal Workflow
 
@@ -425,39 +388,45 @@ This workflow is for reasoning. Do not use it as the default report structure.
 
 ### Step 1: Resolve the target
 
-Use the user's request and immediate conversation context.
+Use the current request and immediate conversation context.
 
-### Step 2: Reflect on scope
+### Step 2: Reflect on the meaningful scope
 
-Identify the likely semantic boundary and which surrounding evidence could change the interpretation.
+Determine what the user actually wants explained and which surrounding evidence could change that explanation.
 
-### Step 3: Establish local meaning
+### Step 3: Establish the target's role in neutral language
 
-Understand what the target actually does or expresses without relying on its own vocabulary.
+Avoid explaining local vocabulary with more local vocabulary.
 
-### Step 4: Follow high-information context
+### Step 4: Reconstruct the use situation
 
-Inspect only surrounding evidence likely to change role, purpose, data/state interpretation, usage, trade-offs, or historical understanding.
+Ask when this becomes valuable, what problem exists without it, and who or what benefits.
 
-### Step 5: Reconstruct interactions and information flow
+### Step 5: Follow high-information context
 
-Trace relevant flows across participants, state, and representations when the design lives in relationships rather than one item.
+Inspect only evidence likely to change the role, situation, purpose, trade-offs, surrounding use, information meaning, or historical understanding.
 
-### Step 6: Abstract away from local wording
+### Step 6: Reconstruct relevant information and process flows
 
-Restate the target in neutral semantic terms before naming broader design ideas.
+Use data and interactions as evidence when they reveal why the target exists.
 
-### Step 7: Infer purpose and trade-offs
+### Step 7: Infer design choices and trade-offs
 
-Generate bounded explanations for why the shape exists and compare alternatives when useful.
+Explain the smallest defensible rationale and compare plausible simpler alternatives.
 
-### Step 8: Test the interpretation
+### Step 8: Think one level wider
+
+Ask what adjacent, future, or more general situations the same design could plausibly serve.
+
+Keep these as wider-use hypotheses unless observed.
+
+### Step 9: Test the interpretation
 
 Look for supporting, contradictory, missing, or independent evidence.
 
-### Step 9: Organize by the user's topic
+### Step 10: Organize by the user's topic
 
-Produce the answer around the thing or things the user wants to understand, not around Steps 1-8.
+Present the explanation around what the user wants to understand, not around Steps 1-9.
 
 ## Topic-Centric Output
 
@@ -465,35 +434,33 @@ The default response is an explanation, not an analysis report.
 
 ### One-topic request
 
-If the user wants to understand one thing, keep the entire answer centered on that thing.
+If the user asks about one thing, keep the answer centered on that thing even if many surrounding materials were inspected.
 
 Use the target or a clearer neutral concept as the main heading.
 
-A useful shape is:
+Start with a concise 1-3 line **Essence** answering:
 
-`# <topic>`
+- what it is really for;
+- the situation or need it addresses;
+- why that matters.
 
-**Essence:** 1-3 lines stating what it does or represents, its apparent purpose, and why that matters.
+Then include only dimensions that add explanatory value. Useful possibilities include:
 
-Then include only dimensions that add explanatory value, such as:
+- **Why it likely exists**
+- **When it becomes useful**
+- **What problem it removes or reduces**
+- **How it is used or fits into a larger process**
+- **Why relevant information is retained**
+- **What design choice / trade-off is visible**
+- **What this enables**
+- **Plausible wider or future uses**
+- **What remains uncertain**
 
-- what it does / means;
-- how it is used or interacts;
-- why relevant information is stored or state exists;
-- how data/state affects the design;
-- why it may be designed this way;
-- trade-offs and alternatives;
-- what it enables;
-- where it fits in its surroundings;
-- uncertainty or historical origin.
-
-Do **not** analyze unrelated areas merely to make the response feel complete.
-
-Surrounding material may be inspected extensively, but only findings that help explain the selected topic belong in its section.
+These are optional dimensions, not mandatory headings.
 
 ### Multi-topic request
 
-When the target contains several materially different things the user is trying to understand, organize the answer by those topics:
+When the target contains several materially different things the user is trying to understand, organize by those topics:
 
 `# Topic A`
 
@@ -501,68 +468,48 @@ When the target contains several materially different things the user is trying 
 
 `# Topic C`
 
-Put relevant behavior, data/state meaning, interactions, reasoning, utility, context, and uncertainty under each topic.
+Keep all relevant purpose, use situation, reasoning, data meaning, interactions, utility, and uncertainty together under the topic they explain.
 
-After the topic sections, add a short **Connections / shared design ideas** section only when relationships between topics add explanatory value.
+Afterward, add a short connections section only when shared design ideas materially improve understanding.
 
 ### Broad target
 
-For a broad target, begin with a 1-3 line **Essence** of the whole target.
+For a broad target, begin with a 1-3 line overall Essence.
 
-Optionally provide a compact topic index when it helps navigation, then explain the important themes one by one.
+Optionally provide a compact topic index when useful, then explain the important themes one by one.
 
-Do not make a mandatory capability table, observation map, design-ID ledger, coverage matrix, or fixed multi-section report.
+Do not make a capability table, observation ledger, coverage matrix, or fixed analysis report mandatory.
 
-Coverage information belongs at the end only when breadth itself matters or meaningful areas were intentionally left unexamined.
-
-### Essence rule
-
-Every material topic should begin with a concise 1-3 line essence that can stand alone.
-
-It should answer, in ordinary language:
-
-- what this thing does or represents;
-- the central purpose it appears to serve;
-- the useful consequence or protected property.
-
-A useful mental form is:
-
-`This does / represents X so that Y becomes possible or Z is protected.`
-
-Do not make this a rigid sentence template.
+Coverage belongs near the end only when breadth itself matters or meaningful areas were intentionally left unexamined.
 
 ## Output Relevance Filter
 
-Before including a discovered detail in the final answer, ask:
+Before including a discovered detail, ask:
 
-> Does this detail help the user understand what the target is for, how it behaves, why it is shaped this way, or what it enables?
+> Does this help explain why the target exists, when it is useful, what problem it addresses, what decision shaped it, or what it enables?
 
 If not, keep it as internal evidence and omit it.
 
 Examples:
 
 - `there are three retries` -> normally omit;
-- `retry exists because temporary failure is treated as recoverable rather than terminal` -> potentially important;
+- `temporary failure is treated as recoverable because the surrounding operation should continue without manual intervention` -> useful when supported;
 - `the value is stored in JSON` -> normally omit;
-- `the value is persisted because the design separates a durable desired state from the currently active state` -> important if supported;
+- `the value is persisted because a later start must remember a previously chosen intention` -> useful when supported;
 - `there are six fields` -> normally omit;
-- `one field exists solely to preserve compatibility across schema evolution` -> potentially important.
+- `one field preserves compatibility with older stored records` -> useful when it explains the design.
 
 The goal is explanatory compression: retain the meaning, not every mechanism that led to it.
 
 ## Anti-Patterns
 
-### Do not mirror the analysis process
+### Do not answer “what is there?” when the real question is “why is it there?”
 
-The user asked to understand the target, not to read the sequence of investigative steps.
+Inventory is evidence, not intent.
 
-### Do not explain local wording with more local wording
+### Do not stay trapped inside the selected folder or fragment
 
-If the explanation only makes sense to someone who already knows the project's glossary, it failed.
-
-### Do not stop at the selected file or folder when its meaning depends on context
-
-Scope is the question boundary. Follow high-value evidence outside it when necessary.
+The selected target is the question boundary. Follow high-information evidence outside it when necessary.
 
 ### Do not zoom out indiscriminately
 
@@ -570,81 +517,85 @@ Context expansion must earn its way by changing the interpretation.
 
 ### Do not privilege code
 
-Configuration, documentation, data shape, generated output, automation, metadata, usage, or history may reveal intent more clearly than implementation code.
+Documentation, data, configuration, automation, metadata, examples, usage, or history may explain intent more clearly.
 
-### Do not ignore data design
+### Do not mirror project vocabulary
 
-Storage, representation, ownership, lifecycle, migration, versioning, absence, conflict, synchronization, and deletion choices may be central design decisions.
+A useful explanation should be understandable to someone who does not already know the local glossary.
 
-### Do not inventory mechanisms as findings
+### Do not stop at the currently observed use
 
-Retries, caches, fields, tables, locks, files, stages, and formats matter only insofar as they reveal meaning, purpose, constraints, or trade-offs.
+After establishing the current role, consider what broader class of situations the same design plausibly serves.
 
-### Do not force a predefined artifact taxonomy
+### Do not confuse plausible wider use with known intent
 
-Discover the target's role from evidence rather than deciding in advance what kind of thing it is.
+Clearly label inference distance.
 
-### Do not call every capability a user feature
+### Do not invent exact private reasoning
 
-Explain the actual observed or inferred role instead of promoting technical mechanisms into product claims.
+Reconstruct bounded design rationale and trade-offs, not a verbatim chain of thought.
 
-### Do not pretend inferred reasoning is known thought
+### Do not force fixed personas or artifact types
 
-Reconstruct decision logic and trade-offs, not a verbatim private chain of thought.
+Discover beneficiaries, role, and context from evidence.
+
+### Do not force every mechanism into the output
+
+Only retain details that explain purpose or consequence.
 
 ### Do not write a grand story first
 
-Broader concepts must emerge from supported local interpretations.
+Broader ideas must emerge from supported local interpretations.
 
-### Do not confuse present design with original motivation
+### Do not confuse present design meaning with historical origin
 
-Historical intent requires historical evidence.
+Historical claims need historical evidence.
 
 ## Optional Evidence Appendix
 
-Only add a raw evidence appendix when:
+Only add raw evidence when:
 
-- the user asks for full traceability;
+- the user asks for traceability;
 - the interpretation is contested;
-- many conclusions depend on subtle evidence;
+- conclusions depend on subtle evidence;
 - stable references would help follow-up work.
 
-Place it after the human-readable explanation, not before it.
+Place evidence after the human-readable explanation, not before it.
 
 ## Source Referencing
 
-Prefer concrete references directly next to the claim they support.
+Prefer precise references directly next to the claims they support.
 
-Use the reference form available in the environment: path and symbol, line, section, key, record shape, workflow step, commit, or another precise locator.
+Use whatever locator fits the material: path, symbol, line, section, key, record shape, workflow step, commit, or another precise reference.
 
-Do not fabricate symbols, lines, or locations.
+Do not fabricate locations.
 
 ## Preferred Tone
 
-Be investigative, explanatory, concept-oriented, and compact enough that the central idea remains visible.
+Be investigative, explanatory, concept-oriented, and focused on purpose.
 
 Prefer language such as:
 
-- `This appears to provide ...`
-- `In neutral terms, this is ...`
-- `The underlying idea appears to be ...`
-- `This seems useful because ...`
+- `This appears to exist because ...`
+- `The situation it seems designed for is ...`
+- `Without this, ...`
+- `This becomes useful when ...`
 - `The design appears to favor ... over ...`
-- `The surrounding usage suggests ...`
-- `The reason this state is retained appears to be ...`
-- `Historical origin remains uncertain.`
+- `The extra complexity buys ...`
+- `A plausible wider use is ...`
+- `That wider use is not directly observed.`
+- `The present rationale is clear; historical origin remains uncertain.`
 
-Avoid making the answer sound like a forensic ledger unless the user asks for that style.
-
-The skill succeeds when the reader understands the target better than its own names explain it: what it is really for, how it participates in a larger design, why relevant state/data/mechanisms exist, which trade-offs shaped it, and what those choices enable.
+The skill succeeds when the reader can answer not just **what the target does**, but **why someone would have bothered to create it, in which situations it pays off, what assumptions and trade-offs it embodies, and what broader possibilities the same idea opens up**.
 
 ## Typical Invocation Phrases
 
-- `[$analyze-design-intent] help me understand what is really behind this`
-- `analyze the design intent of this target`
-- `what is this actually for and why might it be built this way?`
-- `look at this and its relevant surroundings and explain the underlying ideas`
-- `why is this state stored at all and what design does that imply?`
-- `compare these selected targets and explain the reasoning behind their different shapes`
-- `trace how this is used and what its role appears to be`
-- `analyze this broader area, but organize the answer by the actual topics you discover`
+- `[$analyze-design-intent] why does this exist?`
+- `what problem was someone probably trying to solve with this?`
+- `help me understand why somebody wrote this and when it is useful`
+- `look beyond the local implementation and reconstruct the design intent`
+- `why is this information stored at all?`
+- `what situations does this design appear intended for?`
+- `what does this make easier for whoever has to use or maintain it?`
+- `what other plausible uses does the underlying idea support?`
+- `analyze this broader area, but explain it by the topics and purposes you discover`
