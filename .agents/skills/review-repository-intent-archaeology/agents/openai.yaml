@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repository Intent Archaeology"
+  short_description: "Recover likely concepts and intent from repository evidence"
+  default_prompt: "Use $review-repository-intent-archaeology as a source-first, read-only analysis of the selected codebase. Start from direct observations, derive local responsibilities, form bounded alternative hypotheses about present structural intent and possible historical origin, then analyze supporting, contradicting, dependent, shared-evidence, and synthesis relationships. Keep repository state unchanged, return the report in chat, distinguish evidence from inference, include negative or missing expected evidence, avoid turning technical mechanisms into product features without support, and prefer 'No defensible intent hypothesis yet.' over inventing a story."
