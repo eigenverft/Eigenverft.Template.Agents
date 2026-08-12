@@ -4,11 +4,12 @@ Ensure the repository root has a `.gitignore`. Create an empty one only when non
 
 ## Required ignore patterns
 
-Ensure every pattern from this block is present in the root `.gitignore`. If the block is missing, append it once at the end, with a blank line before it when the file already has content. Do not duplicate patterns that are already present, even when surrounding comments differ.
+Ensure every pattern from this block is present in the root `.gitignore`. If the block is missing, append it once at the end, with a blank line before it when the file already has content. Do not duplicate patterns that are already present, even when surrounding comments differ. As a migration step, remove the legacy broad pattern `*[Ss][Ee][Cc][Rr][Ee][Tt]*` when it is present; it must not remain because it can hide legitimate source files whose names contain `secret`.
 
 ```gitignore
-# Sensitive file name patterns
-*[Ss][Ee][Cc][Rr][Ee][Tt]*
+# Sensitive PowerShell and JSON file name patterns
+*[Ss][Ee][Cc][Rr][Ee][Tt]*.[Pp][Ss]1
+*[Ss][Ee][Cc][Rr][Ee][Tt]*.[Jj][Ss][Oo][Nn]
 
 # Local agent instruction files
 AGENTS.md
@@ -26,8 +27,7 @@ Ensure ordinary local build and publish artifact directories are ignored. At min
 - `[Dd]ebug/` and `[Rr]elease/` in .NET / Visual Studio repositories
 - root `artifacts/` when the repository produces publish or packaging output
 
-Add only missing patterns. Keep any existing broader gitignore template intact.
+Add only missing patterns. Keep any existing broader gitignore template intact except for the legacy broad `*[Ss][Ee][Cc][Rr][Ee][Tt]*` pattern, which must be removed during migration.
 
 ## Completion
-
-Complete only after verifying the required patterns are present. Do not commit `.gitignore` changes unless the user asks to commit.
+Complete only after verifying the required patterns are present and the legacy broad `*[Ss][Ee][Cc][Rr][Ee][Tt]*` pattern is absent. Do not commit `.gitignore` changes unless the user asks to commit.
