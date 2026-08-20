@@ -435,7 +435,12 @@ $destinationNames = @(
     'Eigenverft.Manifested.Drydock'
     'Eigenverft.Manifested.Package'
     'Eigenverft.Manifested.Sandbox'
+    'Eigenverft.NetLib.Infrastructure'
+    'Eigenverft.NetLib.SerilogCentralLoggingSink'
+    'Eigenverft.NetLib.SerilogThemes'
+    'Eigenverft.NetLib.SqliteHotBackup'
     'Eigenverft.Routed.RequestFilters'
+    'Eigenverft.Service.CentralLogging'
     'Eigenverft.Web.ControlPlaneMcp'
     'Eigenverft.Web.EdgeReverseProxy'
     'Eigenverft.Web.SessionBridge'
@@ -457,6 +462,10 @@ $explicitlyIgnoredProjects = @(
     [pscustomobject][ordered]@{
         Name   = 'Eigenverft.Templates.HtmlJavascriptDemos'
         Reason = 'Independent HTML and JavaScript demo templates'
+    }
+    [pscustomobject][ordered]@{
+        Name   = 'Eigenverft.Meta.Foundation'
+        Reason = 'Meta repository'
     }
     [pscustomobject][ordered]@{
         Name   = 'eigenverft'
