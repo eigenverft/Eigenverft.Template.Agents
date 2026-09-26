@@ -436,7 +436,6 @@ $destinationNames = @(
     'Eigenverft.Manifested.Package'
     'Eigenverft.Manifested.Sandbox'
     'Eigenverft.NetLib.Infrastructure'
-    'Eigenverft.NetLib.SerilogCentralLoggingSink'
     'Eigenverft.NetLib.SerilogThemes'
     'Eigenverft.NetLib.SqliteHotBackup'
     'Eigenverft.Routed.RequestFilters'
