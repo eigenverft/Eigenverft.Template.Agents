@@ -249,7 +249,7 @@ Assess whether the skill safely handles:
 
 ### 5. Metadata and default prompt
 
-Compare the full skill with:
+Compare the full skill with its frontmatter and any optional metadata that is present:
 
 - frontmatter name and description
 - `display_name`
@@ -257,9 +257,11 @@ Compare the full skill with:
 - `default_prompt`
 - declared tools or metadata when present
 
-The default prompt intentionally contains only activation-critical behavior. Detailed collection and version-comparison output stays in `SKILL.md`; this is a deliberate separation, not a mismatch.
+`SKILL.md` is the only required package file. Missing `agents/openai.yaml`, display fields, or a default prompt is not a quality defect. A skill must remain usable from `SKILL.md` and its referenced resources alone.
 
-Key safety rules are repeated on purpose in the description, main contracts, default prompt, and final check. Keep these copies aligned; do not remove them only to reduce repetition.
+When present, a default prompt may contain only activation-critical behavior. Detailed collection and version-comparison output stays in `SKILL.md`; this is a deliberate separation, not a mismatch.
+
+Key safety rules may be repeated on purpose in the description, main contracts, an optional default prompt, and final check. Keep existing copies aligned; do not require an additional prompt merely to repeat them.
 
 ### 6. Completeness and usability
 

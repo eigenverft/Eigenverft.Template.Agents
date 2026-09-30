@@ -679,8 +679,11 @@ function Test-SkillValidity {
     }
 
     $openAiYamlPath = Join-Path -Path $SkillDirectoryPath -ChildPath "agents/openai.yaml"
+    if (-not (Test-Path -LiteralPath $openAiYamlPath)) {
+        return [pscustomobject]@{ Valid = $true; Message = "Skill is valid!" }
+    }
     if (-not (Test-Path -LiteralPath $openAiYamlPath -PathType Leaf)) {
-        return [pscustomobject]@{ Valid = $false; Message = "agents/openai.yaml not found" }
+        return [pscustomobject]@{ Valid = $false; Message = "agents/openai.yaml must be a file when present" }
     }
     try {
         $interface = Get-OpenAiInterfaceMap -YamlContent (Get-Content -LiteralPath $openAiYamlPath -Raw -Encoding UTF8)
@@ -762,7 +765,9 @@ try {
                 Set-Content -LiteralPath $skillMdPath -Value $content -Encoding UTF8
                 Write-Output "[OK] Created SKILL.md"
 
-                Write-NewOpenAiYaml -SkillDirectoryPath $skillDirectory -SkillNameValue $normalizedSkillName -InterfaceCsv $Interface
+                if (-not [string]::IsNullOrWhiteSpace($Interface)) {
+                    Write-NewOpenAiYaml -SkillDirectoryPath $skillDirectory -SkillNameValue $normalizedSkillName -InterfaceCsv $Interface
+                }
                 if ($resourceList.Count -gt 0) {
                     New-ResourceDirectories -SkillDirectoryPath $skillDirectory -ResourceList $resourceList
                     if ($Examples) {

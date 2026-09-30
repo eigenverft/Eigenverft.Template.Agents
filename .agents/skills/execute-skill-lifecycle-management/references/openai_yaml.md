@@ -2,6 +2,8 @@
 
 `agents/openai.yaml` is an extended, product-specific config intended for the machine/harness to read, not the agent. Other product-specific config can also live in the `agents/` folder.
 
+`SKILL.md` alone is a valid package. This file is an optional reference for explicitly requested OpenAI metadata; do not create that metadata by default. Keep required workflow and safety instructions in `SKILL.md` and its referenced resources rather than depending on a default prompt.
+
 ## Full example
 
 ```yaml

@@ -10,12 +10,17 @@
 ## SKILL.md Authoring Checklist
 
 - Frontmatter includes `name` and `description`.
+- `SKILL.md` is the only required package file; supporting resources are added only when needed.
 - Frontmatter uses only allowed keys.
 - Description states purpose and clear trigger conditions.
 - Body sections define behavior, scope boundaries, and outputs.
 - No placeholder text remains.
 
-## agents/openai.yaml Checklist
+## Optional Harness Metadata Checklist
+
+Create `agents/openai.yaml` only when explicitly requested. Its absence is valid; required behavior belongs in `SKILL.md` and its referenced resources.
+
+When the file is requested:
 
 - `display_name` is user-facing and does not contain `$`.
 - `short_description` is meaningful and 25-64 characters long.
@@ -34,13 +39,12 @@ Skill Brief
 
 Planned Files
 - .agents/skills/<skill-name>/SKILL.md
-- .agents/skills/<skill-name>/agents/openai.yaml
 - .agents/skills/<skill-name>/references/<optional-file>.md
 
 Validation Notes
 - Frontmatter keys validated
 - Description validated
-- Interface fields validated
+- Optional harness metadata checked only when present
 - Placeholder scan clean
 ```
 

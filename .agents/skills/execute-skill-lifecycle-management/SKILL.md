@@ -1,6 +1,6 @@
 ---
 name: execute-skill-lifecycle-management
-description: Manage Codex skills in the git-root .agents/skills directory by creating, updating, deleting, validating, and cleaning up personal test-skill copies. Use when users ask to modify skill metadata, SKILL.md instructions, resources, or agents/openai.yaml.
+description: Manage agent skills in the git-root .agents/skills directory by creating, updating, deleting, validating, and cleaning up personal test-skill copies. Use when users ask to modify skill metadata, instructions, or resources.
 ---
 
 # Execute Skill Lifecycle Management
@@ -10,13 +10,15 @@ description: Manage Codex skills in the git-root .agents/skills directory by cre
 Manage skill lifecycle operations with one Windows PowerShell 5.1 script.
 Repository skill operations target `.agents/skills` resolved from git root. The separate `cleanup-personal` action targets only the fixed personal `.codex/skills/test-skill` path.
 
+`SKILL.md` is the only required package file. Create harness-specific metadata only when explicitly requested; the default package has no `agents/openai.yaml`.
+
 ## Workflow
 
 1. Create a skill
 - Run:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/skills/execute-skill-lifecycle-management/scripts/manage_skill.ps1 -Action create -SkillName <skill-name>`
 - Optional: `-Resources scripts,references,assets -Examples`
-- Optional interface overrides: `-Interface display_name=My Skill,short_description=Short summary text`
+- Only when OpenAI interface metadata is requested: `-Interface display_name=My Skill,short_description=Short summary text`. Supplying `-Interface` creates `agents/openai.yaml`; omitting it leaves the package YAML-free.
 - `-Interface` parsing is comma-separated `key=value`; avoid commas inside values.
 
 2. Update an existing skill
@@ -24,7 +26,7 @@ Repository skill operations target `.agents/skills` resolved from git root. The 
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/skills/execute-skill-lifecycle-management/scripts/manage_skill.ps1 -Action update -SkillName <skill-name>`
 - Optional: `-Description`, `-Title`, `-BodyFile`, `-Resources`, `-PruneResources`, `-Interface`
 - `-PruneResources` recursively removes unlisted resource directories and therefore also requires `-ConfirmDestructive` after the exact target has been verified.
-- Interface updates are field-level: unspecified `interface` fields and other top-level sections such as `dependencies` and `policy` must remain unchanged.
+- Optional interface updates are field-level: unspecified `interface` fields and other top-level sections such as `dependencies` and `policy` must remain unchanged. Do not create or recreate this metadata during an ordinary update.
 
 3. Validate a skill
 - Run:
@@ -50,13 +52,14 @@ Repository skill operations target `.agents/skills` resolved from git root. The 
 - `SKILL.md` frontmatter allows only: `name`, `description`, `license`, `allowed-tools`, `metadata`.
 - `SKILL.md` frontmatter requires: `name` and `description`.
 - `description` must not contain `<` or `>` and must be at most 1024 characters.
-- New `agents/openai.yaml` files include `display_name`, `short_description`, and a `default_prompt` that names `$skill-name`.
+- When explicitly requested, `agents/openai.yaml` includes `display_name`, `short_description`, and a `default_prompt` that names `$skill-name`. Validation checks these fields only when that file exists.
 - `delete`, `cleanup-personal`, and `-PruneResources` require `-ConfirmDestructive`.
 
 ## Minimal Quality Checklist
 
 - Replace all template TODO text in generated `SKILL.md`.
-- Ensure `agents/openai.yaml` has meaningful `display_name` and `short_description`.
+- Ensure all required behavior is defined in `SKILL.md` and its referenced resources, independently of optional harness metadata.
+- When present, ensure `agents/openai.yaml` has meaningful `display_name` and `short_description`.
 - Run `validate` after every `create` or `update`.
 - Run only a safe, non-mutating smoke check unless the user separately authorizes the skill's real action.
 
@@ -80,4 +83,4 @@ Single entrypoint for create, update, delete, validate, and cleanup-personal ope
 
 ### references/openai_yaml.md
 
-Interface field definitions and constraints for `agents/openai.yaml`, including `display_name` rules.
+Read only when creating or updating explicitly requested OpenAI metadata. Defines optional `agents/openai.yaml` fields and constraints, including `display_name` rules.

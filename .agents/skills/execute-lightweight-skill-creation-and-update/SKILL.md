@@ -1,6 +1,6 @@
 ---
 name: execute-lightweight-skill-creation-and-update
-description: Create and update Codex skill files directly from user descriptions using lightweight instructions, checklists, and quality criteria.
+description: Create and update portable agent skill packages directly from user descriptions using lightweight instructions, checklists, and quality criteria.
 ---
 
 # Execute Lightweight Skill Creation and Update
@@ -14,7 +14,7 @@ Resolve `.agents/skills` from the current Git root before editing. Do not assume
 ## When To Use
 
 - You need a new skill scaffold created from requirements.
-- You need to revise `SKILL.md` or `agents/openai.yaml` for an existing skill.
+- You need to revise `SKILL.md` or resources for an existing skill.
 - You need lightweight guidance plus direct file edits in one flow.
 - You need repeatable checklists for skill quality without heavy automation.
 
@@ -40,7 +40,8 @@ Always structure responses in this order:
 - Derive a lowercase hyphen-case skill name.
 - Create required files and folders under `.agents/skills/<skill-name>`.
 - Write `SKILL.md` with complete frontmatter and actionable instructions.
-- Write `agents/openai.yaml` with valid interface values.
+- Treat `SKILL.md` as the only required package file. Create harness-specific metadata such as `agents/openai.yaml` only when explicitly requested.
+- Put all required behavior in `SKILL.md` and its referenced resources so the skill works without harness-specific metadata.
 - Add reference files only when they materially support the skill.
 - When the requested skill is a softskill, default to a generic, reusable design unless the user explicitly wants repo- or stack-specific behavior.
 
@@ -59,7 +60,7 @@ When creating or revising a softskill:
 ### 2. Update Existing Skill
 
 - Inventory the complete selected skill package and read every behavior-changing text resource before editing.
-- Preserve unspecified `agents/openai.yaml` fields and top-level sections such as `dependencies` and `policy`.
+- Preserve existing optional harness metadata unless its change or removal is requested; do not create or recreate it during an ordinary update.
 - Preserve unselected scripts, references, assets, and user-authored content.
 - Apply minimal, targeted edits tied to the requested behavior.
 - Keep naming, invocation wording, and constraints consistent.
@@ -69,9 +70,8 @@ When creating or revising a softskill:
 
 - Ensure `SKILL.md` frontmatter contains only allowed keys and required fields.
 - Ensure `description` is clear and free of angle brackets.
-- Ensure `openai.yaml` interface values are quoted strings.
-- Ensure `short_description` is meaningful and between 25 and 64 characters.
-- Ensure `default_prompt` exists and explicitly mentions `$skill-name`.
+- Do not require harness-specific metadata for a valid skill package.
+- If explicitly requested `agents/openai.yaml` is present, check its quoted interface strings, meaningful 25-64-character `short_description`, and `default_prompt` mentioning `$skill-name`.
 - Remove template placeholders and unresolved markers.
 - For softskills, check whether the instructions are more repo-specific than necessary.
 - For reusable softskills, prefer explicit discovery heuristics over hardcoded project assumptions.
