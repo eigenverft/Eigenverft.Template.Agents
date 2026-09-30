@@ -19,11 +19,11 @@ Use a clear subject and the following sections in the commit body whenever pract
 
 ### Changes
 
-Summarize the concrete code or repository changes in a conventional, implementation-focused way.
+Summarize the concrete technical modifications, not just their overall theme. Identify affected paths, components, or symbols where they help locate and understand the changes, and state relevant additions, removals, changed conditions, or interfaces. Group repetitive modifications into a compact summary rather than listing every touched file.
 
 ### Description
 
-Explain how the implementation, behavior, structure, or workflow changed. Keep it reasonably concise, with enough concrete technical context to understand the change without inspecting the diff, rather than merely repeating Changes.
+Explain how those modifications affect the implementation, behavior, structure, or workflow. Keep it reasonably concise, with enough concrete technical context to understand the change without inspecting the diff, rather than merely repeating Changes.
 
 ### Intent
 
