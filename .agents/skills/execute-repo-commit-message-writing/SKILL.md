@@ -7,7 +7,7 @@ description: Use when carrying out a user's Git commit request to write clear, d
 
 ## Purpose and Activation
 
-Write clear, descriptive commit messages from a developer perspective and use them directly for user-authorized commits. For multiple commits, write a separate message for each group's actual changes, not the entire working diff.
+Write clear, descriptive commit messages and use them directly for user-authorized commits. Keep Changes and Description implementation-focused; express Intent from the user's perspective. For multiple commits, write a separate message for each group's actual changes, not the entire working diff.
 
 This skill defines message content only. Do not regroup changes or independently authorize Git actions. A message-draft request alone does not authorize a commit.
 
@@ -27,7 +27,7 @@ Explain how those modifications affect the implementation, behavior, structure, 
 
 ### Intent
 
-When the user's intent, requested outcome, or relevant background is supported by explicit instructions, repository context, or other verified information, briefly explain why the change was made. Otherwise omit Intent entirely; do not invent or speculate about missing context.
+Explain the purpose of the change from the user's perspective: the desired outcome or benefit, not a record of the user's request or the conversation. Include Intent only when that purpose is supported by explicit instructions, repository context, or other verified information; otherwise omit it entirely. Do not invent or speculate about missing context.
 
 Prefer informative commit messages over overly short summaries. Avoid repeating the same explanation in each section.
 
