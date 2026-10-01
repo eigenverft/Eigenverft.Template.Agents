@@ -61,11 +61,37 @@ For higher risk behavior, identify only the few invariants or expectations neede
 
 Do not perform exhaustive independent passes for every possible defect category.
 
+### High value review signals
+
+Use observable signals to decide where deeper review is worth the cost.
+
+A signal is a reason to ask a targeted question, not evidence that a defect exists.
+
+When relevant, use signals such as:
+
+- **Repeated or uncertain side effects**: If an operation can be retried, repeated, resumed, or have an uncertain outcome, ask whether the same effect can occur more than once and whether repeated execution remains safe.
+- **Persistent state or representation changes**: If behavior changes information that outlives the current operation, ask whether existing, older, newer, or partially transitioned state remains valid and interpretable.
+- **Broad or insufficiently scoped access or mutation**: If an operation reads, changes, removes, or acts on a set of data or resources, ask whether its scope is constrained to exactly what was intended.
+- **Authority sensitive operations**: If behavior depends on identity, ownership, permission, or externally supplied identifiers, ask whether every affected action and resource is authorized in the actual execution path.
+- **Sensitive information exposure**: If information is logged, returned, stored, propagated, or made observable, ask whether its audience, visibility, and lifetime are appropriate for its sensitivity.
+- **Shared mutable state under overlapping execution**: If multiple executions can observe or modify the same state, ask whether correctness still holds under different ordering or concurrent access.
+
+Do not mechanically investigate every signal category. Activate a question only when the corresponding signal is actually present or plausibly relevant.
+
+Multiple interacting signals may justify deeper attention, but they still do not establish a defect by themselves.
+
 ## 3. Generate candidates, not findings
 
 Treat suspicious behavior as a candidate concern first.
 
-A useful candidate should point to a possible concrete behavioral failure. Do not promote suspicion to a finding merely because the code looks unusual or could theoretically fail.
+A useful candidate should point to a possible concrete behavioral failure.
+
+Do not promote suspicion to a finding merely because:
+
+- the code looks unusual,
+- a high value signal is present,
+- a pattern is commonly risky,
+- or something could theoretically fail.
 
 Do not spend review effort generating candidates for:
 
@@ -84,7 +110,7 @@ For each meaningful candidate, establish enough evidence to decide whether it is
 
 When the failure is not already obvious:
 
-1. Identify the smallest concrete input, state, sequence, or operating condition that exposes the suspected problem.
+1. Identify the smallest concrete input, state, sequence, interaction, or operating condition that exposes the suspected problem.
 2. Trace the causal path from the reviewed code to an incorrect observable result.
 3. Check whether the concern depends on an unsupported assumption.
 4. Actively look for nearby evidence that disproves the concern.
@@ -133,7 +159,7 @@ Review the requested scope rather than turning the task into a general repositor
 
 When reviewing a change, report a pre existing problem only when the change introduces a new consequence, exposes it in a newly relevant way, or materially worsens it.
 
-For reviews of existing code without a change, stay within the requested behavioral or structural scope unless an external dependency is necessary to establish a finding.
+For reviews of existing code without a change, stay within the requested behavioral or structural scope unless external context is necessary to establish a finding.
 
 Suppress:
 
@@ -179,6 +205,7 @@ Stop the review when:
 
 - the behavior within scope has been understood,
 - higher risk areas have received proportionate attention,
+- relevant high value signals have been considered where present,
 - each meaningful candidate has been verified or dismissed,
 - no concrete unresolved high impact question remains,
 - additional context is unlikely to change the findings.
