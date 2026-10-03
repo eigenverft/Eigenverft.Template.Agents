@@ -46,11 +46,21 @@ Evaluate approaches in terms of simplicity gained, complexity reduced, restructu
 
 ## Recommendation Threshold
 
-Include an alternative only when the evidence supports a concrete complexity reduction and a plausible way to preserve the required outcomes under its stated conditions. Make unresolved prerequisites explicit rather than presenting them as established facts.
+Include an alternative only when the evidence supports both a concrete complexity reduction and preservation of the required meaning, behavior, and guarantees under its stated conditions.
+
+Before reporting a candidate, establish what the current mechanism represents and which guarantees its consumers rely on. Trace relevant usage and inspect available tests and documentation for that purpose, rather than judging the implementation in isolation. Check a meaningful contrasting condition in which the alternative might behave differently, including lifecycle changes when relevant. Similar names, types, outputs, or happy-path behavior do not establish equivalence. Distinguish required guarantees from incidental implementation choices.
+
+Reject candidates that lose required meaning or guarantees. When preservation remains unresolved, omit the candidate from the alternatives table, recommendations, and quick wins; state a material evidence gap briefly if needed. Do not disguise weaker requirements as a simplification or hide lost guarantees in trade-offs. Migration prerequisites may be conditional, but must not substitute for evidence of semantic fit.
 
 Do not force multiple alternatives, combinations, or quick wins. One worthwhile alternative is sufficient; none is a valid result. Stop when the plausible alternatives have been assessed enough to explain their gains, costs, and conditions, rather than continuing to generate hypothetical redesigns.
 
-If no worthwhile simplification is supported, state that briefly and omit the table, short report, and quick-win list. If missing evidence prevents a conclusion, state that limitation instead of implying that no opportunity exists.
+When the review supports no applicable and worthwhile simplification, return only:
+
+```text
+No worthwhile simplification identified within the reviewed scope.
+```
+
+Do not generate alternatives, rankings, or quick wins merely to populate the output format. If missing evidence prevents a conclusion, briefly state the concrete limitation instead of using the standard message or implying that no opportunity exists.
 
 ## Results Table
 
@@ -63,7 +73,7 @@ Use this table for qualifying alternatives. Identify the observed structure and 
 | Ref | Current structure | Required outcome | Possible target design | What becomes simpler or disappears? | Simplicity gain | Change effort | Risk | Prerequisites | Trade-offs |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 
-Describe the required outcome independently of the current implementation. Explain the concrete mechanisms, states, or special cases reduced or removed by each target design.
+Describe the required outcome independently of the current implementation, including its relevant guarantees. Explain the concrete mechanisms, states, or special cases reduced or removed by each target design, and briefly identify the evidence supporting preservation of those guarantees in the row or its supporting note.
 
 Use qualitative ratings: low / medium / high / very high for simplicity gain, and low / medium / high for effort and risk. Avoid artificial precision; ratings are relative estimates, not measurements or guarantees.
 
@@ -110,7 +120,7 @@ Prefer ordering by:
 3. Low to manageable change effort.
 4. Minimal dependency on other changes.
 
-Include only changes that are sufficiently understood and justified. Uncertain, highly invasive, or unresolved-assumption-dependent proposals remain in the comparison, not in the quick-win list. Omit this section when none qualifies.
+Include only changes that are sufficiently understood and justified. Proposals with uncertain migration effort, high invasiveness, or unresolved migration prerequisites may remain in the comparison only when their semantic fit is established; they do not belong in the quick-win list. Omit this section when none qualifies.
 
 When useful, append a compact assessment such as `Gain: high | Effort: low | Risk: low`.
 
