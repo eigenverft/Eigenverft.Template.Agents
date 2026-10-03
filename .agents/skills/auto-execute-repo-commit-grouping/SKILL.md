@@ -1,9 +1,9 @@
 ---
-name: execute-repo-commit-grouping
+name: auto-execute-repo-commit-grouping
 description: Use before a user-requested Git commit to inspect the actual repository changes and decide internally which changes belong in each coherent commit and in what order. Applies to ordinary commit requests, including requests to commit all suitable changes, without requiring explicit skill invocation. This is internal commit preparation, not a separate report or a staging, commit, or remote-operation workflow.
 ---
 
-# Execute Repo Commit Grouping
+# Auto Execute Repo Commit Grouping
 
 ## Purpose and Activation
 

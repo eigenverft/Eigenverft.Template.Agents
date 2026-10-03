@@ -1,9 +1,9 @@
 ---
-name: execute-repo-commit-message-writing
+name: auto-execute-repo-commit-message-writing
 description: Use when carrying out a user's Git commit request to write clear, descriptive, developer-oriented messages for the actual changes in each commit. Apply these rules directly to every created commit, including multi-commit requests, without requiring explicit skill invocation or a separate draft-approval step. This skill defines commit-message content only, not change grouping or a Git execution or publication workflow.
 ---
 
-# Execute Repo Commit Message Writing
+# Auto Execute Repo Commit Message Writing
 
 ## Purpose and Activation
 

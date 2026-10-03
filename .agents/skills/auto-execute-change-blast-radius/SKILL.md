@@ -1,5 +1,5 @@
 ---
-name: execute-change-blast-radius
+name: auto-execute-change-blast-radius
 description: Use when carrying out a user-requested change to inspect direct and indirect consequences, make the smallest complete set of verified necessary modifications, and stop after complete fulfillment. Applies to ordinary change requests without requiring explicit skill invocation. This skill governs change scope and completion only; it does not independently authorize modifications or expand the user's requested outcome.
 ---
 
