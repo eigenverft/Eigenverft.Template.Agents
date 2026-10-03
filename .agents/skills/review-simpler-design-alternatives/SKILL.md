@@ -30,6 +30,8 @@ How would the same capability be built as simply as possible today if the existi
 
 Which simpler solution models are commonly used, and how do they achieve the same effect with fewer mechanisms, states, and special cases? Treat familiarity as a source of candidates, not evidence that an approach fits this scope.
 
+Consider alternative constructs and mechanisms available in the language, runtime, standard library, or ecosystem, not only different arrangements of the existing implementation. Could another approach fulfill the same responsibility with fewer custom mechanisms, states, or coordination rules? Compare actual behavior and constraints; similar purposes do not make approaches interchangeable.
+
 Deliberately consider multiple possible paths. Examine small simplifications as well as fundamentally different designs, and place meaningful target designs side by side.
 
 For each approach, check the conditions under which it fits, its strengths, and how it differs from the alternatives.
