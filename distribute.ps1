@@ -444,6 +444,7 @@ $destinationNames = @(
     'Eigenverft.Web.EdgeReverseProxy'
     'Eigenverft.Web.SessionBridge'
     'Eigenverft.WebLib.Infrastructure'
+    'Eigenverft.WebLib.RequestFilters'
     'Eigenverft.Windows.ProcessIsolationRestricted'
     'Eigenverft.Windows.ProcessIsolationSandbox'
 )
