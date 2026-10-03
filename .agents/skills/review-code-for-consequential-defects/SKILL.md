@@ -75,6 +75,7 @@ When relevant, use signals such as:
 - **Authority sensitive operations**: If behavior depends on identity, ownership, permission, or externally supplied identifiers, ask whether every affected action and resource is authorized in the actual execution path.
 - **Sensitive information exposure**: If information is logged, returned, stored, propagated, or made observable, ask whether its audience, visibility, and lifetime are appropriate for its sensitivity.
 - **Shared mutable state under overlapping execution**: If multiple executions can observe or modify the same state, ask whether correctness still holds under different ordering or concurrent access.
+- **Implicit dependency behavior**: If correctness depends on defaults, conventions, or implicit behavior of a framework, library, platform, or other component, ask whether the project's assumptions match the behavior effective in its supported configuration and versions. Check relevant overrides and integration paths before concluding that a mismatch causes a concrete failure.
 
 Do not mechanically investigate every signal category. Activate a question only when the corresponding signal is actually present or plausibly relevant.
 
