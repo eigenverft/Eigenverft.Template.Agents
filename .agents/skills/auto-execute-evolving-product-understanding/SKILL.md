@@ -142,6 +142,8 @@ After successful integration, remove or reduce the corresponding working hypothe
 
 ### General Cleanup
 
+After completing a task, check whether the changes made or evidence encountered invalidate, narrow, or contradict existing Stage 2 hypotheses or Stage 3 documentation. Revise, downgrade, or remove affected claims as appropriate, while preserving still-valid knowledge and distinguishing changes in implementation behavior from changes in business intent.
+
 - Merge duplicate provisional knowledge.
 - Remove disproven or obsolete hypotheses when they no longer provide useful context.
 - Preserve meaningful unresolved contradictions.
