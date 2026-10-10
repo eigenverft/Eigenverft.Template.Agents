@@ -1,6 +1,6 @@
 ---
 name: auto-execute-evolving-product-understanding
-description: Apply automatically when handling ordinary development and analysis tasks in a software codebase, including feature implementation, bug fixes, refactoring, debugging, testing, code review, configuration changes, and repository investigation, even when the user does not request documentation. At task start, briefly review existing agent-maintained domain knowledge, then perform the requested work normally. Afterward, reflect on business-relevant information already encountered and selectively maintain domain clues, working hypotheses, grounded domain documentation, and the glossary. Make no knowledge updates without meaningful evidence; never invent business intent or expand the requested task.
+description: Apply automatically when doing any task involving a software product repository, its source, behavior, requirements, tests, configuration, documentation, or design, including reading, answering questions, exploring, planning, implementing, reviewing, debugging, and maintenance, even without an explicit skill invocation or domain-documentation request. Briefly consult relevant existing domain knowledge, do the user's task first, then record only meaningful domain evidence naturally encountered. Start new insights as clues, reconsider them as hypotheses in later task cycles, and promote them to grounded context only after another review. Create knowledge files only when justified; preserve read-only tasks and avoid unrelated investigation or edits.
 ---
 
 # Auto Execute Evolving Product Understanding
@@ -30,11 +30,12 @@ Keep this knowledge base separate from other documentation systems. Do not reloc
 
 Apply the following lightweight sequence during ordinary repository work:
 
-1. **Orient once.** At task start, briefly review the existing knowledge maintained by this skill. Read the provisional records and skim established domain topics as needed to understand what is already known.
-2. **Initialize if missing.** Create the knowledge root and minimal document skeletons when absent, unless the task explicitly prohibits repository changes.
-3. **Complete the actual task.** Work normally. Do not interrupt the requested work to update documentation, investigate domain questions, or gather extra evidence for this skill.
-4. **Reflect once afterward.** Review meaningful domain information naturally encountered during the completed task and compare it with existing knowledge.
-5. **Update only when worthwhile.** Record new insights, reconcile evidence, promote supported conclusions, or correct existing knowledge when justified. Otherwise make no knowledge changes.
+1. **Orient once.** At task start, briefly review existing provisional records and only the established domain topics relevant to the task.
+2. **Complete the actual task.** Work normally. Do not interrupt the requested work to update documentation, investigate domain questions, or gather extra evidence for this skill.
+3. **Reflect once afterward.** Review meaningful domain information naturally encountered during the completed task and compare it with existing knowledge.
+4. **Update only when worthwhile.** Record new clues, revisit prior provisional knowledge, or correct directly affected established knowledge when justified. Otherwise make no knowledge changes.
+
+Create the knowledge root and individual files only when an actual justified entry needs them. Do not initialize empty skeletons, `context/`, or the glossary in advance.
 
 Do not turn this sequence into a separate documentation task.
 
@@ -126,7 +127,7 @@ Treat the stages as a knowledge lifecycle rather than three permanent copies of 
 
 ### Stage 1 to Stage 2
 
-When several clues support a meaningful interpretation, consolidate them into a working hypothesis.
+Revisit clues that were already recorded before the current task. When they now support a meaningful interpretation, consolidate them into a working hypothesis. Newly encountered clues remain in Stage 1 for a later task cycle; do not promote them in the same reflection.
 
 Preserve relevant evidence, qualifications, and open questions.
 
@@ -134,7 +135,7 @@ After the destination has been updated, remove clues whose useful content has be
 
 ### Stage 2 to Stage 3
 
-When a conclusion is sufficiently supported, integrate it into the appropriate domain explanation or glossary entry.
+Revisit hypotheses that were already recorded before the current task. Promote a conclusion into the appropriate domain explanation or glossary entry only after reconsidering its evidence and uncertainty in this later task cycle. Do not create new Stage 3 topics or glossary entries directly from freshly encountered clues or same-task hypotheses.
 
 Promote only what the evidence establishes. Unresolved interpretations may remain provisional.
 
@@ -142,7 +143,7 @@ After successful integration, remove or reduce the corresponding working hypothe
 
 ### General Cleanup
 
-After completing a task, check whether the changes made or evidence encountered invalidate, narrow, or contradict existing Stage 2 hypotheses or Stage 3 documentation. Revise, downgrade, or remove affected claims as appropriate, while preserving still-valid knowledge and distinguishing changes in implementation behavior from changes in business intent.
+After completing a task, check whether directly encountered evidence invalidates, narrows, or contradicts existing Stage 2 hypotheses or Stage 3 documentation. Correct only the affected claims when justified, even if Stage 3 needs an immediate factual correction; do not use corrections to introduce new Stage 3 topics or rewrite unrelated context. Preserve still-valid knowledge and distinguish changes in implementation behavior from changes in business intent.
 
 - Merge duplicate provisional knowledge.
 - Remove disproven or obsolete hypotheses when they no longer provide useful context.
