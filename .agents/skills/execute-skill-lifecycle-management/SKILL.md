@@ -1,13 +1,13 @@
 ---
 name: execute-skill-lifecycle-management
-description: Manage agent skills in the git-root .agents/skills directory by creating, updating, deleting, validating, checking basic cross-harness format compatibility, and cleaning up personal test-skill copies. Use when users ask to modify skills or check whether their packages are portable.
+description: Create, update, delete, and validate agent skill packages; author portable SKILL.md instructions from requirements, maintain resources and optional harness metadata, and run read-only compatibility checks. Use for skill creation, revisions, technical lifecycle maintenance, and validation, rather than independent quality reviews.
 ---
 
 # Execute Skill Lifecycle Management
 
 ## Overview
 
-Manage skill lifecycle operations with one Windows PowerShell 5.1 script.
+Design and maintain portable agent skill content, and manage skill lifecycle operations with one Windows PowerShell 5.1 script.
 Repository skill operations target `.agents/skills` resolved from git root. The separate `cleanup-personal` action targets only the fixed personal `.codex/skills/test-skill` path.
 
 `SKILL.md` is the only required package file. Create harness-specific metadata only when explicitly requested; the default package has no `agents/openai.yaml`.
@@ -47,6 +47,60 @@ Repository skill operations target `.agents/skills` resolved from git root. The 
 - Run:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/skills/execute-skill-lifecycle-management/scripts/manage_skill.ps1 -Action cleanup-personal -ConfirmDestructive`
 - This action is limited to the fixed personal `.codex/skills/test-skill` directory and refuses other resolved targets.
+
+## Skill Authoring and Quality
+
+Use this same skill for both the content of portable agent skills and their technical lifecycle. A user may supply only a short description; turn it into a complete, actionable `SKILL.md` without requiring a separate authoring skill.
+
+### When to Apply
+
+- Create a skill from a description, requirements, or an existing workflow.
+- Revise the instructions, triggers, or resource files of an existing skill.
+- Validate packages, inspect basic portability, or perform the other lifecycle actions above.
+- Do not initiate skill creation or changes during unrelated application work or conceptual brainstorming without an editing request.
+
+### Authoring From Requirements
+
+1. Confirm the goal, triggers, scope, and important exclusions; derive a meaningful lowercase hyphen-case name and check for collisions.
+2. Plan the smallest useful package under the Git-root `.agents/skills` directory. Use the lifecycle script to scaffold packages and for routine metadata or resource changes.
+3. Write complete `SKILL.md` frontmatter and an actionable body explaining behavior, boundaries, and expected outputs. The description must convey both purpose and **when** the skill should activate.
+4. Keep all necessary behavior in `SKILL.md` and any referenced resources. `SKILL.md` is the only required package file; do not require `agents/openai.yaml` or another harness-specific file.
+5. Add scripts, references, or assets only when they materially help. Favor a small, reusable skill over extra scaffolding.
+6. Validate after creating or updating a package; review its final content for completeness, portability, accuracy, and unresolved placeholders.
+
+Direct edits to instructions and resources are appropriate when the lifecycle script cannot express a targeted change. They must remain small, reviewable, and consistent with the package's existing conventions.
+
+### Portable Softskill Defaults
+
+For softskills, prefer generic language and workflows unless the user specifically requests a repository- or technology-bound skill.
+
+- Avoid hardcoding languages, frameworks, particular manifest names, or repository layouts without a task-specific reason.
+- When paths or environments matter, describe how to discover the relevant root or files instead of assuming a fixed location.
+- Keep terminology and behavior reusable across repositories and technology stacks where practical.
+- If an existing softskill is made generic, revise the original rather than duplicating it.
+- When a skill intentionally remains project-specific, make that scope clear in its trigger description or body.
+- Prefer the least-coupled design that accomplishes the requested task.
+
+### Preserving Existing Packages
+
+Before editing an existing skill, inventory the selected package and read every behavior-changing text resource.
+
+- Preserve existing optional harness metadata, scripts, references, assets, and user-authored content unless explicitly in scope.
+- Never create or recreate optional harness metadata during an ordinary update.
+- Make minimal, focused edits. Keep `name`, `description`, invocation language, and constraints aligned.
+- If an update would overwrite or delete an existing resource, identify the exact target and obtain authorization before destructive changes.
+- Prefer deterministic results and preserve useful knowledge rather than replacing an existing package with an oversimplified rewrite.
+
+### Authoring Quality and Delivery
+
+- Check that `name` is distinctive, invocable, and consistent with the directory name.
+- Check frontmatter fields and limits, meaningful trigger conditions, behavior, scope boundaries, and expected outputs.
+- Preserve any required quoted strings and other constraints when optional harness metadata was explicitly requested.
+- Remove template TODOs, example placeholders, and inconsistent instructions.
+- For substantial authoring or editing requests, report in a clear sequence: objective; constraints or assumptions; file plan; applied changes; validation and remaining risks.
+- Provide a useful **Skill Brief**, **File Change Set**, and **Validation Notes** in the response, at a level of detail appropriate to the task.
+
+Use `references/softskill_checklists.md` for the concise naming, authoring, metadata, and creation checklists.
 
 ## Constraints At A Glance
 
@@ -91,3 +145,7 @@ Single entrypoint for create, update, delete, validate, read-only compatibility-
 ### references/openai_yaml.md
 
 Read only when creating or updating explicitly requested OpenAI metadata. Defines optional `agents/openai.yaml` fields and constraints, including `display_name` rules.
+
+### references/softskill_checklists.md
+
+Use when creating or revising skills, especially portable softskills. Contains concise naming, package authoring, optional metadata, and delivery checklists inherited from the former lightweight skill.
