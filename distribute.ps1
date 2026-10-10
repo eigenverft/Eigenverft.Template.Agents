@@ -1,8 +1,8 @@
 # Overlays agent instruction files from Eigenverft.Template.Agents into sibling repos.
 # Copy-only by default: paths removed or renamed in the template intentionally remain in
 # target repositories, so local additional, project-specific, or older skills can coexist.
-# -ForceSkillReplacement removes each available target's complete .agents tree before the
-# overlay, producing a strict rollout without retaining local or obsolete .agents content.
+# -EnforceCurrentAgentStandard applies the current template standard by replacing each
+# available target's complete .agents tree, removing local extras and obsolete content.
 # Distribution creates or updates paths present in the current template; matching relative
 # paths are overwritten only when their content differs.
 # You run this script; it does not commit.
@@ -12,7 +12,7 @@
 param(
     [string]$WorkspaceRoot,
 
-    [switch]$ForceSkillReplacement
+    [switch]$EnforceCurrentAgentStandard
 )
 
 if ([string]::IsNullOrWhiteSpace($WorkspaceRoot)) {
@@ -104,9 +104,9 @@ function Copy-GitTemplateSnapshot {
     .PARAMETER Whitelist
     Glob patterns selecting repository-relative files from the cloned template.
 
-    .PARAMETER ForceSkillReplacement
-    Removes and recreates the complete .agents tree in each available destination before the
-    current template snapshot is distributed.
+    .PARAMETER EnforceCurrentAgentStandard
+    Applies the current template standard by removing and recreating the complete .agents tree
+    in each available destination before distribution. Local extras and obsolete content are removed.
 
     .EXAMPLE
     Copy-GitTemplateSnapshot -RepositoryUrl $templateUrl -DestinationPaths $destinations
@@ -115,11 +115,11 @@ function Copy-GitTemplateSnapshot {
 
     .EXAMPLE
     $parameters = @{
-        RepositoryUrl        = $templateUrl
-        DestinationPaths     = $destinations
-        Whitelist            = $whitelist
-        ForceSkillReplacement = $true
-        WhatIf               = $true
+        RepositoryUrl               = $templateUrl
+        DestinationPaths            = $destinations
+        Whitelist                   = $whitelist
+        EnforceCurrentAgentStandard = $true
+        WhatIf                      = $true
     }
     Copy-GitTemplateSnapshot @parameters
 
@@ -141,7 +141,7 @@ function Copy-GitTemplateSnapshot {
 
         [string[]]$Whitelist = @('*'),
 
-        [switch]$ForceSkillReplacement
+        [switch]$EnforceCurrentAgentStandard
     )
 
     # Converts one whitelist glob into an anchored regular expression.
@@ -268,8 +268,8 @@ function Copy-GitTemplateSnapshot {
                 Where-Object { $_.RelativePath -ilike '.agents/*' }
         )
 
-        if ($ForceSkillReplacement -and $sourceAgentsFiles.Count -eq 0) {
-            throw 'Strict skill rollout requires at least one whitelisted .agents file in the template.'
+        if ($EnforceCurrentAgentStandard -and $sourceAgentsFiles.Count -eq 0) {
+            throw 'Enforcing the current agent standard requires at least one whitelisted .agents file in the template.'
         }
 
         foreach ($destinationPath in $destinations) {
@@ -292,7 +292,7 @@ function Copy-GitTemplateSnapshot {
             $removedAgentsFileCount = 0
 
             try {
-                $action = if ($ForceSkillReplacement) {
+                $action = if ($EnforceCurrentAgentStandard) {
                     'Remove the complete .agents tree and distribute the current template snapshot'
                 }
                 else {
@@ -316,7 +316,7 @@ function Copy-GitTemplateSnapshot {
                     continue
                 }
 
-                if ($ForceSkillReplacement) {
+                if ($EnforceCurrentAgentStandard) {
                     $resolvedDestinationPath = (Resolve-Path -LiteralPath $destinationPath -ErrorAction Stop).Path
                     $destinationPrefix = $resolvedDestinationPath.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
                     $targetAgentsPath = [System.IO.Path]::GetFullPath(
@@ -371,8 +371,8 @@ function Copy-GitTemplateSnapshot {
                 else {
                     Write-Host ("Distributed {0} changed files -> {1}" -f $changedFiles.Count, $destinationPath)
                     $details = 'Template changes successfully distributed'
-                    if ($ForceSkillReplacement) {
-                        $details = 'Strict skill replacement completed; .agents was recreated from the current template'
+                    if ($EnforceCurrentAgentStandard) {
+                        $details = 'Current agent standard applied; .agents was recreated from the current template'
                     }
 
                     [void]$results.Add([pscustomobject][ordered]@{
@@ -394,8 +394,8 @@ function Copy-GitTemplateSnapshot {
                     Destination  = $destinationPath
                     ChangedCount = $changedFiles.Count
                     ChangedFiles = $changedFiles.ToArray()
-                    Details      = if ($ForceSkillReplacement) {
-                        "Strict skill replacement could not be completed after removing $removedAgentsFileCount existing .agents file(s): $errorMessage"
+                    Details      = if ($EnforceCurrentAgentStandard) {
+                        "Current agent standard could not be fully applied after removing $removedAgentsFileCount existing .agents file(s): $errorMessage"
                     }
                     else {
                         "Template could not be fully distributed: $errorMessage"
@@ -479,11 +479,11 @@ $destinations = @(
 )
 
 $copyTemplateParameters = @{
-    RepositoryUrl         = $templateUrl
-    DestinationPaths      = $destinations
-    Whitelist             = $whitelist
-    ForceSkillReplacement = $ForceSkillReplacement
-    WhatIf                = $WhatIfPreference
+    RepositoryUrl               = $templateUrl
+    DestinationPaths            = $destinations
+    Whitelist                   = $whitelist
+    EnforceCurrentAgentStandard = $EnforceCurrentAgentStandard
+    WhatIf                      = $WhatIfPreference
 }
 
 $distributionResults = @(Copy-GitTemplateSnapshot @copyTemplateParameters)
