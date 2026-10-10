@@ -1,6 +1,6 @@
 ---
 name: execute-skill-lifecycle-management
-description: Manage agent skills in the git-root .agents/skills directory by creating, updating, deleting, validating, and cleaning up personal test-skill copies. Use when users ask to modify skill metadata, instructions, or resources.
+description: Manage agent skills in the git-root .agents/skills directory by creating, updating, deleting, validating, checking basic cross-harness format compatibility, and cleaning up personal test-skill copies. Use when users ask to modify skills or check whether their packages are portable.
 ---
 
 # Execute Skill Lifecycle Management
@@ -32,12 +32,18 @@ Repository skill operations target `.agents/skills` resolved from git root. The 
 - Run:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/skills/execute-skill-lifecycle-management/scripts/manage_skill.ps1 -Action validate -SkillName <skill-name>`
 
-4. Delete a skill
+4. Check basic compatibility (read-only)
+- All skills: `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/skills/execute-skill-lifecycle-management/scripts/manage_skill.ps1 -Action compatibility-check`
+- One skill: add `-SkillName <skill-name>`.
+- Reuses the repository's metadata validation rules (which may be stricter than the shared Agent Skills specification) and checks optional Codex `agents/openai.yaml` metadata when present. Reports failures and returns a nonzero exit code if any package fails.
+- Does not create files, modify skills, install adapters, or test harness discovery, model selection, or runtime behavior. It is a basic static check, not a guarantee of activation or complete YAML validation.
+
+5. Delete a skill
 - Run:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/skills/execute-skill-lifecycle-management/scripts/manage_skill.ps1 -Action delete -SkillName <skill-name> -ConfirmDestructive`
 - Verify the exact normalized target path printed by the dry attempt before granting `-ConfirmDestructive`.
 
-5. Cleanup personal test-skill copy
+6. Cleanup personal test-skill copy
 - Run:
   `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .agents/skills/execute-skill-lifecycle-management/scripts/manage_skill.ps1 -Action cleanup-personal -ConfirmDestructive`
 - This action is limited to the fixed personal `.codex/skills/test-skill` directory and refuses other resolved targets.
@@ -49,9 +55,10 @@ Repository skill operations target `.agents/skills` resolved from git root. The 
 - Allowed `-Interface` keys: `display_name,short_description,icon_small,icon_large,brand_color,default_prompt`.
 - `display_name` must not include `$`.
 - `short_description` must be 25-64 characters.
-- `SKILL.md` frontmatter allows only: `name`, `description`, `license`, `allowed-tools`, `metadata`.
+- `SKILL.md` frontmatter allows only: `name`, `description`, `license`, `compatibility`, `allowed-tools`, `metadata`.
 - `SKILL.md` frontmatter requires: `name` and `description`.
 - `description` must not contain `<` or `>` and must be at most 1024 characters.
+- Optional `compatibility` must be between 1 and 500 characters.
 - When explicitly requested, `agents/openai.yaml` includes `display_name`, `short_description`, and a `default_prompt` that names `$skill-name`. Validation checks these fields only when that file exists.
 - `delete`, `cleanup-personal`, and `-PruneResources` require `-ConfirmDestructive`.
 
@@ -77,7 +84,7 @@ Repository skill operations target `.agents/skills` resolved from git root. The 
 
 ### scripts/manage_skill.ps1
 
-Single entrypoint for create, update, delete, validate, and cleanup-personal operations.
+Single entrypoint for create, update, delete, validate, read-only compatibility-check, and cleanup-personal operations.
 
 ## References
 

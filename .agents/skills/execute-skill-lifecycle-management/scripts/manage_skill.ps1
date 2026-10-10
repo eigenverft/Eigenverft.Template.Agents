@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("create", "update", "delete", "validate", "cleanup-personal")]
+    [ValidateSet("create", "update", "delete", "validate", "compatibility-check", "cleanup-personal")]
     [string]$Action,
     [string]$SkillName,
     [string]$Resources = "",
@@ -19,7 +19,7 @@ $ErrorActionPreference = "Stop"
 $MaxSkillNameLength = 64
 $AllowedResources = @("scripts", "references", "assets")
 $AllowedInterfaceKeys = @("display_name", "short_description", "icon_small", "icon_large", "brand_color", "default_prompt")
-$AllowedFrontmatterKeys = @("name", "description", "license", "allowed-tools", "metadata")
+$AllowedFrontmatterKeys = @("name", "description", "license", "compatibility", "allowed-tools", "metadata")
 
 $SkillTemplate = @'
 ---
@@ -677,6 +677,12 @@ function Test-SkillValidity {
     if ($descriptionValue.Length -gt 1024) {
         return [pscustomobject]@{ Valid = $false; Message = "Description is too long ($($descriptionValue.Length) characters). Maximum is 1024 characters." }
     }
+    if ($frontmatter.ContainsKey("compatibility")) {
+        $compatibilityValue = ([string]$frontmatter["compatibility"]).Trim()
+        if (($compatibilityValue.Length -lt 1) -or ($compatibilityValue.Length -gt 500)) {
+            return [pscustomobject]@{ Valid = $false; Message = "Compatibility must be 1-500 characters when present." }
+        }
+    }
 
     $openAiYamlPath = Join-Path -Path $SkillDirectoryPath -ChildPath "agents/openai.yaml"
     if (-not (Test-Path -LiteralPath $openAiYamlPath)) {
@@ -722,9 +728,11 @@ function Test-SkillValidity {
 try {
     $gitRoot = Get-GitRoot
     $skillsRoot = Get-SkillsRoot -GitRoot $gitRoot
-    New-Item -Path $skillsRoot -ItemType Directory -Force | Out-Null
+    if ($Action -ne "compatibility-check") {
+        New-Item -Path $skillsRoot -ItemType Directory -Force | Out-Null
+    }
 
-    if ($Action -ne "cleanup-personal") {
+    if (($Action -ne "cleanup-personal") -and (($Action -ne "compatibility-check") -or (-not [string]::IsNullOrWhiteSpace($SkillName)))) {
         if ([string]::IsNullOrWhiteSpace($SkillName)) {
             throw "-SkillName is required for action '$Action'."
         }
@@ -865,6 +873,44 @@ try {
                 exit 0
             }
             exit 1
+        }
+        "compatibility-check" {
+            if (-not (Test-Path -LiteralPath $skillsRoot -PathType Container)) {
+                throw "Skills directory not found: $skillsRoot"
+            }
+            if ([string]::IsNullOrWhiteSpace($SkillName)) {
+                $skillDirectories = @(Get-ChildItem -LiteralPath $skillsRoot -Directory | Sort-Object Name)
+            } else {
+                if (-not (Test-Path -LiteralPath $skillDirectory -PathType Container)) {
+                    throw "Skill directory not found: $skillDirectory"
+                }
+                $skillDirectories = @((Get-Item -LiteralPath $skillDirectory))
+            }
+            if ($skillDirectories.Count -eq 0) {
+                throw "No skill directories found under $skillsRoot"
+            }
+
+            $passed = 0
+            $failed = 0
+            Write-Output "[INFO] Read-only check using repository format rules; optional agents/openai.yaml checked only when present."
+            foreach ($directory in $skillDirectories) {
+                $result = Test-SkillValidity -SkillDirectoryPath $directory.FullName
+                if ($result.Valid) {
+                    $passed++
+                    if ($skillDirectories.Count -eq 1) {
+                        Write-Output "[PASS] $($directory.Name)"
+                    }
+                } else {
+                    $failed++
+                    Write-Output "[FAIL] $($directory.Name): $($result.Message)"
+                }
+            }
+            Write-Output "[SUMMARY] $passed passed, $failed failed ($($skillDirectories.Count) checked)."
+            Write-Output "[LIMIT] Basic format and metadata checks only; full YAML semantics, harness discovery, implicit activation, and runtime behavior are not verified."
+            if ($failed -gt 0) {
+                exit 1
+            }
+            exit 0
         }
         "cleanup-personal" {
             $userProfilePath = [Environment]::GetFolderPath([Environment+SpecialFolder]::UserProfile)
