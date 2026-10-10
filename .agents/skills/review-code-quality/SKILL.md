@@ -1,6 +1,6 @@
 ---
 name: review-code-quality
-description: Review main-product source, solution, and project-definition files against repository-provided extension-mapped quality rules. Use only for an explicitly requested code-quality or rule review, return only concrete rule violations, and keep repository state unchanged.
+description: Use for a read-only review when the user explicitly requests an assessment of main-product source, solution, and project-definition files against repository-provided extension-mapped quality rules. Use only for an explicitly requested code-quality or rule review, return only concrete rule violations, and keep repository state unchanged.
 ---
 
 # Review Code Quality

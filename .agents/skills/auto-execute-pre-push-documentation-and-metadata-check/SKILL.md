@@ -1,6 +1,6 @@
 ---
 name: auto-execute-pre-push-documentation-and-metadata-check
-description: Use before a user-requested Git push, including commit-and-push requests, to maintain existing repository documentation and descriptive publication metadata affected by the outgoing changes. Apply without explicit skill invocation, discover relevant targets independently for each repository, and commit verified necessary corrections separately as part of the push request. Do not create new documentation or metadata structures, expand publication scope, modify implementation code or inline code documentation, or perform releases or history rewriting.
+description: Apply automatically when preparing a user-requested Git push, including commit-and-push requests, to maintain existing repository documentation and descriptive publication metadata affected by the outgoing changes. Apply without explicit skill invocation, discover relevant targets independently for each repository, and commit verified necessary corrections separately as part of the push request. Do not create new documentation or metadata structures, expand publication scope, modify implementation code or inline code documentation, or perform releases or history rewriting.
 ---
 
 # Auto Execute Pre-Push Documentation and Metadata Check

@@ -1,6 +1,6 @@
 ---
 name: review-software-delivery-simplification
-description: Analyze software projects and propose practical simplifications for build, publish, deployment, installation, updates, configuration, data handling, rollback, and ongoing operation.
+description: Use for a read-only review when the user requests analysis of software projects to propose practical simplifications for build, publish, deployment, installation, updates, configuration, data handling, rollback, and ongoing operation.
 ---
 
 # Review Software Delivery Simplification

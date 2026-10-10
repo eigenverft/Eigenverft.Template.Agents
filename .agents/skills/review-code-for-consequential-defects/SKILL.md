@@ -1,6 +1,6 @@
 ---
 name: review-code-for-consequential-defects
-description: Manual invocation only. Use only when the user explicitly invokes review-code-for-consequential-defects or explicitly requests that this specific skill be applied. Do not activate for generic code-review requests, inferred task relevance, or ordinary implementation work. Perform a read-only, risk-proportional review of the selected code scope for verified consequential behavioral defects, reporting only High or Medium findings and avoiding speculative concerns and low-value nits.
+description: Use for a read-only review when the user explicitly invokes review-code-for-consequential-defects or explicitly requests that this specific skill be applied. Do not activate for generic code-review requests, inferred task relevance, or ordinary implementation work. Perform a read-only, risk-proportional review of the selected code scope for verified consequential behavioral defects, reporting only High or Medium findings and avoiding speculative concerns and low-value nits.
 ---
 
 # Review Code for Consequential Defects

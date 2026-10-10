@@ -1,6 +1,6 @@
 ---
 name: review-code-duplication-and-indirection
-description: Source-first refactoring guidance for reducing duplication through careful consolidation, shared helpers, reusable core flows, data-structure harmonization when sensible, and removal of redundant wrappers, layers, unnecessary call chains, repeated late-bound selection, responsibility relocation disguised as abstraction, wide-signature thin implementations, over-specialized micro-functions that should often be inlined, and incomplete deduplication passes that leave new shared paths unused or old fragments lingering beside them.
+description: Use for a read-only review when the user requests source-first refactoring guidance for reducing duplication through careful consolidation, shared helpers, reusable core flows, data-structure harmonization when sensible, and removal of redundant wrappers, layers, unnecessary call chains, repeated late-bound selection, responsibility relocation disguised as abstraction, wide-signature thin implementations, over-specialized micro-functions that should often be inlined, and incomplete deduplication passes that leave new shared paths unused or old fragments lingering beside them.
 ---
 
 # Review Code Duplication and Indirection

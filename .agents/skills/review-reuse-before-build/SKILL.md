@@ -1,6 +1,6 @@
 ---
 name: review-reuse-before-build
-description: Review a repository for custom mechanisms that should be replaced or materially reduced now by an existing project, platform, framework, standard-library, current-dependency, or established ecosystem solution. Emit only current-state actionable recommendations; no finding is a valid result. Verify realistic reuse options, project health, maintenance status, compatibility, and package-manager availability without modifying product code or dependencies.
+description: Use for a read-only review when the user requests an assessment of a repository for custom mechanisms that should be replaced or materially reduced now by an existing project, platform, framework, standard-library, current-dependency, or established ecosystem solution. Emit only current-state actionable recommendations; no finding is a valid result. Verify realistic reuse options, project health, maintenance status, compatibility, and package-manager availability without modifying product code or dependencies.
 ---
 
 # Review Reuse Before Build

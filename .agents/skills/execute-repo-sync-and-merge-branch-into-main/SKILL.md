@@ -1,6 +1,6 @@
 ---
 name: execute-repo-sync-and-merge-branch-into-main
-description: Verify a branch is fully synced, switch to mainline, refresh mainline, and merge the branch into main locally. Leave source branches intact unless cleanup is explicitly requested.
+description: Use when the user requests synchronizing a branch and merging it into main locally. Verify the branch is fully synced, switch to mainline, refresh mainline, and merge. Leave source branches intact unless cleanup is explicitly requested.
 ---
 
 # Execute Repo Sync and Merge Branch into Main

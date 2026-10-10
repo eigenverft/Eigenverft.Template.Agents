@@ -1,6 +1,6 @@
 ---
 name: execute-github-repo-metadata-and-community-maintenance
-description: Reusable skill for inspecting and auto-reconciling GitHub repository metadata, About content, and community surface with gh CLI using current-state-first and README-grounded derivation.
+description: Use when the user requests inspecting or reconciling GitHub repository metadata, About content, and community surface with gh CLI using current-state-first and README-grounded derivation.
 ---
 
 # Execute GitHub Repo Metadata and Community Maintenance

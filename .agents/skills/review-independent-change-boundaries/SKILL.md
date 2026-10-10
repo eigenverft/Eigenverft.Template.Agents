@@ -1,6 +1,6 @@
 ---
 name: review-independent-change-boundaries
-description: Review a repository for team-scalable change boundaries: clear responsibility ownership, local implementation freedom, stable contracts, low shared-hotspot pressure, independent verification, and incremental paths that let developer groups work in parallel. Use qualitative source-based scenario analysis rather than invented precision. Return only material chat findings and keep repository state unchanged.
+description: Use for a read-only review when the user requests an assessment of a repository for team-scalable change boundaries: clear responsibility ownership, local implementation freedom, stable contracts, low shared-hotspot pressure, independent verification, and incremental paths that let developer groups work in parallel. Use qualitative source-based scenario analysis rather than invented precision. Return only material chat findings and keep repository state unchanged.
 ---
 
 # Review Independent Change Boundaries

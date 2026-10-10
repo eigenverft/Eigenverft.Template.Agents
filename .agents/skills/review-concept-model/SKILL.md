@@ -1,6 +1,6 @@
 ---
 name: review-concept-model
-description: Source-first review guidance for finding weak concepts, flawed underlying models, and costly implementation ideas in an app, then turning them into realistic alternatives and concrete improvement work.
+description: Use for a read-only review when the user requests source-first review guidance for finding weak concepts, flawed underlying models, and costly implementation ideas in an app, then turning them into realistic alternatives and concrete improvement work.
 ---
 
 # Review Concept Model

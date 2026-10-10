@@ -1,6 +1,6 @@
 ---
 name: review-pattern-and-structure-coherence
-description: Perform a read-only outside-view review of a selected subject for broken patterns, structural inconsistencies, disrupted sequences, and conspicuously missing counterparts. Use when the user requests a surface-level pattern or coherence review of text, code, documentation, concepts, workflows, repositories, or comparable material. Resolve the target from the request and immediate context, then return concrete findings in a compact, direct Markdown table without turning the review into a detailed correctness audit.
+description: Use for a read-only review when the user requests an outside-view assessment of a selected subject for broken patterns, structural inconsistencies, disrupted sequences, and conspicuously missing counterparts. Use when the user requests a surface-level pattern or coherence review of text, code, documentation, concepts, workflows, repositories, or comparable material. Resolve the target from the request and immediate context, then return concrete findings in a compact, direct Markdown table without turning the review into a detailed correctness audit.
 ---
 
 # Review Pattern and Structure Coherence

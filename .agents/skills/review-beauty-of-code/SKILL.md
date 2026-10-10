@@ -1,6 +1,6 @@
 ---
 name: review-beauty-of-code
-description: Perform a source-first, repository-bound beauty-of-code review focused on honest naming, local readability, consistency, quiet surfaces, proportional complexity, and readable tests or scripts. Return only concrete, worthwhile chat findings while keeping repository state unchanged.
+description: Use for a read-only review when the user requests a source-first, repository-bound beauty-of-code assessment focused on honest naming, local readability, consistency, quiet surfaces, proportional complexity, and readable tests or scripts. Return only concrete, worthwhile chat findings while keeping repository state unchanged.
 ---
 
 # Review Beauty of Code

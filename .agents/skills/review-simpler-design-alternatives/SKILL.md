@@ -1,6 +1,6 @@
 ---
 name: review-simpler-design-alternatives
-description: Use when the user requests simpler design alternatives for a selected codebase, feature, mechanism, or workflow. Perform a read-only comparison of realistic ways to achieve the same required outcomes with materially less structural complexity, from small simplifications to different solution models. Report evidence-based alternatives, trade-offs, and optional quick wins; do not implement them.
+description: Use for a read-only review when the user requests simpler design alternatives for a selected codebase, feature, mechanism, or workflow. Perform a read-only comparison of realistic ways to achieve the same required outcomes with materially less structural complexity, from small simplifications to different solution models. Report evidence-based alternatives, trade-offs, and optional quick wins; do not implement them.
 ---
 
 # Review Simpler Design Alternatives

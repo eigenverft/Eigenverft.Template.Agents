@@ -1,6 +1,6 @@
 ---
 name: review-practical-usability
-description: Perform a strictly read-only practical usability review that surfaces friction, satisfying improvements, and conspicuously missing obvious capabilities. Use when the user explicitly requests a usability review of a product, workflow, interface, API, tool, documentation set, or other subject without forcing findings or judging aesthetics. When the requested subject or scope remains too unclear, stop with a direct clarification instead of guessing.
+description: Use for a read-only review when the user explicitly requests a practical usability assessment of a product, workflow, interface, API, tool, documentation set, or other subject. Surface friction, worthwhile improvements, and conspicuously missing capabilities without forcing findings or judging aesthetics. When the subject or scope remains too unclear, stop with a direct clarification instead of guessing.
 ---
 
 # Review Practical Usability

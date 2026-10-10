@@ -1,6 +1,6 @@
 ---
 name: auto-execute-output-humanizer
-description: Use automatically when producing or revising user-facing prose, including answers, explanations, research summaries, progress updates, and coding-agent reports, without requiring explicit skill invocation. Improve clarity, naturalness, and useful detail while preserving accuracy, task requirements, output language, and technical formats. Do not add prose to machine-only or exact-format outputs.
+description: Apply automatically when producing or revising user-facing prose, including answers, explanations, research summaries, progress updates, and coding-agent reports, without requiring explicit skill invocation. Improve clarity, naturalness, and useful detail while preserving accuracy, task requirements, output language, and technical formats. Do not add prose to machine-only or exact-format outputs.
 ---
 
 # Auto Execute Output Humanizer

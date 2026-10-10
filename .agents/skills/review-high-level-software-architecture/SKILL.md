@@ -1,6 +1,6 @@
 ---
 name: review-high-level-software-architecture
-description: Source-first software architecture guidance that turns actual codebase evidence into concrete, incremental refactoring directions and task lists.
+description: Use for a read-only review when the user requests source-first software architecture guidance that turns actual codebase evidence into concrete, incremental refactoring directions and task lists.
 ---
 
 # Review High-Level Software Architecture

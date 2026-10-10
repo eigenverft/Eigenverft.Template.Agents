@@ -610,6 +610,63 @@ function Test-QuotedYamlString {
     return ($RawValue -match '^"(?:[^"\\]|\\.)*"$') -or ($RawValue -match "^'(?:[^']|'')*'$")
 }
 
+function Get-SkillDescriptionLengthAssessment {
+    param([string]$SkillDirectoryPath)
+
+    $skillMdPath = Join-Path -Path $SkillDirectoryPath -ChildPath "SKILL.md"
+    if (-not (Test-Path -LiteralPath $skillMdPath -PathType Leaf)) {
+        return $null
+    }
+    $content = Get-Content -LiteralPath $skillMdPath -Raw -Encoding UTF8
+    if ($content -notmatch '(?s)\A---\r?\n(.*?)\r?\n---') {
+        return $null
+    }
+    try {
+        $frontmatter = Get-TopLevelFrontmatterMap -FrontmatterText $Matches[1]
+    } catch {
+        return $null
+    }
+    if (-not $frontmatter.ContainsKey("description")) {
+        return $null
+    }
+
+    $length = ([string]$frontmatter["description"]).Trim().Length
+    if ($length -gt 1024) {
+        $band = "over-limit"
+    } elseif ($length -ge 768) {
+        $band = "long"
+    } elseif ($length -ge 512) {
+        $band = "medium"
+    } else {
+        $band = "normal"
+    }
+    return [pscustomobject]@{ Length = $length; Band = $band }
+}
+
+function Get-RequiredDescriptionStart {
+    param([string]$SkillNameValue)
+
+    if ($SkillNameValue.StartsWith("auto-execute-", [System.StringComparison]::Ordinal)) {
+        return "Apply automatically when "
+    }
+    if ($SkillNameValue.StartsWith("execute-", [System.StringComparison]::Ordinal)) {
+        return "Use when the user requests "
+    }
+    if ($SkillNameValue.StartsWith("review-", [System.StringComparison]::Ordinal)) {
+        return "Use for a read-only review when "
+    }
+    return $null
+}
+
+function Get-UnclassifiedSkillWarning {
+    param([string]$SkillNameValue)
+
+    if ($null -ne (Get-RequiredDescriptionStart -SkillNameValue $SkillNameValue)) {
+        return $null
+    }
+    return "No recognized category prefix (auto-execute-, execute-, review-); activation and side-effect intent cannot be inferred from the name. Review the description manually."
+}
+
 function Test-SkillValidity {
     param([string]$SkillDirectoryPath)
 
@@ -677,6 +734,13 @@ function Test-SkillValidity {
     if ($descriptionValue.Length -gt 1024) {
         return [pscustomobject]@{ Valid = $false; Message = "Description is too long ($($descriptionValue.Length) characters). Maximum is 1024 characters." }
     }
+
+    $requiredStart = Get-RequiredDescriptionStart -SkillNameValue $name
+    if (($null -ne $requiredStart) -and
+        (-not $descriptionValue.StartsWith($requiredStart, [System.StringComparison]::Ordinal))) {
+        return [pscustomobject]@{ Valid = $false; Message = "Description must start with '$requiredStart' for skill '$name'." }
+    }
+
     if ($frontmatter.ContainsKey("compatibility")) {
         $compatibilityValue = ([string]$frontmatter["compatibility"]).Trim()
         if (($compatibilityValue.Length -lt 1) -or ($compatibilityValue.Length -gt 500)) {
@@ -869,6 +933,19 @@ try {
             }
             $result = Test-SkillValidity -SkillDirectoryPath $skillDirectory
             Write-Output $result.Message
+            $warning = Get-UnclassifiedSkillWarning -SkillNameValue $normalizedSkillName
+            $lengthInfo = Get-SkillDescriptionLengthAssessment -SkillDirectoryPath $skillDirectory
+            if ($null -ne $lengthInfo) {
+                $lengthMessage = "$($lengthInfo.Band) ($($lengthInfo.Length)/1024 characters)"
+                if ($lengthInfo.Band -eq "long") {
+                    Write-Output "[WARN] $($normalizedSkillName): Description length $lengthMessage"
+                } else {
+                    Write-Output "[LENGTH] $($normalizedSkillName): $lengthMessage"
+                }
+            }
+            if ($null -ne $warning) {
+                Write-Output "[WARN] $($normalizedSkillName): $warning"
+            }
             if ($result.Valid) {
                 exit 0
             }
@@ -892,9 +969,27 @@ try {
 
             $passed = 0
             $failed = 0
+            $warnings = 0
+            $lengthCounts = @{ "normal" = 0; "medium" = 0; "long" = 0; "over-limit" = 0 }
             Write-Output "[INFO] Read-only check using repository format rules; optional agents/openai.yaml checked only when present."
             foreach ($directory in $skillDirectories) {
                 $result = Test-SkillValidity -SkillDirectoryPath $directory.FullName
+                $lengthInfo = Get-SkillDescriptionLengthAssessment -SkillDirectoryPath $directory.FullName
+                if ($null -ne $lengthInfo) {
+                    $lengthCounts[$lengthInfo.Band]++
+                    $lengthMessage = "$($lengthInfo.Band) ($($lengthInfo.Length)/1024 characters)"
+                    if ($lengthInfo.Band -eq "long") {
+                        $warnings++
+                        Write-Output "[WARN] $($directory.Name): Description length $lengthMessage"
+                    } else {
+                        Write-Output "[LENGTH] $($directory.Name): $lengthMessage"
+                    }
+                }
+                $warning = Get-UnclassifiedSkillWarning -SkillNameValue $directory.Name
+                if ($null -ne $warning) {
+                    $warnings++
+                    Write-Output "[WARN] $($directory.Name): $warning"
+                }
                 if ($result.Valid) {
                     $passed++
                     if ($skillDirectories.Count -eq 1) {
@@ -905,7 +1000,8 @@ try {
                     Write-Output "[FAIL] $($directory.Name): $($result.Message)"
                 }
             }
-            Write-Output "[SUMMARY] $passed passed, $failed failed ($($skillDirectories.Count) checked)."
+            Write-Output "[SUMMARY] $passed passed, $failed failed, $warnings warning(s) ($($skillDirectories.Count) checked)."
+            Write-Output "[LENGTH SUMMARY] $($lengthCounts["normal"]) normal, $($lengthCounts["medium"]) medium, $($lengthCounts["long"]) long, $($lengthCounts["over-limit"]) over-limit."
             Write-Output "[LIMIT] Basic format and metadata checks only; full YAML semantics, harness discovery, implicit activation, and runtime behavior are not verified."
             if ($failed -gt 0) {
                 exit 1

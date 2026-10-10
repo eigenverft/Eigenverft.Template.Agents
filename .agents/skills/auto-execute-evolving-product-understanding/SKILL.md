@@ -1,6 +1,6 @@
 ---
 name: auto-execute-evolving-product-understanding
-description: Use automatically for ordinary development and analysis tasks in a software codebase, including feature implementation, bug fixes, refactoring, debugging, testing, code review, configuration changes, and repository investigation, even when the user does not request documentation. At task start, briefly review existing agent-maintained domain knowledge, then perform the requested work normally. Afterward, reflect on business-relevant information already encountered and selectively maintain domain clues, working hypotheses, grounded domain documentation, and the glossary. Make no knowledge updates without meaningful evidence; never invent business intent or expand the requested task.
+description: Apply automatically when handling ordinary development and analysis tasks in a software codebase, including feature implementation, bug fixes, refactoring, debugging, testing, code review, configuration changes, and repository investigation, even when the user does not request documentation. At task start, briefly review existing agent-maintained domain knowledge, then perform the requested work normally. Afterward, reflect on business-relevant information already encountered and selectively maintain domain clues, working hypotheses, grounded domain documentation, and the glossary. Make no knowledge updates without meaningful evidence; never invent business intent or expand the requested task.
 ---
 
 # Auto Execute Evolving Product Understanding

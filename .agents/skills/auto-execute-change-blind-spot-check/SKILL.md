@@ -1,6 +1,6 @@
 ---
 name: auto-execute-change-blind-spot-check
-description: Use before declaring a user-requested change complete to run a brief context challenge across actors and usage chains, interactions, states, timing, boundaries, negative space, and real-world conditions. Verify plausible blind spots with the smallest meaningful contrasting case and address confirmed risks only within the authorized change scope. Applies to ordinary change requests without explicit skill invocation; this skill does not independently authorize changes or scope expansion.
+description: Apply automatically when a user-requested change is about to be declared complete to run a brief context challenge across actors and usage chains, interactions, states, timing, boundaries, negative space, and real-world conditions. Verify plausible blind spots with the smallest meaningful contrasting case and address confirmed risks only within the authorized change scope. Applies to ordinary change requests without explicit skill invocation; this skill does not independently authorize changes or scope expansion.
 ---
 
 # Blind Spots

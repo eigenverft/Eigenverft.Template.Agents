@@ -1,6 +1,6 @@
 ---
 name: execute-skill-lifecycle-management
-description: Create, update, delete, and validate agent skill packages; author portable SKILL.md instructions from requirements, maintain resources and optional harness metadata, and run read-only compatibility checks. Use for skill creation, revisions, technical lifecycle maintenance, and validation, rather than independent quality reviews.
+description: Use when the user requests creation, updates, deletion, or validation of agent skill packages; author portable SKILL.md instructions from requirements, maintain resources and optional harness metadata, and run read-only compatibility checks. Use for skill creation, revisions, technical lifecycle maintenance, and validation, rather than independent quality reviews.
 ---
 
 # Execute Skill Lifecycle Management
@@ -112,6 +112,11 @@ Use `references/softskill_checklists.md` for the concise naming, authoring, meta
 - `SKILL.md` frontmatter allows only: `name`, `description`, `license`, `compatibility`, `allowed-tools`, `metadata`.
 - `SKILL.md` frontmatter requires: `name` and `description`.
 - `description` must not contain `<` or `>` and must be at most 1024 characters.
+- Repository-local, case-sensitive description starts: `auto-execute-*` requires `Apply automatically when `; `execute-*` requires `Use when the user requests `; `review-*` requires `Use for a read-only review when `.
+- `validate` and `compatibility-check` reject mismatched starts. Names without these prefixes remain valid but produce a non-failing `[WARN]` because their activation and side-effect intent is not classified by name.
+- These checks enforce only the written convention; semantic compliance with read-only or execution boundaries must be assessed separately, and automatic harness activation is not guaranteed.
+- Description length assessment: `normal` = 0-511 characters, `medium` = 512-767, `long` = 768-1024 (`[WARN]` without failing validation); above 1024 remains a validation error.
+- Both `validate` and `compatibility-check` report the category and length. Compatibility checks additionally summarize the length categories; unknown name categories and long descriptions count as non-failing warnings.
 - Optional `compatibility` must be between 1 and 500 characters.
 - When explicitly requested, `agents/openai.yaml` includes `display_name`, `short_description`, and a `default_prompt` that names `$skill-name`. Validation checks these fields only when that file exists.
 - `delete`, `cleanup-personal`, and `-PruneResources` require `-ConfirmDestructive`.

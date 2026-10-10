@@ -1,6 +1,6 @@
 ---
 name: review-architecture-responsibility-boundaries
-description: Review implementation architecture for evidence-based responsibility, ownership, separation-of-concerns, and lifecycle-boundary concerns. Use when the user explicitly requests an architecture review focused on where responsibilities should remain together or be separated. Inspect actual source and behavior, report only concrete concerns, and keep repository state unchanged.
+description: Use for a read-only review when the user explicitly requests an implementation architecture assessment focused on responsibility, ownership, separation of concerns, or lifecycle boundaries. Inspect actual source and behavior, report only concrete concerns, and keep repository state unchanged.
 ---
 
 # Review Architecture Responsibility Boundaries

@@ -1,6 +1,6 @@
 ---
 name: execute-preparatory-codebase-change
-description: Use when asked to prepare a codebase for a later task, prompt, implementation, feature, refactor, fix, or investigation without performing the main requested work yet. The skill analyzes the current codebase, identifies safe preparatory changes, and performs only unambiguous preparation. If there are multiple reasonable preparation options, output the options first and make no changes until the user locks one in.
+description: Use when the user requests preparation of a codebase for a later task, prompt, implementation, feature, refactor, fix, or investigation without performing the main requested work yet. The skill analyzes the current codebase, identifies safe preparatory changes, and performs only unambiguous preparation. If there are multiple reasonable preparation options, output the options first and make no changes until the user locks one in.
 ---
 
 # Execute Preparatory Codebase Change
