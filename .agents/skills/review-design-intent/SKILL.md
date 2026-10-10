@@ -1,9 +1,9 @@
 ---
-name: analyze-design-intent
-description: Read-only reconstruction of why a selected technical target likely exists, what situation or need makes it useful, what role and consequences it has, which assumptions and trade-offs shaped it, and what broader or future uses the same design could plausibly support. Use any relevant evidence without privileging code, treat the selected target as the question boundary rather than the evidence boundary, abstract away from local vocabulary, and clearly separate observed use, inferred rationale, plausible wider use, and historical fact.
+name: review-design-intent
+description: Use for a read-only review when the user asks why a selected technical target exists, which need or situation it addresses, or what assumptions and trade-offs shaped its design. Reconstruct the supported rationale from relevant evidence without privileging source code, treat the selected target as the question boundary rather than the evidence boundary, and distinguish observed use, inferred purpose, plausible wider uses, and documented historical intent. Explain findings in chat without changing repository, workspace, or external state.
 ---
 
-# Analyze Design Intent
+# Review Design Intent
 
 ## Purpose
 
@@ -46,8 +46,8 @@ This is a read-only analysis skill.
 - Do not create, edit, delete, rename, stage, commit, merge, rebase, push, restore, or format files.
 - Do not run commands whose purpose is to mutate application, repository, workspace, or external state.
 - Build, test, or execute only when the user explicitly asks for runtime evidence and the action is known to be non-destructive.
-- Return the analysis in chat by default.
-- Do not create report files unless the user explicitly asks for an artifact.
+- Return the analysis in chat only.
+- Do not create report files or other output artifacts as part of this review, even when a saved report is requested. Handle any separately authorized artifact creation outside the review workflow.
 
 If a useful probe would require mutation, describe the probe instead of performing it.
 
@@ -590,7 +590,7 @@ The skill succeeds when the reader can answer not just **what the target does**,
 
 ## Typical Invocation Phrases
 
-- `[$analyze-design-intent] why does this exist?`
+- `[$review-design-intent] why does this exist?`
 - `what problem was someone probably trying to solve with this?`
 - `help me understand why somebody wrote this and when it is useful`
 - `look beyond the local implementation and reconstruct the design intent`
