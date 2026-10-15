@@ -25,6 +25,6 @@ Freeze the *product outcome and outer change boundary* before Record, not the im
 2. Return to Assess/Select as needed.
 3. After an issue exists, preserve its original intent and append the reassessment/rescoping decision.
 4. A newly revealed constraint can justify a different **small outcome tied to the same discovery** (for example explaining or testing a previously hidden necessary behavior). Reassess eligibility and scope, preserve the original issue intent, and checkpoint a material decision change **before** implementing it. Do not silently reuse that issue for an unrelated product objective or manufacture a change just to claim success.
-5. If no worthwhile, permitted change remains, report No change; if a justified change remains but cannot be safely completed or verified, report Blocked. Never report Done without a real, verified improvement.
+5. **Before issue/branch/worktree creation**, if no worthwhile, permitted candidate remains, report No change. **After an issue exists**, if reassessment yields no justified, verifiable improvement, report Blocked with the actual reason; do not convert the recorded work into a No change outcome. Never report Done without a real, verified improvement.
 
 Users may specialize selection preferences and change size in natural language. Future strategies may adjust soft budget heuristics but must preserve SKILL.md invariants and deliver **one** self-contained reviewable increment.

@@ -50,14 +50,14 @@ Both layouts are valid linked Git worktrees, but only choose paths actually acce
 4. **Early remote visibility gate, before product edits:** push only the new dedicated feature branch to the repository's existing authorized remote (normally `origin`; e.g. `git push -u origin <feature-branch>`), then verify the remote ref. For a versioned issue, the published tip includes its issue-only baseline commit. For an external tracker, the new branch may initially point at the refreshed integration-base SHA; its actual issue and scope live in the external tracker, which should link to the branch when supported. Do not create a filler commit just to force a branch diff. A published branch is a discoverable claim of work, **not** an atomic reservation; competing agents still apply the quick same-area check. On failed/disallowed publication, keep local issue/branch/worktree intact and stop **Blocked** before implementation; never force-push to claim an occupied name.
 5. Work, run tests and make **meaningful, scoped implementation commits only in the linked worktree**, distinct from versioned issue decision checkpoints. Do not make a commit per trivial edit or let a long autonomous run rely only on an unsaved working tree. Keep the original baseline commit and subsequent decision/implementation history reviewable, without amending them away just to conceal how scope evolved. The caller's branch and files remain untouched. Record actual checkpoint commit and branch/worktree references for traceability.
 
-## No-Change Cleanup of Unused Local Setup
+## Recover from Premature Unused Local Setup
 
 Normally duplicate checks run **before** creating a worktree or branch. If a duplicate is discovered later and this invocation has only created an **unused local** worktree and branch, with no primary issue, product edits, own commits or remote publication:
 
 1. Confirm both were created by this invocation, the branch still points at its recorded starting base, no other worktree uses it, and there are no valuable tracked, untracked or ignored changes. If any condition is uncertain, preserve the artifacts and report why.
 2. Remove only that worktree using non-forced `git worktree remove <exact-created-path>`, then delete only its own unpublished, fully merged local branch using `git branch -d <exact-created-branch>`. Remove an ignore entry added solely for this worktree only when it is unambiguously unused; otherwise leave it. Never touch another agent's or a published branch, force-delete, or change the caller's checkout.
 
-Return **No change** and report actual cleanup. If a primary issue or remote branch already exists, this disposable-setup cleanup does not apply: preserve it and report the situation without automatically creating closure work or deleting published history.
+Report that the early selection had no eligible increment, along with the actual cleanup; this recovery is not a new No change outcome after implementation. If a primary issue or remote branch already exists, this disposable-setup cleanup does not apply: preserve it and report the situation without automatically creating closure work or deleting published history.
 
 ## Final Closure Commit, Remote Publication, and Cleanup
 
