@@ -33,6 +33,8 @@ The original baseline, intent and policy must remain distinguishable from later 
 
 Track material tasks (optional for trivial work), actual modifications, unexpected observations, scope decisions, failures, and retesting. Keep it concise and decision-oriented, not a transcript of every tool call. If a change is re-scoped, append what changed and why; do not rewrite the original assignment to make an unexpected outcome appear intentional.
 
+**Reviewable chronology:** For a versioned issue, its first Git commit must contain the **original request, selected approach, boundaries and acceptance criteria without product edits**. If the agreed direction changes materially, append the prior and new decisions with reasons and create a **separate issue-only decision commit before the implementation relying on that change**. Keep the issue identifier stable. Subsequent implementation commits cite the issue and explain the actual work and verification, so reviewers can compare what was agreed with what happened and when. For an external tracker, record the same decisions durably there before affected implementation; reference the issue in Git commits instead of adding a duplicate file. Record actual checkpoint commit IDs when available, without inventing future/self-referential hashes.
+
 ## Final Outcome
 
 Include:
