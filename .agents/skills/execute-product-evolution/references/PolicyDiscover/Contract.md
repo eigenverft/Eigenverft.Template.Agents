@@ -8,7 +8,7 @@ Discover **product opportunities**, not arbitrary code-edit tasks. Examine actua
 
 Inputs: understood user assignment and context, binding invariants from SKILL.md, selected Discover strategy and any natural-language scope refinements.
 
-Output to Assess: normally 2–5 candidates where credible evidence supports them, each covering (a) observed problem or opportunity, (b) affected consumers and expected outcome, (c) baseline and evidence locations, (d) opportunity type, (e) uncertainties, dependencies and possible contract effects. No credible opportunity is a valid No change result.
+Output to Assess: **try to discover around five distinct, evidence-backed product opportunities** before selection, so Assess can compare meaningful alternatives instead of accepting the first technically valid edit. This is a **soft search aim, not a quota**: stay proportionate to the product, scope and available evidence; neither invent weak candidates nor keep searching without reasonable prospect of added value. Pass along fewer genuine candidates when that is what a reasonable search finds. For each, provide (a) observed problem or opportunity, (b) affected consumers and expected outcome, (c) baseline and evidence locations, (d) opportunity type, (e) uncertainties, dependencies and possible contract effects. No credible opportunity is a valid No change result.
 
 ## Non-negotiable Rules
 

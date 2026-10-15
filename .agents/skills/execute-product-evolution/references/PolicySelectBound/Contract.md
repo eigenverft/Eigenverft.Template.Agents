@@ -4,7 +4,7 @@ This file defines the common Select & Bound behavior for every profile and futur
 
 ## Objective
 
-Autonomously choose **one eligible, cohesive, worthwhile product increment** from the assessed opportunities. Cohesion is defined by **one understandable product outcome**, not by a repository directory, number of commits or lines changed. One meaningful increment may require changes across multiple technical layers.
+Autonomously choose **one eligible, cohesive, worthwhile product increment** from the assessed opportunities. Prefer demonstrable practical product benefit over a merely correct or easy mechanical cleanup; do not select the first eligible candidate without considering credible alternatives. A tiny code change can still win when its meaningful consequence is supported by evidence. Cohesion is defined by **one understandable product outcome**, not by a repository directory, number of commits or lines changed. One meaningful increment may require changes across multiple technical layers.
 
 Inputs: assessed opportunities, protected invariants, effective selection emphasis and applicable change budget.
 
