@@ -2,17 +2,25 @@
 
 An issue is the **durable explanation of why the change was selected and what actually happened**, not merely a task checklist. Prefer the repository's usable issue mechanism and existing formatting. **When no suitable accessible tracker or issue-file convention exists and repository policy does not forbid one, this skill must establish a minimal versioned fallback** at `issues/open/<short-topic>-<YYMMDD>[-N].md` on the isolated feature branch, with final closure at `issues/done/<same-filename>.md`. Use the content below as the new file's format; general notes or issue-summary documents do not automatically count as a usable per-issue tracker and must not be overwritten. Do not add indexes, templates or further tracking infrastructure merely to create this one issue. Structure the content as follows, adapting headings to established local conventions where present. Do not create a separate policy report by default. **Write for a developer or reviewer trying to understand why this change is worth merging, not for a process auditor.** The product rationale comes first; the provenance, policy and Git details support it rather than replacing it.
 
-## Product Improvement — Reviewer Summary (First)
+Lead every issue with the four plain headings below (or their direct equivalents in the repository's language, e.g. **Vorher / Änderung / Nachher / Nachweis**). **Name the specific thing and what happens to it.** Use direct, ordinary wording, not abstract improvement claims, a list of changed files or a log of agent activity. **Clarity matters more than length:** use however many sentences are needed to make the real difference unambiguous; do not pad with generic phrases such as "improved UX", "more robust" or "optimized workflow" without saying exactly what changed. **Before and After must describe the same concrete situation** so a developer can compare them. For internal-only changes, describe the actual developer/operational behavior or risk instead of inventing user-facing benefits.
 
-Lead the issue with a **short, concrete explanation in product terms**, not a task list, file inventory or sequence of tool calls. Populate the *intended* outcome in the initial issue-only baseline commit; update this **same section** with the *actual* outcome in the final issue closure commit. Preserve the difference between what was expected and what was demonstrated.
+## Before
 
-- **Problem and affected people/workflow:** What currently happens, who is affected (users, operators or developers), and what observed evidence supports that claim? Describe an actual product or development experience, not just a code smell or missing test.
-- **Why this matters:** What concrete friction, failure, risk or wasted effort does the current behavior cause? Why is improving it worthwhile compared with leaving it as is? For purely internal changes, explain the impact on maintainability, reliability or developer work instead of inventing end-user benefits.
-- **Before → intended after:** State the change in behavior or capability a reviewer should expect. Explain why this bounded increment is a useful solution, not only which files/functions are to be modified. Make assumptions and unvalidated benefit hypotheses explicit.
-- **After implementation — actual improvement:** Once verified, summarize what materially changed, which original problem it addresses, important deviations from the intended outcome, and any remaining limitation. Before implementation, mark the actual result as *pending* rather than presenting planned benefits as facts.
-- **Evidence and confidence:** Point briefly to the relevant observed baseline and verification results below. Distinguish working code and passing tests from measured consumer benefit; do not assert user impact without evidence.
+Describe the **observed pre-change behavior or state**, where it happens, who encounters it and precisely what is wrong or inconvenient about it. Explain the practical consequence in concrete words; separate observed facts from assumptions. Do not substitute a file name or test failure for the problem it represents.
 
-Keep this summary readable in a brief review glance; omit boilerplate, repeated policy labels, invented metrics or promotional claims. A technically correct change without an intelligible reason or describable improvement is **not** adequately documented for review.
+## Change
+
+Explain **what will be done** to address that specific problem, in straightforward terms. In the initial issue-only commit this is the **planned** change. At completion, state what **was actually changed**; keep meaningful differences from the original plan traceable in the supporting decision history. Describe the mechanism only as far as it helps someone understand the resulting difference, not as a technical activity list.
+
+## After
+
+In the initial issue-only commit write **"Not implemented yet"** (or its equivalent in the issue's language), rather than presenting an intended improvement as a fact; the intended outcome belongs under Change and the acceptance criteria below. In the final closure commit replace this with **what demonstrably happens now** in the *same situation* described under Before, and **why that concrete difference is useful**. Mention remaining limits when relevant. Do not replace an outcome with "tests passed", "refactoring completed" or unsupported claims of measured user benefit.
+
+## Evidence
+
+Record the observation supporting Before and, once implemented, how the claimed After behavior was checked (relevant test or reproduction steps and observed result). State what remains unmeasured. A passing test proves a checked behavior, not automatically real-world consumer value. Keep detailed test logs, policy decisions, scope and commit references in the supporting sections below.
+
+These headings describe the **change itself**, not the agent's workflow; no separate reviewer-summary document, fixed word count or extra reporting layer is required.
 
 ## Required Pre-Implementation Content
 
@@ -32,7 +40,7 @@ Keep this summary readable in a brief review glance; omit boilerplate, repeated 
 - If later evidence requires a policy change **before the issue exists**, first record the transition and reason in working context before reading the replacement strategy; transfer the full relevant selection history when opening the issue. **After issue creation**, append each new selection, reason, and changed boundary to the issue before loading the replacement strategy. Preserve the original selection and intent.
 
 ### Selected improvement and baseline
-- Supporting pre-change evidence and relevant source references for the **reviewer summary above**, without repeating the whole product explanation.
+- Supporting pre-change evidence and relevant source references for **Before / Change / After / Evidence** above, without repeating their concrete explanation.
 - Decision details: why this bounded improvement was selected over credible alternatives, with evidence limits or trade-offs that do not fit in the short summary.
 - Consumer groups, contractual and behavioral invariants, permissible UX changes, known compatibility risk.
 - Included/excluded scope, acceptance criteria, expected verification and available rollback/mitigation.
@@ -53,7 +61,7 @@ Track material tasks (optional for trivial work), actual modifications, unexpect
 
 ## Final Outcome
 
-**First update the Product Improvement reviewer summary above** with the actual before/after improvement, the reason it matters, and an honest distinction between verified behavior and unmeasured hoped-for benefit. Then include supporting details here:
+**First update Change and After above** with what was actually changed and the observable result in the same case described under Before; add the supporting test/reproduction result to Evidence. Make clear what is verified versus still assumed or unmeasured. Then include supporting details here:
 - Actual behavior delivered and meaningful differences from the original proposal, with enough detail to investigate the implementation.
 - Verification evidence with command/test names and observed results; contract and regression findings.
 - Validation evidence if available, or an explicit statement that expected consumer benefit remains unverified.
