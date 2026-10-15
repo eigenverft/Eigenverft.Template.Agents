@@ -1,6 +1,6 @@
 # Primary Issue Record — Intent, Policy and Outcome
 
-An issue is the **durable explanation of why the change was selected and what actually happened**, not merely a task checklist. Use the repository's actual issue mechanism and existing formatting. Structure the content to include the following information, adapting headings to local conventions. Do not create a separate policy report by default.
+An issue is the **durable explanation of why the change was selected and what actually happened**, not merely a task checklist. Prefer the repository's usable issue mechanism and existing formatting. **When no suitable accessible tracker or issue-file convention exists, this skill must establish a minimal versioned fallback unless repository policy explicitly forbids it** at `issues/open/<unique-id>-<topic>.md` on the isolated feature branch, with final closure at `issues/done/<same-filename>.md`. Use the content below as the new file's format; a `KnownIssues.md` summary alone does not prevent this fallback and must not be overwritten or silently treated as an issue tracker. Do not add indexes, templates or further tracking infrastructure merely to create this one issue. Structure the content as follows, adapting headings to established local conventions where present. Do not create a separate policy report by default.
 
 ## Required Pre-Implementation Content
 
