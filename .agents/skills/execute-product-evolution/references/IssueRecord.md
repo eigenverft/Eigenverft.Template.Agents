@@ -17,7 +17,7 @@ An issue is the **durable explanation of why the change was selected and what ac
 - Record **why a non-default profile was justified** by an explicit profile invocation or unambiguous user/context instruction. If no such direction existed, record `Default.md (Conservative fallback)`. A vague improvement request does not justify loading `Balanced.md` or `Ambitious.md`.
 - For a fully user-specified phase, record `Custom — no profile file read` and the governing instructions; still apply the phase's common contract. Explicit context can refine any chosen default independently.
 - Distinguish explicit user request, established project/conversation context, selected preset, future specialization, and assumptions. A profile label or file name without **resolved effective criteria** is insufficient.
-- If later evidence requires a policy change, append the new selection, reason, and effect on boundaries without erasing the original before reading the replacement strategy.
+- If later evidence requires a policy change **before the issue exists**, first record the transition and reason in working context before reading the replacement strategy; transfer the full relevant selection history when opening the issue. **After issue creation**, append each new selection, reason, and changed boundary to the issue before loading the replacement strategy. Preserve the original selection and intent.
 
 ### Selected improvement and baseline
 - Pre-change observable situation and evidence references.
@@ -25,7 +25,7 @@ An issue is the **durable explanation of why the change was selected and what ac
 - Consumer groups, contractual and behavioral invariants, permissible UX changes, known compatibility risk.
 - Included/excluded scope, acceptance criteria, expected verification and available rollback/mitigation.
 - Date or relevant version/revision reference so future reviewers can reconstruct the *before* state.
-- Planned integration target, isolated feature branch, and workspace-local worktree location (ignored repository-local directory preferred, accessible sibling when needed), including deviations from repository conventions.
+- Planned integration target (and actual refreshed base ref/SHA where known), **local** feature branch (`feature/product-evolution-<issue>-<topic>` unless repository policy requires another prefix), and workspace-local worktree location (ignored repository-local directory preferred, accessible sibling when needed). Distinguish local branch creation from later authorized remote publication; document deviations from repository conventions.
 
 The original baseline, intent and policy must remain distinguishable from later decisions, including if the plan changes.
 
@@ -39,8 +39,8 @@ Include:
 - Actual behavior delivered and meaningful differences from the original proposal.
 - Verification evidence with command/test names and observed results; contract and regression findings.
 - Validation evidence if available, or an explicit statement that expected consumer benefit remains unverified.
-- Reviewable Git commit/change-set identifiers, integration target, feature branch and where a human can inspect them; distinguish committed, pushed/published, ready for review, and integrated.
-- Temporary linked-worktree cleanup outcome (removed after commit, or exact remaining path and blocker); keep the committed feature branch available for review.
+- Reviewable Git change-set references, integration target, feature branch and where a human can inspect them; distinguish locally committed, pushed/published, ready for review, and integrated. Do not fabricate or self-reference the eventual commit SHA inside that same not-yet-created commit; a durable issue file can reference the branch/issue/PR, with exact final SHA reported in a post-commit handoff or external tracker update.
+- **Cleanup timing depends on issue storage.** For an external tracker, update the issue with the **actual verified worktree cleanup outcome after removal**. For an issue stored as a versioned repository file, record cleanup as **pending/not yet verified** before its final commit; after removing the worktree, report the actual result (or exact surviving path/blocker) in the final handoff. Do not falsely mark cleanup as complete in a pre-cleanup commit. Keep the feature branch for review.
 - Residual risks, follow-ups outside the finished increment, rollback considerations.
 - Final state and rationale: **Done**, **Blocked**, or **Abandoned**; if no issue was created because no candidate met the criteria, return **No change** outside the issue.
 

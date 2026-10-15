@@ -1,6 +1,6 @@
 # Select & Bound — Phase Contract
 
-This file defines the common Select & Bound behavior for every profile and future specialization. Read this file and exactly one active strategy file from this directory before selection.
+This file defines the common Select & Bound behavior for every profile and future specialization. Read this contract before Select & Bound, and read **only the single strategy file selected by SKILL.md, if any**. Fully user-specified criteria may require no strategy file; an explicitly supported external specialization need not live in this directory. Do not load other profiles.
 
 ## Objective
 

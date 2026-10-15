@@ -1,6 +1,6 @@
 # Discover — Phase Contract
 
-This file defines the common Discover behavior for every profile and future specialization. It is not a profile. Read this file and exactly one active strategy file from this directory before Discover.
+This file defines the common Discover behavior for every profile and future specialization. It is not a profile. Read this contract before Discover, and read **only the single strategy file selected by SKILL.md, if any**. Fully user-specified criteria may require no strategy file; an explicitly supported external specialization need not live in this directory. Do not load other profiles.
 
 ## Objective and Scope
 
