@@ -14,6 +14,10 @@ Output to Record: (1) selected outcome and selection rationale; (2) observed bas
 
 Check cohesion, consumer/contract impact, semantic blast radius, human review complexity, risk, reversibility and ability to complete and verify in the available environment. Changed file count or line count is not a sufficient reviewability measure. If an attractive candidate is too broad, choose **one independently useful part**, never a knowingly incomplete feature. Keep other opportunities outside this run.
 
+## Lightweight Pre-Selection Overlap Recheck
+
+Before committing to the chosen increment or creating its issue/feature branch, briefly recheck fresh available issue/PR/branch information for **that candidate's product area** (refresh remote refs where permitted, without changing the caller's checked-out branch). If another agent's work already implements or clearly claims the **same outcome**, discard this pick and select the next eligible candidate; otherwise proceed. Do not block unrelated improvements just because the area name matches. This is a best-effort duplicate filter, not a guarantee against simultaneous selections, and requires no locks, reservations or expanded naming convention.
+
 ## Freeze and Controlled Rescoping
 
 Freeze the *product outcome and outer change boundary* before Record, not the implementation details. If new information undermines feasibility, requires widening the boundary, or invalidates eligibility:

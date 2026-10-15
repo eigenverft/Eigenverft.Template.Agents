@@ -14,5 +14,6 @@ Output to Assess: normally 2–5 candidates where credible evidence supports the
 
 - Distinguish observed facts, hypotheses and missing evidence. Do not invent user interviews, analytics, performance measurements or usage patterns.
 - A broad search area is not permission for broad implementation.
+- Apply the lightweight **area-overlap screen in SKILL.md**: check readily available existing/finished issues, PRs and feature-branch names by product area. Where a candidate overlaps, briefly verify whether its specific outcome is already done or being implemented; remove covered candidates rather than propose parallel duplicate work. Matching a broad area alone is not proof that every new need is covered. No exhaustive semantic search or coordination infrastructure.
 - A user may tailor search domain, consumer audience and opportunity types in natural language without prescribing Assessment or Selection.
 - Specialized Discover strategies must return evidence-backed comparable opportunities, preserve SKILL.md invariants and leave selection/implementation to subsequent phases.
