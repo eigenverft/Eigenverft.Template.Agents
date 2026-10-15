@@ -27,6 +27,10 @@ An issue is the **durable explanation of why the change was selected and what ac
 - Date or relevant version/revision reference so future reviewers can reconstruct the *before* state.
 - Planned integration target (and actual refreshed base ref/SHA where known), **local** feature branch (`feature/agent-product-evolution/<area>-<topic>-<issue-id>` unless repository policy requires a different naming scheme), and workspace-local worktree location (ignored repository-local directory preferred, accessible sibling when needed). **After this initial issue record exists, push the feature branch early before implementation and verify the remote ref**; for external issues, link the published branch in the tracker when supported. Distinguish this start checkpoint from later publication of the finished branch; document deviations from repository conventions.
 
+### Incidental Discoveries (Out of Scope)
+- Include this section **only when noteworthy incidental observations actually arose** in Discover (or during the bounded work). Give each a short description, where/why it was noticed, and what remains unknown. Separate observation from speculation; do not claim unmet user demand or established value without evidence.
+- These entries are **not** part of the selected improvement, acceptance criteria or implementation scope. Do not investigate, assess, prioritize, implement, or create additional issue files merely to fill this section. Keep the stable heading so a future human or specialized review skill can locate the notes in existing issues, without automatically promoting them to product opportunities.
+
 The original baseline, intent and policy must remain distinguishable from later decisions, including if the plan changes.
 
 ## During Implementation
