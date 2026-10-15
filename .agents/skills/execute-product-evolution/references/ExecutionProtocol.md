@@ -41,5 +41,6 @@ All runs follow these gates after a single candidate has been selected and bound
 ## Controlled Returns and Stops
 
 - Revisit Discover/Assess/Select when evidence undermines the selected assumptions; after issue creation, preserve original issue intent and append a transparent decision trail.
-- No-change before selecting a viable increment is a legitimate terminal result; when an issue exists but cannot be completed, mark it accurately as Blocked or Abandoned rather than Done.
+- **A duplicate found early is a candidate rejection, not a new issue.** Apply the earliest Discover overlap screen, the Select & Bound recheck and the just-before-worktree gate; if none remains, report No change without preparing a worktree or issue. If an unused local worktree/branch was already created without an issue, follow [WorkspaceLifecycle.md](WorkspaceLifecycle.md)'s non-forced early duplicate cleanup rather than leaving throwaway refs.
+- No-change before selecting a viable increment is a legitimate terminal result; when an issue already exists but cannot be completed because an equivalent improvement was discovered, mark it accurately as Abandoned rather than Done and retain its reviewable decision history. Do not automatically delete a published issue-bearing branch.
 - Stop after this single increment. The next autonomous evolution cycle requires a new invocation.
