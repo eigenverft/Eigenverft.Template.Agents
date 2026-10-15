@@ -16,7 +16,7 @@ Check cohesion, consumer/contract impact, semantic blast radius, human review co
 
 ## Lightweight Pre-Selection Overlap Recheck
 
-Before committing to the chosen increment **and before allocating its worktree or feature branch**, briefly recheck fresh available issue/PR/branch information for **that candidate's product area** (refresh remote refs where permitted, without changing the caller's checked-out branch). If another agent's work already implements or clearly claims the **same outcome**, discard this pick and select the next eligible candidate; if no eligible candidate remains, return **No change** without creating an issue, worktree or feature branch. Otherwise proceed. Do not block unrelated improvements just because the area name matches. This is a best-effort duplicate filter, not a guarantee against simultaneous selections, and requires no locks, reservations or expanded naming convention.
+Before committing to the chosen increment **and before creating its issue, worktree or feature branch**, briefly recheck fresh available issue/PR/branch information for **that candidate's product area** (refresh remote refs where permitted, without changing the caller's checked-out branch). If another agent's work already implements or clearly claims the **same outcome**, discard this pick and select the next eligible candidate; if no eligible candidate remains, return **No change** without creating an issue, worktree or feature branch. Otherwise proceed. Do not block unrelated improvements just because the area name matches. This is a best-effort duplicate filter, not a guarantee against simultaneous selections, and requires no locks, reservations or expanded naming convention.
 
 ## Freeze and Controlled Rescoping
 
