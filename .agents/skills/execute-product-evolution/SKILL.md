@@ -25,6 +25,17 @@ Invoke this skill explicitly, using the skill's name where supported (for exampl
 
 **Safety default:** If it is not clear that `Ambitious.md` applies, **do not read it**. The same rule applies to `Balanced.md` when not clearly selected. Unspecified phases use `Default.md`; higher-priority and explicit user/context requirements still override soft defaults. No profile selection overrides binding contract or safety invariants.
 
+## Lightweight Product Sanity Pass (Before Discovery)
+
+After the **Mandatory Pre-Read Policy Selection Gate**, perform a proportionate, **read-only** orientation in the actual target product repository before judging improvement opportunities. This is part of Discover's `Understand` stage, not a new phase or permission to expand scope.
+
+1. **Locate the real product context:** confirm repository/workspace root, relevant components, current Git branch/status and existing local changes. Do not treat the caller's checkout as an implementation workspace.
+2. **Read relevant documentation first:** inspect available root/component READMEs, product and user guides, architecture/design notes, API and integration contracts, contribution/test instructions, and relevant changelogs or prior decisions. Follow the user's scope; do not indiscriminately read every file or execute setup scripts just because documentation mentions them.
+3. **Cross-check with reality:** compare documented intentions with actual interfaces, code, tests and applicable issue history. Identify supported consumer journeys, existing capabilities, known constraints and whether a proposed improvement is already implemented or deliberately ruled out. Documentation may be missing or stale; do not confuse hypotheses with verified behavior.
+4. **Establish a reviewable baseline:** identify existing build/test tooling and feasible verification evidence, relevant source/document locations, protected contracts and material unknowns. Carry the meaningful evidence into assessment and the pre-implementation issue; do not invent consumer feedback, automatically modify files, or treat absent documentation as a reason to manufacture work.
+
+Keep this check lightweight; deepen investigation only where evidence, risk or selected scope requires it. **Product documentation does not select Balanced or Ambitious on its own** and never overrides explicit user instructions or the already resolved phase-policy rules.
+
 ## Package Structure and Extension Points
 
 This package defines **three independently selectable policy phases** and one shared execution protocol. The phase-specific strategy files are alternatives, **not cumulative layers**:
