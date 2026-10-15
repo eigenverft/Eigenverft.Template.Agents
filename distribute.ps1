@@ -442,6 +442,7 @@ $destinationNames = @(
     'Eigenverft.Service.CentralLogging'
     'Eigenverft.Web.ControlPlaneMcp'
     'Eigenverft.Web.EdgeReverseProxy'
+    'Eigenverft.Web.Hullmark'
     'Eigenverft.Web.SessionBridge'
     'Eigenverft.WebLib.Infrastructure'
     'Eigenverft.WebLib.RequestFilters'
