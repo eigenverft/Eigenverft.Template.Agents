@@ -1,6 +1,18 @@
 # Primary Issue Record — Intent, Policy and Outcome
 
-An issue is the **durable explanation of why the change was selected and what actually happened**, not merely a task checklist. Prefer the repository's usable issue mechanism and existing formatting. **When no suitable accessible tracker or issue-file convention exists and repository policy does not forbid one, this skill must establish a minimal versioned fallback** at `issues/open/<short-topic>-<YYMMDD>[-N].md` on the isolated feature branch, with final closure at `issues/done/<same-filename>.md`. Use the content below as the new file's format; general notes or issue-summary documents do not automatically count as a usable per-issue tracker and must not be overwritten. Do not add indexes, templates or further tracking infrastructure merely to create this one issue. Structure the content as follows, adapting headings to established local conventions where present. Do not create a separate policy report by default.
+An issue is the **durable explanation of why the change was selected and what actually happened**, not merely a task checklist. Prefer the repository's usable issue mechanism and existing formatting. **When no suitable accessible tracker or issue-file convention exists and repository policy does not forbid one, this skill must establish a minimal versioned fallback** at `issues/open/<short-topic>-<YYMMDD>[-N].md` on the isolated feature branch, with final closure at `issues/done/<same-filename>.md`. Use the content below as the new file's format; general notes or issue-summary documents do not automatically count as a usable per-issue tracker and must not be overwritten. Do not add indexes, templates or further tracking infrastructure merely to create this one issue. Structure the content as follows, adapting headings to established local conventions where present. Do not create a separate policy report by default. **Write for a developer or reviewer trying to understand why this change is worth merging, not for a process auditor.** The product rationale comes first; the provenance, policy and Git details support it rather than replacing it.
+
+## Product Improvement — Reviewer Summary (First)
+
+Lead the issue with a **short, concrete explanation in product terms**, not a task list, file inventory or sequence of tool calls. Populate the *intended* outcome in the initial issue-only baseline commit; update this **same section** with the *actual* outcome in the final issue closure commit. Preserve the difference between what was expected and what was demonstrated.
+
+- **Problem and affected people/workflow:** What currently happens, who is affected (users, operators or developers), and what observed evidence supports that claim? Describe an actual product or development experience, not just a code smell or missing test.
+- **Why this matters:** What concrete friction, failure, risk or wasted effort does the current behavior cause? Why is improving it worthwhile compared with leaving it as is? For purely internal changes, explain the impact on maintainability, reliability or developer work instead of inventing end-user benefits.
+- **Before → intended after:** State the change in behavior or capability a reviewer should expect. Explain why this bounded increment is a useful solution, not only which files/functions are to be modified. Make assumptions and unvalidated benefit hypotheses explicit.
+- **After implementation — actual improvement:** Once verified, summarize what materially changed, which original problem it addresses, important deviations from the intended outcome, and any remaining limitation. Before implementation, mark the actual result as *pending* rather than presenting planned benefits as facts.
+- **Evidence and confidence:** Point briefly to the relevant observed baseline and verification results below. Distinguish working code and passing tests from measured consumer benefit; do not assert user impact without evidence.
+
+Keep this summary readable in a brief review glance; omit boilerplate, repeated policy labels, invented metrics or promotional claims. A technically correct change without an intelligible reason or describable improvement is **not** adequately documented for review.
 
 ## Required Pre-Implementation Content
 
@@ -20,8 +32,8 @@ An issue is the **durable explanation of why the change was selected and what ac
 - If later evidence requires a policy change **before the issue exists**, first record the transition and reason in working context before reading the replacement strategy; transfer the full relevant selection history when opening the issue. **After issue creation**, append each new selection, reason, and changed boundary to the issue before loading the replacement strategy. Preserve the original selection and intent.
 
 ### Selected improvement and baseline
-- Pre-change observable situation and evidence references.
-- Opportunity and why selected over other plausible candidates; expected benefit and degree of confidence.
+- Supporting pre-change evidence and relevant source references for the **reviewer summary above**, without repeating the whole product explanation.
+- Decision details: why this bounded improvement was selected over credible alternatives, with evidence limits or trade-offs that do not fit in the short summary.
 - Consumer groups, contractual and behavioral invariants, permissible UX changes, known compatibility risk.
 - Included/excluded scope, acceptance criteria, expected verification and available rollback/mitigation.
 - Date or relevant version/revision reference so future reviewers can reconstruct the *before* state.
@@ -41,8 +53,8 @@ Track material tasks (optional for trivial work), actual modifications, unexpect
 
 ## Final Outcome
 
-Include:
-- Actual behavior delivered and meaningful differences from the original proposal.
+**First update the Product Improvement reviewer summary above** with the actual before/after improvement, the reason it matters, and an honest distinction between verified behavior and unmeasured hoped-for benefit. Then include supporting details here:
+- Actual behavior delivered and meaningful differences from the original proposal, with enough detail to investigate the implementation.
 - Verification evidence with command/test names and observed results; contract and regression findings.
 - Validation evidence if available, or an explicit statement that expected consumer benefit remains unverified.
 - Reviewable implementation checkpoint references, target branch, feature branch and actual test evidence; distinguish implementation verified, remotely published, ready for review and actually integrated. A versioned issue file cannot contain its own not-yet-created closure commit SHA; record the actual SHA in the final handoff.

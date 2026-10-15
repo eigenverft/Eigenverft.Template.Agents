@@ -83,7 +83,7 @@ To add a new strategy for one phase, create a new descriptive Markdown policy fi
 
 ### Record policy provenance in the issue
 
-The primary issue must capture the **understood user assignment** and the **effective Discover, Assess, and Select & Bound policies**, including the selected strategy source file or specialization for each phase, any natural-language refinements, and the rationale for the selected increment. Distinguish user instructions, established context, profile defaults, and assumptions. This goes in the issue—not a mandatory separate configuration artifact—via [IssueRecord.md](references/IssueRecord.md).
+The primary issue must **lead with an intelligible product-improvement story for developers and reviewers**: the concrete problem, affected workflow, why addressing it matters, intended before/after change, and after verification what actually improved (distinguishing confirmed behavior from expected but unmeasured consumer value). It must also capture the **understood user assignment** and the **effective Discover, Assess, and Select & Bound policies**, including the selected strategy source file or specialization for each phase, any natural-language refinements, and the rationale for the selected increment. Distinguish user instructions, established context, profile defaults, and assumptions. This goes in the issue—not a mandatory separate configuration artifact—via [IssueRecord.md](references/IssueRecord.md).
 
 ## Shared Invariants
 
