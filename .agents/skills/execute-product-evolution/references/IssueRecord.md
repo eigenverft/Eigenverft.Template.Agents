@@ -25,7 +25,7 @@ An issue is the **durable explanation of why the change was selected and what ac
 - Consumer groups, contractual and behavioral invariants, permissible UX changes, known compatibility risk.
 - Included/excluded scope, acceptance criteria, expected verification and available rollback/mitigation.
 - Date or relevant version/revision reference so future reviewers can reconstruct the *before* state.
-- Planned integration target (and actual refreshed base ref/SHA where known), **local** feature branch (`feature/product-evolution/<area>-<topic>-<issue-id>` unless repository policy requires a different naming scheme), and workspace-local worktree location (ignored repository-local directory preferred, accessible sibling when needed). Distinguish local branch creation from later authorized remote publication; document deviations from repository conventions.
+- Planned integration target (and actual refreshed base ref/SHA where known), **local** feature branch (`agent/product-evolution/<area>-<topic>-<issue-id>` unless repository policy requires a different naming scheme), and workspace-local worktree location (ignored repository-local directory preferred, accessible sibling when needed). Distinguish local branch creation from later authorized remote publication; document deviations from repository conventions.
 
 The original baseline, intent and policy must remain distinguishable from later decisions, including if the plan changes.
 
