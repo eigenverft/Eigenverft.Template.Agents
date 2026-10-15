@@ -2,6 +2,8 @@
 
 All runs follow these gates after a single candidate has been selected and bounded. The agent works autonomously **within the selected increment**, subject to actual tool authority and repository instructions.
 
+**Mandatory workspace rules:** Read and follow [WorkspaceLifecycle.md](WorkspaceLifecycle.md) before creating a branch/worktree or making product changes. The caller's arbitrary current checkout is read-only context; the implementation is isolated in a dedicated feature branch and temporary linked worktree inside the mounted project workspace: prefer ignored repo-local `.worktrees/` where compatible; otherwise choose a safe workspace-local sibling. Clean up only after committing and checking tracked, untracked, and ignored content, preserving the branch.
+
 ## Phase 4 — Record: Issue Before Product Changes
 
 1. Inspect the repository's actual issue-tracking convention. Prefer the established durable tracker or repository-managed issue format. Do not create unrelated new tracking systems.
@@ -11,7 +13,7 @@ All runs follow these gates after a single candidate has been selected and bound
 
 ## Phase 5 — Implement: Scoped, Tracked Work
 
-1. Observe the repository's branching, isolation, synchronization, and clean-worktree practices. Inspect current Git state before writing; preserve other agents' or users' work.
+1. Follow [WorkspaceLifecycle.md](WorkspaceLifecycle.md): inspect Git state and correct integration baseline, create a task-specific feature branch and a workspace-local linked worktree (prefer an ignored repository-local path; fall back to an accessible sibling where needed), verify its initial state, and **implement only there**. Preserve the user's original worktree, branch and uncommitted work. If issues are repo files, creating the isolation environment may precede persisting the issue, but not product implementation.
 2. Break the increment into tasks only when helpful; record tasks/steps in the issue. Do not turn each implementation step into a separate independent product objective.
 3. Make the **smallest complete** implementation, including direct and verified indirect consequences. Update the issue's implementation log with meaningful progress, deviations, decisions and resulting task statuses.
 4. Additional attractive improvements are **future opportunities**, not automatic work inside this increment.
@@ -29,9 +31,9 @@ All runs follow these gates after a single candidate has been selected and bound
 
 1. Build **one clearly identifiable reviewable change set** linked to the issue; one product increment may use multiple technical commits where needed for durable issue history or repository conventions.
 2. Review the complete diff and issue together: can a human understand **why**, **what**, **consumer impact**, **tests/evidence**, and **remaining uncertainties** without being present during the session?
-3. Keep unrelated changes out of commits. Observe repository commit/branch conventions. Create a final descriptive Git commit for the completed product increment and issue documentation; include a stable issue reference. Verify the commit actually exists. Push or publish only when allowed by repository/user policy and current tool permissions.
+3. Keep unrelated changes out of commits. Observe repository commit/branch conventions. Create a final descriptive Git commit **on the dedicated feature branch** for the completed product increment and issue documentation; include a stable issue reference. Verify the commit actually exists and is retained by the branch. Push and create a review handoff or PR where required/permitted; do not auto-merge without actual authority.
 4. Update the issue with actual commit/change-set references and final test/evidence summary. Use Done/Closed **only** when acceptance criteria pass and traceable completion really exists; otherwise use an appropriate Blocked or Abandoned state. If repository-managed issue updates require another commit, perform it and include it in the same cohesive review history.
-5. If issue closure or remote publication fails, record the actual pending state. Never imply that creating a commit alone proved consumer value or completed external publication.
+5. **After successful commit and any required publication attempt, clean up the temporary linked worktree** according to [WorkspaceLifecycle.md](WorkspaceLifecycle.md): verify it has no unsaved valuable work, remove it without force, verify it is gone, and retain the feature branch. If removal is unsafe or fails, keep it and report the exact remaining path; do not claim cleanup. If issue closure or remote publication fails, record the actual pending state. Never imply that creating a commit alone proved consumer value, completed external publication, or meant integration.
 
 ## Controlled Returns and Stops
 

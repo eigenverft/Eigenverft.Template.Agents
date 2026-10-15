@@ -25,6 +25,7 @@ An issue is the **durable explanation of why the change was selected and what ac
 - Consumer groups, contractual and behavioral invariants, permissible UX changes, known compatibility risk.
 - Included/excluded scope, acceptance criteria, expected verification and available rollback/mitigation.
 - Date or relevant version/revision reference so future reviewers can reconstruct the *before* state.
+- Planned integration target, isolated feature branch, and workspace-local worktree location (ignored repository-local directory preferred, accessible sibling when needed), including deviations from repository conventions.
 
 The original baseline, intent and policy must remain distinguishable from later decisions, including if the plan changes.
 
@@ -38,7 +39,8 @@ Include:
 - Actual behavior delivered and meaningful differences from the original proposal.
 - Verification evidence with command/test names and observed results; contract and regression findings.
 - Validation evidence if available, or an explicit statement that expected consumer benefit remains unverified.
-- Reviewable Git commit/change-set identifiers and where a human can inspect them.
+- Reviewable Git commit/change-set identifiers, integration target, feature branch and where a human can inspect them; distinguish committed, pushed/published, ready for review, and integrated.
+- Temporary linked-worktree cleanup outcome (removed after commit, or exact remaining path and blocker); keep the committed feature branch available for review.
 - Residual risks, follow-ups outside the finished increment, rollback considerations.
 - Final state and rationale: **Done**, **Blocked**, or **Abandoned**; if no issue was created because no candidate met the criteria, return **No change** outside the issue.
 

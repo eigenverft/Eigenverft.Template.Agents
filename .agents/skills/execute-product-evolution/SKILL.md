@@ -38,8 +38,9 @@ This package defines **three independently selectable policy phases** and one sh
 Shared execution references:
 - [ExecutionProtocol.md](references/ExecutionProtocol.md): **Record, Implement, Verify, Package & Close**, plus controlled returns to earlier phases.
 - [IssueRecord.md](references/IssueRecord.md): durable issue content, policy provenance, and outcome traceability.
+- [WorkspaceLifecycle.md](references/WorkspaceLifecycle.md): mandatory isolated feature-branch/worktree setup and safe post-commit cleanup.
 
-Select the policy sources **before reading any references**, as required by the Mandatory Pre-Read Policy Selection Gate above. At execution time, read the current phase's `Contract.md` and only its preselected profile file, if applicable. Fully user-specified phases may need no profile file. Do not read unused variants. Phase contracts and Shared Invariants in this main skill always apply. Read ExecutionProtocol and IssueRecord before issue creation or product modification.
+Select the policy sources **before reading any references**, as required by the Mandatory Pre-Read Policy Selection Gate above. At execution time, read the current phase's `Contract.md` and only its preselected profile file, if applicable. Fully user-specified phases may need no profile file. Do not read unused variants. Phase contracts and Shared Invariants in this main skill always apply. Read ExecutionProtocol, IssueRecord, and WorkspaceLifecycle before issue creation or product modification.
 
 ### Invocation: simple defaults, natural-language tailoring
 
@@ -80,7 +81,7 @@ The primary issue must capture the **understood user assignment** and the **effe
 - **Review burden** and **product impact** are distinct limits. Prefer cohesive, comprehensible, verifiable and reversible change units; file counts and changed lines do not prove reviewability.
 - Investigate indirect consequences, but only implement verified necessary effects of the selected increment. Capture unrelated discoveries as future candidates, not opportunistic scope expansion.
 - Clearly separate **verification** (was the change implemented correctly?) from **validation** (did consumers actually benefit?). Never invent user feedback or claim an unmeasured improvement is proven.
-- Preserve repository cleanliness and others' work. Follow applicable Git/branch practices, permissions, safety gates, deployment requirements, and durable documentation rules. No unlimited authority follows from autonomy.
+- Preserve repository cleanliness and others' work. Never implement an increment in the caller's arbitrary current checkout. Use a dedicated feature branch and temporary linked worktree **within the accessible project workspace**: normally an ignored repo-local `.worktrees/<topic>` directory, or an accessible workspace-local sibling when nesting conflicts with tooling. Once changes are durably committed and all tracked, untracked, and ignored work is safe, remove the temporary checkout without force. Keep the branch for review; follow [WorkspaceLifecycle.md](references/WorkspaceLifecycle.md) and applicable Git/branch practices, permissions, safety gates, deployment requirements, and durable documentation rules. No unlimited authority follows from autonomy.
 - If a primary issue cannot be durably recorded **before** implementation, or the required final reviewable Git change set cannot be created, report the blocker; do not silently skip either commitment.
 
 ## Seven-Phase Cycle
@@ -91,9 +92,9 @@ The primary issue must capture the **understood user assignment** and the **effe
 | **2. Assess** | Value → Compatibility → Risk → Feasibility | Comparable eligible candidates and exclusions |
 | **3. Select & Bound** | Select → Define Intent → Bound Change | Exactly one cohesive increment with clear boundaries |
 | **4. Record** | Baseline → Understood Assignment → Effective Policies → Acceptance Criteria → Issue | Durable issue created before implementation |
-| **5. Implement** | Plan → Execute → Track → Adapt | Product change confined to selected increment; issue updated |
+| **5. Implement** | Create isolated branch/worktree → Plan → Execute → Track → Adapt | Product change confined to selected increment in its own worktree; issue updated |
 | **6. Verify** | Test → Contract Check → Impact/Outcome Assessment | Verified evidence, honest remaining validation uncertainties |
-| **7. Package & Close** | Reviewable Change Set → Commit → Link Evidence → Resolve Issue | Traceable commit(s), closure only if criteria met |
+| **7. Package & Close** | Reviewable Change Set → Commit → Handoff → Clean Worktree → Resolve Issue | Traceable commit(s), review handoff and safe worktree cleanup; closure only if criteria met |
 
 Use the phase policies and shared execution rules, not the table alone. A newly discovered hard constraint, failed feasibility assumption, or scope expansion can require returning to Assess/Select, re-scoping transparently in the issue, or abandoning the pick. Never silently rewrite the original intention or mark a failed pick Done.
 
