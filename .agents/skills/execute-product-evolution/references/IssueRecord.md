@@ -29,19 +29,25 @@ These headings describe the **change itself**, not the agent's workflow; no sepa
 - Why is autonomous product evolution being run, and which user-specified goals/constraints apply?
 - Distinguish stated facts from reasonable assumptions.
 
-### Effective evolution policy and pre-read selection
-- Before opening any phase-policy references, the agent must determine the policy source for **each of the three phases** from user assignment and already-known context. Preserve **what was selected and why** in this issue; the issue is the durable record, not a separate policy log.
-- **Discover:** selected source (`references/PolicyDiscover/Default.md`, `Balanced.md`, `Ambitious.md` or a named authorized specialization / fully specified user instruction), selection reason, effective search domain, opportunity types, audience, and source of refinements.
-- **Assess:** selected source and selection reason, effective criteria, evidence thresholds, hard exclusions, and source of refinements.
-- **Select & Bound:** selected source and selection reason, effective change budget, cohesion/reviewability limits, allowed consumer impact, and source of refinements.
-- Record **why a non-default profile was justified** by an explicit profile invocation or unambiguous user/context instruction. If no such direction existed, record `Default.md (Conservative fallback)`. A vague improvement request does not justify loading `Balanced.md` or `Ambitious.md`.
-- For a fully user-specified phase, record `Custom — no profile file read` and the governing instructions; still apply the phase's common contract. Explicit context can refine any chosen default independently.
-- Distinguish explicit user request, established project/conversation context, selected preset, future specialization, and assumptions. A profile label or file name without **resolved effective criteria** is insufficient.
-- If later evidence requires a policy change **before the issue exists**, first record the transition and reason in working context before reading the replacement strategy; transfer the full relevant selection history when opening the issue. **After issue creation**, append each new selection, reason, and changed boundary to the issue before loading the replacement strategy. Preserve the original selection and intent.
+### Discover → Assess → Select & Bound — decision trail
+
+In the **initial issue-only commit**, preserve a concise, evidence-grounded comparison of the actual phase outputs. This is the durable review of **what was found, how alternatives were judged, and why one outcome was selected**, not a recital of what the policy files instruct. Use three short phase subsections in order; keep stable labels (A, B, C, etc.) across them so a reviewer can follow each candidate. Use fewer labels when fewer genuine candidates exist; do not manufacture alternatives, scores or evidence to fill the format.
+
+- **Discover** (`Default.md` / `Balanced.md` / `Ambitious.md` / named specialization / `Custom`, plus `Contract.md`): list each distinct, evidence-backed candidate surviving the early duplicate screen, with its concrete observed problem, useful source/location and any material uncertainty. Already implemented or actively claimed outcomes, incidental observations and unqualified search hits are **not** candidates; mention a consequential exclusion briefly with its reason if it helps explain the search, without giving it a candidate label or counting it toward the soft target.
+- **Assess** (selected source plus `Contract.md`): use the **same candidate labels** to state the actual comparative judgment: strength of evidence, likely practical consumer/developer benefit, meaningful drawbacks or lost existing utility, relevant compatibility/risk and feasibility/effort trade-offs. Mark uncertain or ineligible candidates truthfully. Say what actually mattered in this comparison rather than copying generic evaluation rules or inventing a stronger rationale afterward.
+- **Select & Bound** (selected source plus `Contract.md`): name the chosen label, why it wins **over the other credible alternatives**, what useful result it should produce, and the concrete inclusion/exclusion boundary. If a candidate was discarded during a final overlap recheck, preserve the material reason and the eventual selection. Do not claim unmeasured benefit as verified.
+
+Show the **one actually selected policy source for each phase** next to its heading, not all alternative files. `Contract.md` remains binding for each phase. For an ordinary default run, the source names suffice: **do not reproduce or paraphrase entire Default policies, hard gates, or generic skill rules**. Briefly identify only meaningful user/context refinements, changes of profile, non-default selection reasons or custom governing criteria and their provenance; distinguish user instructions from agent assumptions. The mandatory **pre-read policy choice still happens before any policy files are opened** as defined in `SKILL.md`; this issue records that resolved choice and its actual application, not a new choice made afterward. If selection changed before issue creation, include the real transition; after issue creation, append and checkpoint material transitions before following them, preserving the original decision history.
+
+A compact illustration of the intended level of detail (not mandatory wording or a fixed candidate count):
+
+- **Discover** (`Default.md` + `Contract.md`): A — documented build path differs from the project target (source locations); B — deployment status is contradictory (actual deployment unverified); C — example values may be misread (no observed harm).
+- **Assess** (`Default.md` + `Contract.md`): A — verified discrepancy, practical developer impact, moderate work; B — impact needs checking; C — weak risk evidence, removing examples could reduce usefulness.
+- **Select & Bound** (`Default.md` + `Contract.md`): A chosen — better-established value than B/C; fix affected build instructions, not unrelated documentation.
 
 ### Selected improvement and baseline
 - Supporting pre-change evidence and relevant source references for **Before / Change / After / Evidence** above, without repeating their concrete explanation.
-- Decision details: why this bounded improvement was selected over credible alternatives, with evidence limits or trade-offs that do not fit in the short summary.
+- Reference the phase decision trail above instead of repeating its alternative comparison; add only supporting evidence or trade-offs that need further explanation.
 - Consumer groups, contractual and behavioral invariants, permissible UX changes, known compatibility risk.
 - Included/excluded scope, acceptance criteria, expected verification and available rollback/mitigation.
 - Date or relevant version/revision reference so future reviewers can reconstruct the *before* state.
