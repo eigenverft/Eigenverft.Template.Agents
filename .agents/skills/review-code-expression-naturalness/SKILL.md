@@ -61,7 +61,90 @@ Also examine the opposite:
 
 Do not assume shorter, longer, more abstract, or more idiomatic code is better.
 
-## Review method
+## Required two-pass review
+
+Run both passes in order within the same read-only invocation.
+
+**Pass 1 creates candidates, not findings. Pass 2 tries to disprove them.**
+Do not attach impact or confidence ratings, or commit to an improvement, during
+Pass 1. A plausible first impression is a hypothesis until challenged.
+
+### Pass 1 — Map the operation and list candidates
+
+Survey the requested code area and the immediate context needed to recognize
+each operation. Recover the mental plan before evaluating expression.
+
+Build a provisional candidate list. For each material candidate record:
+
+- source location and operation;
+- exact expression choice that looks awkward;
+- specific mental work it appears to impose;
+- the smallest plausible alternative or question to investigate;
+- a plausible reason the current expression might be intentional;
+- missing evidence needed before treating it as a finding.
+
+Include both overexpression and overcompression candidates. Avoid padding the
+list with cosmetic preferences. Similar-looking code is a clue to inspect,
+not evidence that its behavior or purpose is the same.
+
+**Do not publish this list as an unqualified review verdict.** Preserve it
+for the second pass; the final report will show each material candidate's
+disposition.
+
+### Pass 2 — Adversarially review every candidate
+
+Individually challenge each candidate using relevant read-only source context:
+callers, callees, types, contracts, adjacent branches, supported variants, and
+existing tests when helpful. Reading tests is permitted; running them is not.
+
+Start with the strongest defense of the existing implementation. Ask what
+meaning the first pass might have missed and whether the proposed alternative
+would actually reduce human reading work without introducing new machinery.
+
+For apparently duplicated implementations, compare **the whole operations**,
+not just their shared syntax:
+
+- inputs, candidate counts and ordering;
+- eligibility and selection policies;
+- early returns and short-circuit behavior;
+- fallback behavior and empty-result semantics;
+- side effects, resource and lifecycle constraints;
+- performance expectations, scheduling and state transitions.
+
+A common loop or formula does not justify extraction when the surrounding
+algorithms differ. A configurable shared helper can create more conceptual
+cost than the duplication it replaces.
+
+For awkwardly named or reused state, trace **when it is written and read**,
+including iteration order and the consequences for observable behavior.
+If the issue turns out to be a correctness or domain-rule defect, do not
+present a behavior-changing fix as an expression-only improvement.
+
+Attempt to invalidate the candidate's causal story and proposed alternative.
+For each candidate choose one disposition:
+
+- **Confirmed:** clear expression friction, with a defensible local alternative.
+- **Narrowed:** only a smaller or different expression issue survives; update
+  the location, explanation, and suggested scope accordingly.
+- **Rejected:** the current structure serves genuine semantics, or the
+  alternative is not demonstrably better.
+- **Reclassified:** the primary problem is correctness, architecture, domain
+  policy or another concern outside this skill.
+
+Only confirmed and narrowed candidates can become expression findings.
+Assign impact and confidence **after** this pass, not before it. Suppress a
+candidate if key contracts or behavior-preservation conditions remain too
+uncertain to support a useful finding.
+
+A rejection is a successful review result, not a reason to invent a weaker
+finding. A consequential reclassified concern may be briefly noted as
+out of scope with its uncertainty, but must not be disguised as an expression
+finding or expanded into a separate audit.
+
+## Detailed inspection guidance
+
+Apply the following analysis to Pass 1 hypotheses and use its counterfactual
+and challenge checks in Pass 2.
 
 ### 1. Recover the mental plan
 
@@ -326,6 +409,22 @@ the available evidence supports that claim.
 
 Start with a brief overall assessment of implementation expression.
 
+Give a compact **candidate disposition** summary showing the material
+candidates from Pass 1 and how Pass 2 resolved them. For each, include
+its location, the original suspicion, the final disposition (Confirmed,
+Narrowed, Rejected, or Reclassified), and the decisive reason. This is an audit trail, not a second set of findings;
+do not list every trivial or cosmetic suspicion.
+
+Then detail **only** confirmed or narrowed expression findings in the
+existing format. Do not silently carry forward a rejected recommendation.
+A candidate rejected after inspecting meaningful semantic differences should
+remain visibly rejected in the disposition summary.
+
+If a reclassified concern reveals a material possible correctness or
+domain-policy issue, optionally add a short, clearly separate
+**Out-of-scope observation** describing the evidence and uncertainty.
+Do not prescribe an unverified behavior change.
+
 For each material finding, provide:
 
 ### [Impact] `path:line-range` — Title
@@ -355,6 +454,8 @@ similarity to AI-generated code.
 Group related instances sharing one underlying cause.
 
 Do not pad the report with generic praise or speculative style complaints.
+The disposition summary is part of the completed review, not permission to
+publish low-confidence candidates as actionable findings.
 
 If there are no material findings, state:
 
@@ -376,4 +477,5 @@ Or:
 would help a reader understand the real operation without changing its
 architecture."
 
-If neither explanation is substantiated, do not report the finding.
+If neither explanation is substantiated, reject or reclassify the Pass 1
+candidate instead of reporting it as an expression finding.
