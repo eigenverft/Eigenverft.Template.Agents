@@ -63,83 +63,57 @@ Do not assume shorter, longer, more abstract, or more idiomatic code is better.
 
 ## Required two-pass review
 
-Run both passes in order within the same read-only invocation.
+Complete two distinct passes within the same read-only invocation.
 
-**Pass 1 creates candidates, not findings. Pass 2 tries to disprove them.**
-Do not attach impact or confidence ratings, or commit to an improvement, during
-Pass 1. A plausible first impression is a hypothesis until challenged.
+### Pass 1 — Identify potential friction
 
-### Pass 1 — Map the operation and list candidates
+Read the requested code and enough context to understand the operations being
+performed. Collect plausible expression-friction candidates without treating
+them as established findings.
 
-Survey the requested code area and the immediate context needed to recognize
-each operation. Recover the mental plan before evaluating expression.
+For each material candidate, record:
 
-Build a provisional candidate list. For each material candidate record:
+- the source location and intended operation;
+- the expression choice that may impose unnecessary reading effort;
+- the specific effort a reader may need to expend;
+- an initial improvement hypothesis;
+- the relevant uncertainties or potential reasons for the existing form.
 
-- source location and operation;
-- exact expression choice that looks awkward;
-- specific mental work it appears to impose;
-- the smallest plausible alternative or question to investigate;
-- a plausible reason the current expression might be intentional;
-- missing evidence needed before treating it as a finding.
+Do not assign severity or confidence yet. Do not presume that an alternative
+is better merely because it is more concise, conventional, or familiar.
 
-Include both overexpression and overcompression candidates. Avoid padding the
-list with cosmetic preferences. Similar-looking code is a clue to inspect,
-not evidence that its behavior or purpose is the same.
+### Pass 2 — Challenge each candidate
 
-**Do not publish this list as an unqualified review verdict.** Preserve it
-for the second pass; the final report will show each material candidate's
-disposition.
+Re-examine every candidate independently, using the relevant source context.
+Look for evidence that contradicts the initial interpretation.
 
-### Pass 2 — Adversarially review every candidate
+For each candidate:
 
-Individually challenge each candidate using relevant read-only source context:
-callers, callees, types, contracts, adjacent branches, supported variants, and
-existing tests when helpful. Reading tests is permitted; running them is not.
+1. Establish what the current form contributes to behavior, meaning, or
+   maintainability before treating any part as unnecessary.
+2. Test the initial explanation against applicable contracts, constraints,
+   dependencies, and meaningful variations in behavior.
+3. Assess whether the proposed alternative actually reduces comprehension
+   effort, or merely moves complexity elsewhere.
+4. Check whether behavior, interfaces, guarantees, and relevant side effects
+   can be preserved without introducing comparable new costs.
+5. Determine whether the concern is genuinely about implementation expression
+   or belongs primarily to another review discipline.
 
-Start with the strongest defense of the existing implementation. Ask what
-meaning the first pass might have missed and whether the proposed alternative
-would actually reduce human reading work without introducing new machinery.
+Conclude with one disposition for each material candidate:
 
-For apparently duplicated implementations, compare **the whole operations**,
-not just their shared syntax:
+- **Confirmed:** the expression concern and proposed improvement are supported.
+- **Narrowed:** a more specific or limited expression concern survives.
+- **Rejected:** the concern does not hold up, or the alternative is not
+  demonstrably preferable.
+- **Reclassified:** the primary issue is outside expression naturalness.
 
-- inputs, candidate counts and ordering;
-- eligibility and selection policies;
-- early returns and short-circuit behavior;
-- fallback behavior and empty-result semantics;
-- side effects, resource and lifecycle constraints;
-- performance expectations, scheduling and state transitions.
+Only confirmed and narrowed candidates may become expression findings.
+Set impact and confidence only after Pass 2. Reject uncertain or unsupported
+claims instead of converting every candidate into a recommendation.
 
-A common loop or formula does not justify extraction when the surrounding
-algorithms differ. A configurable shared helper can create more conceptual
-cost than the duplication it replaces.
-
-For awkwardly named or reused state, trace **when it is written and read**,
-including iteration order and the consequences for observable behavior.
-If the issue turns out to be a correctness or domain-rule defect, do not
-present a behavior-changing fix as an expression-only improvement.
-
-Attempt to invalidate the candidate's causal story and proposed alternative.
-For each candidate choose one disposition:
-
-- **Confirmed:** clear expression friction, with a defensible local alternative.
-- **Narrowed:** only a smaller or different expression issue survives; update
-  the location, explanation, and suggested scope accordingly.
-- **Rejected:** the current structure serves genuine semantics, or the
-  alternative is not demonstrably better.
-- **Reclassified:** the primary problem is correctness, architecture, domain
-  policy or another concern outside this skill.
-
-Only confirmed and narrowed candidates can become expression findings.
-Assign impact and confidence **after** this pass, not before it. Suppress a
-candidate if key contracts or behavior-preservation conditions remain too
-uncertain to support a useful finding.
-
-A rejection is a successful review result, not a reason to invent a weaker
-finding. A consequential reclassified concern may be briefly noted as
-out of scope with its uncertainty, but must not be disguised as an expression
-finding or expanded into a separate audit.
+The final response must distinguish initial candidates from validated findings.
+Discarded hypotheses are normal and useful results of the review.
 
 ## Detailed inspection guidance
 
@@ -409,21 +383,14 @@ the available evidence supports that claim.
 
 Start with a brief overall assessment of implementation expression.
 
-Give a compact **candidate disposition** summary showing the material
-candidates from Pass 1 and how Pass 2 resolved them. For each, include
-its location, the original suspicion, the final disposition (Confirmed,
-Narrowed, Rejected, or Reclassified), and the decisive reason. This is an audit trail, not a second set of findings;
-do not list every trivial or cosmetic suspicion.
+Summarize the disposition of material Pass 1 candidates in a compact
+review trail: location, initial concern, final disposition, and the reason
+for that decision. Do not present rejected or reclassified candidates as
+actionable expression findings.
 
-Then detail **only** confirmed or narrowed expression findings in the
-existing format. Do not silently carry forward a rejected recommendation.
-A candidate rejected after inspecting meaningful semantic differences should
-remain visibly rejected in the disposition summary.
-
-If a reclassified concern reveals a material possible correctness or
-domain-policy issue, optionally add a short, clearly separate
-**Out-of-scope observation** describing the evidence and uncertainty.
-Do not prescribe an unverified behavior change.
+Then report only confirmed or narrowed expression findings. If a material
+concern is reclassified, it may be noted briefly and clearly as outside this
+skill's scope; do not expand the review into that other discipline.
 
 For each material finding, provide:
 
@@ -477,5 +444,4 @@ Or:
 would help a reader understand the real operation without changing its
 architecture."
 
-If neither explanation is substantiated, reject or reclassify the Pass 1
-candidate instead of reporting it as an expression finding.
+If neither explanation is substantiated, do not report an expression finding.
