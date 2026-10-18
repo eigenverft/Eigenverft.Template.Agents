@@ -48,7 +48,7 @@ written by an experienced person, a coding agent, or both.
 
 ## Central question
 
-For the same intended behavior, relevant contracts, dependencies,
+For the same **existing observable behavior**, relevant contracts, dependencies,
 responsibilities, and architecture:
 
 > Does the chosen expression make a developer understand more machinery,
@@ -95,10 +95,55 @@ For each candidate:
    dependencies, and meaningful variations in behavior.
 3. Assess whether the proposed alternative actually reduces comprehension
    effort, or merely moves complexity elsewhere.
-4. Check whether behavior, interfaces, guarantees, and relevant side effects
-   can be preserved without introducing comparable new costs.
+4. Apply the mandatory behavior-preservation gate below. A clearer-looking
+   expression is not a valid improvement if it changes existing behavior.
 5. Determine whether the concern is genuinely about implementation expression
    or belongs primarily to another review discipline.
+
+### Mandatory behavior-preservation gate
+
+This is a blocking condition for **every** proposed expression improvement,
+not an optional caveat or a post-review implementation detail.
+
+Compare the current code with the proposed local alternative using available
+read-only evidence. Trace affected callers, state transitions, and relevant
+execution paths. Account for normal, boundary, failure, and exceptional
+behavior as applicable.
+
+Preserve **what the implementation currently does**, not only what the
+reviewer assumes it was intended to do. Do not silently "correct" apparently
+odd behavior, remove a special case, change the timing of an operation, or
+substitute a cleaner domain policy under the label of expression naturalness.
+
+Consider all relevant observable differences, including:
+
+- return values, externally visible state, and persistent effects;
+- branch selection, evaluation order, and short-circuit behavior;
+- exceptions, failure handling, retries, and recovery;
+- mutation, side effects, callbacks, logging, and notifications;
+- timing, scheduling, concurrency, and asynchronous behavior;
+- resource ownership, lifetime, and cleanup;
+- API contracts, compatibility, and behavior across supported inputs.
+
+The gate has three outcomes:
+
+- **Preservation supported:** Specific source evidence supports equivalence
+  for the affected behavior. The candidate may proceed to the expression
+  finding threshold.
+- **Preservation uncertain:** A relevant behavior difference cannot be ruled
+  out from the inspected evidence. Do not present the alternative as a safe
+  rewrite or an actionable expression recommendation. Record the missing
+  evidence or condition in the candidate review trail; investigate further
+  read-only if appropriate.
+- **Behavior change identified:** The alternative changes existing behavior.
+  Reject that alternative. If a narrower, supported behavior-preserving
+  alternative exists, reassess only that narrower proposal; otherwise reject
+  or reclassify the candidate.
+
+A correct diagnosis of reading friction does **not** validate an unsafe
+improvement. A preservation checklist, a "should behave the same" statement,
+or a proposed test is not evidence that the change preserves behavior.
+Do not claim proof beyond the read-only evidence available.
 
 Conclude with one disposition for each material candidate:
 
@@ -108,9 +153,10 @@ Conclude with one disposition for each material candidate:
   demonstrably preferable.
 - **Reclassified:** the primary issue is outside expression naturalness.
 
-Only confirmed and narrowed candidates may become expression findings.
-Set impact and confidence only after Pass 2. Reject uncertain or unsupported
-claims instead of converting every candidate into a recommendation.
+Only confirmed and narrowed candidates **that pass the behavior-preservation
+gate** may become actionable expression findings. Set impact and confidence
+only after Pass 2. Reject unsupported recommendations instead of converting
+every candidate into a finding.
 
 The final response must distinguish initial candidates from validated findings.
 Discarded hypotheses are normal and useful results of the review.
@@ -285,9 +331,9 @@ Do not mistake unfamiliarity for lack of information.
 
 Before accepting a finding, formulate a reasonably concrete alternative.
 
-The alternative must aim to preserve:
+The alternative must preserve established existing behavior, including:
 
-- intended behavior and outputs;
+- current behavior and outputs, even when the intent is disputed;
 - relevant public and internal contracts;
 - side effects and error semantics;
 - evaluation and mutation order;
@@ -324,7 +370,8 @@ Before reporting, ask:
 
 When relevant evidence is incomplete, express the uncertainty.
 
-Do not present unverified behavioral equivalence as fact.
+Do not present unverified behavioral equivalence as fact. If the preservation
+gate does not pass, do not recommend the change as an expression improvement.
 
 ## Scope
 
@@ -360,12 +407,13 @@ Report a material finding only when it has:
 2. A recognizable intended operation or mental plan.
 3. A concrete representation choice causing friction.
 4. A specific unnecessary mental task imposed on a reader.
-5. Evidence or a clearly stated condition supporting the concern.
+5. Evidence supporting the concern beyond an unverified condition.
 6. A proportionate alternative direction.
-7. Identified preservation constraints or uncertainty.
+7. Specific evidence supporting preservation of existing behavior; mere
+   preservation instructions or unresolved uncertainty do not pass the gate.
 
 A subjective impression can motivate investigation but cannot alone justify
-a finding.
+a finding. Low confidence is never a substitute for passing the behavior gate.
 
 Do not emit cosmetic or low-confidence observations just to fill the report.
 
@@ -373,11 +421,12 @@ Use:
 
 - **High confidence** when the relevant semantics and contracts are clear
   and the alternative is strongly justified.
-- **Medium confidence** when friction is credible but a meaningful
-  interpretation or preservation condition remains uncertain.
+- **Medium confidence** when friction is credible but limited contextual
+  uncertainty remains without undermining supported behavior preservation.
 
 Do not claim that a suggested modification is behavior-preserving unless
-the available evidence supports that claim.
+the available evidence supports that claim. Do not issue an actionable
+improvement direction if a material preservation risk is still unresolved.
 
 ## Output
 
@@ -385,8 +434,10 @@ Start with a brief overall assessment of implementation expression.
 
 Summarize the disposition of material Pass 1 candidates in a compact
 review trail: location, initial concern, final disposition, and the reason
-for that decision. Do not present rejected or reclassified candidates as
-actionable expression findings.
+for that decision. State when a candidate failed the behavior gate because
+preservation is uncertain or because a change was established.
+Do not present rejected or reclassified candidates as actionable expression
+findings.
 
 Then report only confirmed or narrowed expression findings. If a material
 concern is reclassified, it may be noted briefly and clearly as outside this
@@ -411,7 +462,12 @@ evidence from applicable semantics, contracts, or local behavior.
 **Improvement direction:** A concrete, proportionate alternative without
 implementing it.
 
-**Preserve:** Important behavior, side effects, contracts, and uncertainty.
+**Preserve:** Existing behavior, side effects, and contracts that must remain
+unchanged.
+
+**Preservation evidence:** Why the proposed alternative is supported as
+behavior-preserving, including the relevant code context. Do not use a
+conditional "assuming behavior is unchanged" as a substitute for evidence.
 
 **Confidence:** High or medium.
 
@@ -444,4 +500,5 @@ Or:
 would help a reader understand the real operation without changing its
 architecture."
 
-If neither explanation is substantiated, do not report an expression finding.
+If neither explanation is substantiated, or if the proposed alternative fails
+the behavior-preservation gate, do not report an actionable expression finding.
