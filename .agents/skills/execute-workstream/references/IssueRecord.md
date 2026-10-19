@@ -10,7 +10,7 @@ The workstream is the durable **remote branch**. An issue is a **single step's**
   - Verified: `issues/done/<same-filename>`
   - Blocked: `issues/blocked/<same-filename>`
   - Honor existing issue roots, naming conventions and status directories when suitable, instead of creating a second tracking system.
-- `<stream-id>` stays constant for that remote stream. `sNNN` is the next unoccupied, monotonically increasing step number in **this stream**; determine it from the stream's own remotely published issues/history, not by searching semantically similar tasks in unrelated branches.
+- `<stream-id>` stays constant for that remote stream (new streams use `<YYDDMM>-<N>` with the number allocated per topic/day). **Do not confuse** the stream's daily branch number `N` with the issue's `sNNN`: `sNNN` is the next unoccupied, monotonically increasing step number in **this stream**, determined from its own remotely published issues/history, not by searching semantically similar tasks in unrelated branches.
 - For an external tracker, use its actual unique issue ID. No extra versioned issue file is required solely to make a Git checkpoint. For a versioned fallback, the filename is the issue's stable identity when moved between lifecycle directories.
 - A new explicit workstream with a deliberately repeated task creates a new ID, remote feature ref and step issue; repeated content is not grounds to suppress or combine those records.
 
