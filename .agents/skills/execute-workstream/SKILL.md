@@ -84,4 +84,10 @@ A finding-free review or a justified decision not to change anything **before a 
 
 For each invoked step, report the target repository, **stream ID and readable remote ref**, whether the stream was **new or resumed**, source base SHA or resumed remote SHA, task/input source, issue/step identifier, meaningful change or `No work`, relevant verification, commit(s), publication result and final exact remote head, local worktree and feature-branch cleanup result, and `Done / Blocked / No work`. When the step is remotely published and locally cleaned, explicitly state that **the same stream can be materialized for another step** without changing its identity.
 
+**CRITICAL — MANDATORY ACTIVE-STREAM HANDOFF:** Every user-facing response after a successfully published, independently verified workstream step **MUST end** with an explicit, clearly identifiable active-stream reminder. This is a required final part of the response, not optional prose, and cannot be replaced by a generic "resumable" statement or omitted for brevity. State the exact remote branch and that subsequent eligible tasks and review invocations in this conversation continue **that same branch using the complete `execute-workstream` lifecycle**, retaining applicable user-specified scope, unless the user explicitly starts a new stream, switches streams or opts out. Use a short closing format such as:
+
+> **Active workstream:** `<remote>/<exact-ref>` (remote HEAD verified). Subsequent eligible tasks/reviews in this conversation continue this branch with the full `execute-workstream` methodology and existing scope unless explicitly overridden.
+
+Only name a stream as active when its remote identity was actually verified; a `No work` on a never-published new stream must not claim one. This handoff reinforces conversation context but does not override the host-activation limitation above.
+
 Do not report invented commands, issue IDs, commit hashes, results or guaranteed recovery from interruptions. Successful publication checkpoints reduce local dependence but do not guarantee survival of unfinished, unpublished work.
