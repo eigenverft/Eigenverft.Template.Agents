@@ -425,6 +425,7 @@ $whitelist   = @( '.gitattributes', 'AGENTS.md', '.agents/**', 'AGENTS/**' )
 $destinationNames = @(
     'Eigenverft.App.AutomationWorkbench'
     'Eigenverft.App.BlazorMultihost'
+    'Eigenverft.App.DeskProbe'
     'Eigenverft.App.GlobalServerPwaHost'
     'Eigenverft.App.Lattice'
     'Eigenverft.NetLib.LlamaCpp'
