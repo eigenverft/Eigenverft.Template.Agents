@@ -65,7 +65,7 @@ Use this ownership layout for newly established documentation:
 ```text
 docs/
   <product>/
-    workhistory.md
+    workhistory.md  # local-only, when applicable (see Section 4)
     user/
       <documentation for product consumers>
     operations/
@@ -95,7 +95,7 @@ Maintain **`docs/<product>/workhistory.md`** as a small, local-only trace of use
 
 - **Short-lived checkout exception:** If the workflow performs scoped edits in a temporary worktree or equivalent disposable checkout and its handoff is designed to push/publish the changes and clean up that checkout, **skip local work-history tracing for this run**. Do not create or update `workhistory.md`, add an ignore rule solely for it, or write the trace to the invoking checkout or another persistent location. Determine this exception from the workflow design, even if its push or cleanup later fails. This exception does not affect normal audience documentation or the workflow's Git/issue lifecycle.
 - **Existing trace:** If the product's `workhistory.md` already exists in a persistent checkout, append the completed work entry without rechecking ignore rules, migrating files, or performing Git bookkeeping for the trace.
-- **First entry only:** If the file is missing, first check whether its path is effectively Git-ignored. Only when it is not, add `docs/*/workhistory.md` to the repository's `.gitignore` (creating `.gitignore` if needed and permitted). Then create the history file with its first actual completed-work entry, never as an empty placeholder. If the ignore rule cannot be established within the permitted writable scope, skip local tracing and briefly report the limitation; do not force-add the trace or modify another checkout.
+- **First entry only:** If the file is missing, first check whether its path is effectively Git-ignored. Only when it is not, add `docs/*/workhistory.md` to the repository's `.gitignore` (creating `.gitignore` if needed and permitted). If the task includes a final commit/push, establish the missing ignore rule beforehand. Write the first actual history entry only after the delivered outcome is known, never as an empty placeholder. If the ignore rule cannot be established within the permitted writable scope, skip local tracing and briefly report the limitation; do not force-add the trace or modify another checkout.
 - Never stage or commit `workhistory.md`. Its local convenience is not a substitute for durable Git commits or issue records.
 - Prefix every entry with the **actual local calendar date of the work** in `YYYY-MM-DD` ISO format, followed by a space, `#`, and the next sequence number for **that date in that product file** (`#1`, `#2`, ...). Read existing entries to choose the next number; never write the literal placeholder `YYYY-MM-DD`.
 - Keep entries very short, preferably one line. State **what the user requested** and **what was delivered**; add interpretive context only when essential to understand the outcome. Record completed facts, not intentions or predicted results.
@@ -107,8 +107,6 @@ Maintain **`docs/<product>/workhistory.md`** as a small, local-only trace of use
 - If the work genuinely affects multiple independently documented products, record a brief product-specific outcome in each affected product's history. Do not assign internal components their own history unless they are independently delivered products.
 - Work history can mention relevant audience-documentation updates, but does not substitute for maintaining those documents. Audience publications must not depend on links to the work-history file.
 - Do not record secrets, sensitive user details, raw conversations, unsupported motives, or unrelated activity. Respect read-only and explicitly restricted work. If no product can be responsibly identified, report that uncertainty rather than inventing a product path.
-
-The product-level history is separate from any repository-level work history required by instructions such as `AGENTS/WORKHISTORY.md`. Neither silently replaces the other.
 
 ## 5. Independent Documentation and Publication
 
