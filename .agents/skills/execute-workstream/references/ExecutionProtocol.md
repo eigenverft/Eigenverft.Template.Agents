@@ -13,11 +13,11 @@ This protocol is the general execution component derived from the practical Reco
 
 ## 1. Record the Step Before Any Product Edits
 
-1. Respect the target repository's usable issue-tracking convention. Prefer its existing accessible tracker or versioned per-issue format. If neither is suitable and policy allows it, use `issues/open/<topic>-<stream-id>-sNNN.md` inside the isolated stream worktree. Existing issue summary pages do not automatically become a tracker. Do not overwrite existing summaries or create a global issue index.
+1. Use the target repository's established compatible file-based issue convention. If none exists and repository policy permits it, create `issues/open/<topic>-<stream-id>-sNNN.md` inside the isolated stream worktree. Existing issue summary pages are not per-step issue records. Do not overwrite existing summaries or create a global issue index.
 2. For a new stream, allocate the next Git-verified daily stream ID and exact `feature/ewrks/<topic>-<stream-id>` branch, then record stable stream identity, target repo, selected starting ref/SHA and original assignment. For a continuation, retain the **same** branch/ID and derive the next distinct step number from that stream's own remote issue history and committed state.
 3. Write the **single primary issue for this step** using [IssueRecord.md](IssueRecord.md). Start with `Before / Change / After / Evidence` (or direct translations). Initial `Change` is planned; initial `After` is explicitly `Not implemented yet`. Record the user/skill-provided task, baseline and scope, criteria and risks. There is **no Discover/Assess/Select candidate-comparison requirement**.
-4. For a versioned issue, stage the issue alone and create a **dedicated issue-only baseline commit** before modifying any product file. Confirm the commit's actual diff contains no product changes. For an external tracker, ensure the issue actually exists durably; do not create a duplicate file merely to simulate a checkpoint. Link its ID in subsequent commits.
-5. **Early publication gate on every step:** Push only the workstream branch to the authorized existing remote and independently verify that the actual remote ref is now at the new step's baseline commit (or, with an external issue, at the approved branch base). Even a resumed branch needs a fresh baseline for a new versioned issue. No product edit before this success.
+4. Stage the issue file alone and create a **dedicated issue-only baseline commit** before modifying any product file. Confirm the commit's actual diff contains no product changes.
+5. **Early publication gate on every step:** Push only the workstream branch to the authorized existing remote and independently verify that the actual remote ref is now at the new step's issue-only baseline commit. Even a resumed branch needs a fresh baseline commit for its new step issue. No product edit before this success.
 6. If an issue cannot be durably recorded or early publication fails, report **Blocked before edits**. Preserve real issue, branch, worktree and uncommitted state safely; do not silently fall back to changing the caller's checkout, force-push, or treat a local scratch note as a durable issue.
 
 ## 2. Implement the Bounded Assignment
@@ -25,7 +25,7 @@ This protocol is the general execution component derived from the practical Reco
 1. Recheck that the issue, branch, current step baseline commit and early remote publication are real. All edits happen only in the dedicated linked worktree.
 2. Implement the smallest **complete** authorized outcome (or cohesive related findings) consistent with acceptance criteria. Touch dependent layers only when necessary; preserve relied-upon APIs, behavior, data and accessibility unless an authorized change explicitly covers them.
 3. Use meaningful implementation commits when a coherent piece is finished or an important recoverability checkpoint exists. Each should explain actual effect, refer to the step issue and not combine unrelated work. Avoid per-edit noise, dummy commits and secret/ignored local files.
-4. **Material changes of intent first, code second:** If evidence changes outcome, acceptance criteria, risk boundary or outer scope, stop affected implementation and append original versus revised decision, reason, and authorization to the *same step issue*. For versioned issues, make a distinct issue-only decision commit before coding to the new decision and verify its staged diff. For external issues, persist that history in the tracker before the new work. Do not silently rewrite the original assignment.
+4. **Material changes of intent first, code second:** If evidence changes outcome, acceptance criteria, risk boundary or outer scope, stop affected implementation and append original versus revised decision, reason, and authorization to the *same step issue*. Make a distinct issue-only decision commit before coding to the new decision and verify its staged diff. Do not silently rewrite the original assignment.
 5. If review findings prove inapplicable, document what was observed. Do not manufacture a replacement product objective to force `Done`. A different or larger change is a new choice requiring valid authorization. Work that cannot safely meet the issued acceptance criteria becomes an honest `Blocked` handoff.
 6. Do not automatically run a standalone skill's conflicting version of branch setup, issue management, pushing, merging, deployment or repository-wide synchronization. The outer workstream owns these stages; honor inner domain rules only within this boundary.
 
@@ -40,21 +40,17 @@ This protocol is the general execution component derived from the practical Reco
 
 A step can finish while its workstream remains usable for later tasks.
 
-### Verified Done — versioned issue
+### Verified Done
 
 1. Confirm every intended product change and meaningful test artifact is committed and the complete branch diff and decision chronology are reviewable.
 2. Update the **same step issue** in its opening `Change / After / Evidence` fields with the actual change and observable behavior in the same `Before` situation. Record tests, residual risks, explicit `Done` (implemented and verified, **not merged**) and the status of final remote publication, PR/merge and local cleanup as **pending**.
 3. Move that exact issue file to `done/` in the established issue root (use `git mv` when available). Preserve filename, identity and earlier history; no duplicate.
 4. Stage **only** the final issue closure/move, verify the staged diff, and make this the **last step commit**. No product file edits or subsequent issue-file commits after the dedicated closure commit.
 
-### Verified Done — external tracker
-
-- Keep the real issue identifier; do not invent a repository issue file or filesystem move. Record verified progress and implementation commit references in that tracker; close it after successful final remote publication and permitted cleanup according to tracker rules. An issue may be implementation-complete before the entire handoff succeeds.
-
 ### Blocked after issue creation
 
 - Commit any safe and coherent implementation progress when possible and state its unverified status. Preserve valuable uncommitted work on uncertainty; do not discard it or claim verification.
-- In the **same step issue**, record actual work, blockers, missing evidence, recovery conditions and status `Blocked`. For versioned issues, move the same filename to `blocked/` in a dedicated final issue-only status commit. For external trackers, update their native status.
+- In the **same step issue**, record actual work, blockers, missing evidence, recovery conditions and status `Blocked`. Move the same filename to `blocked/` in a dedicated final issue-only status commit.
 - Push this same stream branch, verify its actual remote head and preserve local state if publication fails. `Blocked` is not merge-ready and does not close the overall stream or earlier completed issues.
 
 ## 5. Publish the Step's Final Head

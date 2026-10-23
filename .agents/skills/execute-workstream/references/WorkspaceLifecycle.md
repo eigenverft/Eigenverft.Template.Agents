@@ -65,8 +65,8 @@ If read-only inspection/review finds **no actionable authorized step**, and this
 ## Per-Step Record and Early Publication
 
 1. Follow [IssueRecord.md](IssueRecord.md): one new primary issue for each actual step. On a brand-new stream, use its `s001` identity; on a continuation use the next stream-local identity (for example `s002`), derived from committed issue records without screening semantic duplicates.
-2. When versioned in Git, write it inside the linked worktree and commit the original issue **alone**, with acceptance criteria and baseline facts, before product edits. For external issues, verify the actual tracker record, then use the branch without manufacturing an extra issue-file commit.
-3. **Push the exact local stream branch early** to its authorized remote and verify the actual remote head equals this step's issue-only baseline commit or, for an external issue without a unique commit, the approved branch SHA. This applies to both new and resumed streams. In the latter case, the new baseline extends an already published branch; do not mistake existence of an older remote ref for successful publication of the current step.
+2. Write the issue file inside the linked worktree and commit the original issue **alone**, with acceptance criteria and baseline facts, before product edits.
+3. **Push the exact local stream branch early** to its authorized remote and verify the actual remote head equals this step's issue-only baseline commit. This applies to both new and resumed streams. In the latter case, the new baseline extends an already published branch; do not mistake existence of an older remote ref for successful publication of the current step.
 4. Remote advancement since materialization or rejection of a non-fast-forward push is a conflict, **not** authority to force-push, silently rebase away other steps or overwrite another actor's work. Preserve local state and report it. If early publication cannot succeed, **stop before product edits** and safely retain the local issue/worktree/branch for recovery.
 
 ## Implement, Verify and Publish

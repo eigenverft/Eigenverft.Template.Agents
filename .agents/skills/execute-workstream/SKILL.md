@@ -30,7 +30,7 @@ Read [ExecutionProtocol.md](references/ExecutionProtocol.md), [IssueRecord.md](r
 
 ## Stream and Branch Identity
 
-Default remote feature ref:
+User-defined default remote feature ref:
 
 `feature/ewrks/<topic>-<stream-id>`
 
@@ -38,7 +38,7 @@ Default remote feature ref:
 - For **new** streams, use `<stream-id>` = `<YYDDMM>-<N>`: two-digit year, day, month, then a positive decimal number starting at `1` **per topic per calendar day** (for example `client-review-261910-1` for 19 October 2026). Do not prescribe a clock, shell, or date-source tool. After refreshing Git refs, inspect existing local and actual remote `feature/ewrks/<topic>-<YYDDMM>-<N>` branches; choose `N = highest matching number + 1`, or `1` when none exists. Check the entire proposed branch name and linked-worktree path are free immediately before creation, and recheck the actual remote at publication; a concurrent claim is a conflict, never grounds for force-push or silently joining another stream. No random ID, UUID, or literal `id` marker is needed. **Existing streams keep their original full ref and directory name**, including older UUID-like suffixes; never rename them during continuation.
 - **Use one deterministic local worktree name matching the branch's final segment:** `.worktrees/<topic>-<stream-id>/`, inside the target repository's accessible checkout. Keep the `feature/ewrks/` prefix out of the directory name. This is the **only** permitted placement: no workspace sibling, `_tempWorkTrees/`, or alternative directory fallback. Apply the proven Product Evolution checks (Git state, full-tree ignore verification, scanner/build isolation, safe removal). If repository-local placement cannot be made safe and accessible, stop rather than silently choosing a different checkout location.
 - Keep the exact stream ID, repo identifier, existing remote name, ref and initially selected base SHA in the first issue and user handoff. Later steps preserve the same ID/ref and record their own starting remote SHA.
-- Each subsequent real change step gets a **new primary issue** with a stream-specific unique step identity; existing completed issues remain completed. For a repository-file fallback, use `issues/open/<topic>-<stream-id>-sNNN.md` with a monotonic stream-local step number (`s001`, `s002`, etc.); move the exact same file to `done/` or `blocked/`. Resolve the next number from the stream's own remote history and issue records, not semantic searches for related work.
+- Each subsequent real change step gets a **new primary issue** with a stream-specific unique step identity; existing completed issues remain completed. For file-based step issues, use the established compatible issue layout; otherwise, when repository policy permits, use `issues/open/<topic>-<stream-id>-sNNN.md` with a monotonic stream-local step number (`s001`, `s002`, etc.); move the exact same file to `done/` or `blocked/`. Resolve the next number from the stream's own remote history and issue records, not semantic searches for related work.
 - A new stream starts from a verified base chosen by **repository branch role**, not the caller's checkout or a hard-coded branch name; see [WorkspaceLifecycle.md](references/WorkspaceLifecycle.md#new-stream-base-selection). An explicit permitted branch or commit takes priority, including a pinned SHA for comparable experiments. Resumed streams instead start at their existing remote stream HEAD.
 
 ## Input Composition and Authority
@@ -59,7 +59,7 @@ The inner task/skill and the outer lifecycle are different responsibilities.
 | 1. Resolve | Determine **new vs continued stream**, target repository/ref/base, authorized task and a single reviewable step |
 | 2. Materialize | Fresh remote refs; create or safely re-create the local stream branch and a dedicated linked worktree from the correct SHA |
 | 3. Observe | Run read-only task preparation/review against **this stream snapshot**; define change and acceptance criteria; no product edits |
-| 4. Record and publish intent | Establish primary issue; **issue-only baseline commit** for versioned issues; early remote push of the stream head, even on resumed streams |
+| 4. Record and publish intent | Establish primary issue; **issue-only baseline commit**; early remote push of the stream head, even on resumed streams |
 | 5. Implement | Apply only the step's scoped work in the linked worktree, with honest, separately checkpointed scope decisions |
 | 6. Verify | Relevant tests, compatibility, actual behavior and remaining uncertainty |
 | 7. Close and publish | Last dedicated issue-status commit (`Done` or `Blocked`), final branch push, independent remote-head confirmation |
@@ -75,7 +75,7 @@ A finding-free review or a justified decision not to change anything **before a 
 - The remote stream ref, not conversation memory, local directory or issue filename alone, is the durable Git history. A conversation may retain the active stream pointer; explicit ref/ID is required if that context is missing or ambiguous.
 - **The invoking checkout may be actively used by a developer or another agent; it and all other checkouts are strictly read-only to this workstream throughout preparation, implementation, verification, publication, cleanup and handoff.** All repository content edits belong exclusively in the designated linked worktree. After its removal, no further repository content edits are permitted. Never modify, revert or clean another checkout.
 - Keep original issue intent, material decision changes and implementation commits reviewable in time order; never rewrite history to hide changed decisions. Record evidence accurately; verification is not proof of real-world value.
-- Before any product edit, verify **this step's durable issue**, issue-only baseline commit where relevant and successful early publication of the new/resumed remote branch tip. Any remote publication failure is a stop, not permission to continue locally.
+- Before any product edit, verify **this step's durable issue**, issue-only baseline commit and successful early publication of the new/resumed remote branch tip. Any remote publication failure is a stop, not permission to continue locally.
 - After verification or a concrete blocker, commit and publish the honest `Done` or `Blocked` handoff; verify the **actual remote HEAD**. Only then attempt safe local cleanup; preserve valuable local artifacts on any uncertainty or failure.
 - Never auto-merge, create a PR by default, delete a remote stream branch, force-push, introduce global coordination locks, conduct semantically motivated duplicate work searches, or claim a successful publication/cleanup without verification.
 - Explicitly distinguish **step completed**, **remote published**, **local cleaned**, **stream resumable**, and **integrated**. Integration is separate and not implied by `Done`.
