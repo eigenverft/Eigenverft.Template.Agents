@@ -29,7 +29,22 @@ Explain how those modifications affect the implementation, behavior, structure, 
 
 Explain the purpose of the change from the user's perspective: the desired outcome or benefit, not a record of the user's request or the conversation. Include Intent only when that purpose is supported by explicit instructions, repository context, or other verified information; otherwise omit it entirely. Do not invent or speculate about missing context.
 
-Prefer informative commit messages over overly short summaries. Avoid repeating the same explanation in each section.
+### Tags
+
+Add a compact set of descriptive, lowercase tags that classify the actual changes in the commit. Use any tags that accurately describe the committed changes, including change types, technical areas, or other relevant characteristics. Tags such as `feature`, `bugfix`, `enhancement`, `refactor`, `performance`, `configuration`, `documentation`, `maintenance`, `ui`, `backend`, `api`, `database`, or `security` are illustrative examples only, not a predefined or exhaustive list.
+
+Include all meaningful tags that directly apply to the commit, without imposing a fixed number or artificial limit. Avoid generic, redundant, or speculative tags. Base every tag on the actual committed changes rather than merely on the user's request.
+
+These tags are plain text within the commit message body only. Do not create or modify Git tags, branches, or repository metadata.
+
+Example (illustrative only, not a fixed template):
+
+```text
+### Tags
+bugfix, backend, validation
+```
+
+Prefer informative commit messages over overly short summaries. When supported by the actual changes, expand each section with additional concrete technical details and explanations, aiming for substantive sentences rather than brief one-line summaries. Avoid repeating the same explanation in each section.
 
 When practical, prefix the commit subject with the current local date:
 
