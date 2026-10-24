@@ -8,3 +8,8 @@ noch Produktcode aus und behauptet keine praktische Wirksamkeit.
 
 Die tatsächlich ausgegebenen Prüfergebnisse werden im Abschlussbericht
 festgehalten. Dieses Dokument ersetzt keine Quellenbewertung echter Läufe.
+
+Beim ersten Start wurde die Statusprüfung an die operative Fortführung
+angepasst: vorbereitete Register müssen leer sein; ein belegter Dispatchfehler
+ist ein zulässiger Betriebszustand. Kandidaten- und Regelprüfungen bleiben
+unverändert. Der Validator startet keine Reviewer.

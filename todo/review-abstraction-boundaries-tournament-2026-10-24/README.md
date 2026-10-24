@@ -1,6 +1,9 @@
 # T01 – Turnier für Abstraktions- und Verantwortungsgrenzen
 
-Status: **vorbereitet, nicht gestartet**. Datum: 2026-10-24.
+Status: **BLOCKED_INFRASTRUCTURE**. Datum: 2026-10-24.
+
+Der erste native Startversuch wurde wegen belegter Agentenplätze abgewiesen.
+Es wurden keine Reviewer gestartet. [Fortsetzung](RESUME.md).
 
 Acht eingefrorene Kandidaten liegen als vollständige, eigenständig lesbare
 Skill-Dateien vor. Pro Kandidat und Vergleichsdurchgang gelten **2 × 3

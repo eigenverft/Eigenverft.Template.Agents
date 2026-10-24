@@ -1,7 +1,7 @@
 {
   "tournament_id": "T01",
   "rules_version": 1,
-  "status": "PREPARED_NOT_STARTED",
+  "status": "BLOCKED_INFRASTRUCTURE",
   "skill_name": "review-abstraction-and-responsibility-boundaries",
   "canonical_experiment_path": "C:\\dev\\github.com\\eigenverft\\Eigenverft.Template.Agents\\todo\\review-abstraction-boundaries-tournament-2026-10-24",
   "source_product_commit": "bca95497f016d6aa5a92cf0e2131eb24796afa55",

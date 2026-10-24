@@ -1,5 +1,5 @@
 match_id,stage,input_a,input_b,status,current_pass,qualifiers,decision_reference
-Q01,quarterfinal,V01,V03,PENDING,0,,
+Q01,quarterfinal,V01,V03,BLOCKED_INFRASTRUCTURE,1,,events.jsonl:DISPATCH_FAILED:T01-Q01-P01-V01-B01-R01
 Q02,quarterfinal,V05,V07,PENDING,0,,
 Q03,quarterfinal,V02,V04,PENDING,0,,
 Q04,quarterfinal,V06,V08,PENDING,0,,

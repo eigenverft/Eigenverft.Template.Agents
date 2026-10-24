@@ -67,12 +67,19 @@ with (ROOT / 'results/matches.csv').open(encoding='utf-8', newline='') as stream
     matches = list(csv.DictReader(stream))
 check([m['match_id'] for m in matches] == ['Q01','Q02','Q03','Q04','S01','S02','F01'], 'Seven bracket nodes registered')
 check(sorted([m[k] for m in matches[:4] for k in ['input_a','input_b']]) == [f'V{i:02d}' for i in range(1,9)], 'Each candidate appears once in the quarterfinals')
-check(all(m['status'] == 'PENDING' for m in matches), 'No invented match result')
+prepared = manifest['status'] == 'PREPARED_NOT_STARTED'
+if prepared:
+    check(all(m['status'] == 'PENDING' for m in matches), 'Prepared bracket has no match result')
+valid_runs = 0
 for name in ['runs.csv','findings.csv','scores.csv']:
     with (ROOT / 'results' / name).open(encoding='utf-8', newline='') as stream:
-        check(list(csv.DictReader(stream)) == [], f'{name}: no fabricated run or assessment')
+        rows = list(csv.DictReader(stream))
+        if prepared:
+            check(rows == [], f'{name}: prepared bundle has no run or assessment')
+        if name == 'runs.csv':
+            valid_runs = sum(row['status'] == 'VALID_COMPLETE' for row in rows)
 
 plan = (ROOT / 'TESTPLAN.md').read_text(encoding='utf-8')
 check(all(f'**{n} Läufe**' in plan for n in [84,252,432]), 'Minimum and bounded maximum run counts documented')
-check('PREPARED_NOT_STARTED' in (ROOT / 'results/TOURNAMENT.md').read_text(encoding='utf-8'), 'Tournament has not started')
-print(json.dumps({'result':'PASS','checks':len(checks),'candidates':8,'reviewer_runs':0,'warnings':0}, ensure_ascii=False))
+check(manifest['status'] in (ROOT / 'results/TOURNAMENT.md').read_text(encoding='utf-8'), 'Overview matches operational status')
+print(json.dumps({'result':'PASS','checks':len(checks),'candidates':8,'reviewer_runs':valid_runs,'warnings':0}, ensure_ascii=False))

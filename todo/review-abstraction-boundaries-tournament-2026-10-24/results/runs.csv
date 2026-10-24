@@ -1,1 +1,2 @@
 run_id,match_id,pass_id,candidate_id,batch_id,reviewer_slot,attempt,blind_evidence_id,native_agent_id,model,reasoning_effort,skill_sha256,prompt_sha256,product_commit,status,started_at,finished_at,raw_report,protocol_deviations,invalid_reason
+T01-Q01-P01-V01-B01-R01,Q01,P01,V01,B01,R01,1,,,gpt-6-luna,xhigh,3A172FA70B68662CADE3BC8F54C0E554284E64D5D817FB640BC137D2E5F94822,19261A7B607128D06AF9AF5229217505BDD26D07F63CFEEA2DAD6C631EEF117B,bca95497f016d6aa5a92cf0e2131eb24796afa55,DISPATCH_FAILED,,,,,Native spawn refused: agent thread limit reached; no reviewer started.
