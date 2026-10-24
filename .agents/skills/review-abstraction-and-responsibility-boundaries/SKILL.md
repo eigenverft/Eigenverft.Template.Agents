@@ -209,16 +209,6 @@ When recommending a separation, explain:
 Also consider whether related rules should return to their existing
 owner or whether existing units should be combined.
 
-Compare the proposed boundary with the current organization and, where
-credible, a less extensive alternative that could address the same task.
-Explain the concrete advantage that justifies the proposed extent. A brief
-qualitative comparison is usually enough; do not require a fixed number
-of alternatives or several complete designs.
-
-Choose a responsibility-complete boundary. A larger coherent owner may
-be justified where a helper would leave related state and rules scattered;
-the smallest code edit is not automatically the best boundary.
-
 Choose the appropriate technical form only after that analysis.
 
 "Extract a service" or "add an interface" is not a sufficient
@@ -241,18 +231,12 @@ Assess the relevant overall effect:
 - Are required consistency guarantees and joint operations preserved?
 - Are relevant runtime and memory constraints accounted for?
 
-Challenge the proposed boundary against a relevant contrasting case in
-the existing source: a workflow or variant that could make the separation
-less suitable. Depending on the code, this might involve cancellation,
-resumption, a shared state change, or a different behavior variant. These
-are examples, not a checklist to apply to every proposal.
-
-Trace the operations and access paths that case would need. Check whether
-necessary collaboration remains clear, protected rules stay with their
-owner, and the new unit avoids needing its former owner's full internals.
-Begin with one proportionate case and investigate further when it reveals
-a material concern. This is a source-based design check, not a demand for
-implementation, exhaustive proof, or runtime execution.
+Check plausible counterarguments before settling on a recommendation.
+Use a relevant existing workflow or variant to challenge the proposed
+boundary when it could expose a material weakness. Consider a credible
+less extensive alternative when it could solve the same problem. Use
+these checks to refine the direction and expose limits; do not require
+an exhaustive design comparison or a fully worked-out refactoring.
 
 Do not demand a complete architectural redesign. Recommend a proportionate
 set of boundaries that adequately addresses the concrete problem.
@@ -298,44 +282,49 @@ It requires an identifiable responsibility, a concrete practical drawback,
 and a sufficiently supported improvement direction. A correct observation
 does not by itself establish that the proposed new boundary is better.
 
-Before presenting a proposal as a selectable implementation recommendation,
-establish both the problem and the proposed remedy:
+Before presenting a recommendation, establish the problem and the useful
+direction of improvement:
 
 - **Problem:** Show which decision, rule, or state responsibility is
   unnecessarily mixed, exposed, or scattered. Several lifecycle stages
   handling the same operation is not enough; explain which knowledge or
   authority is unnecessarily shared between them.
-- **Target:** Identify the proposed owner, its rules, relevant state, and
-  consumer operations. A stateless boundary is valid when appropriate.
-  Do not leave the central ownership decision to a later investigation.
-- **Improvement:** Trace a concrete ordinary change before and after the
-  proposed boundary. Explain which external knowledge or coordinated
-  edits disappear and why. Moving code or adding a shared contract alone
-  does not establish this benefit.
-- **Preservation:** Challenge the remedy against the actual differences
-  between the responsibilities and their required collaboration. Show why
-  it preserves relevant behavior, consistency, and meaningful distinctions
-  instead of merely giving distinct responsibilities a shared name or
-  moving their coordination burden elsewhere.
+- **Direction:** Identify the coherent responsibility, its relevant state
+  and rules, and meaningful operations a suitable owner could provide.
+  Explain what should remain with collaborators. Exact API signatures,
+  complete transition designs, and final class boundaries are not required.
+- **Benefit:** Trace an ordinary change sufficiently to explain which
+  external knowledge or coordinated edits the proposed direction could
+  remove. Moving code or sharing a name alone does not establish benefit.
+- **Limits:** Check material differences and necessary collaboration.
+  State what the evidence supports and which parts still need design.
+  Shared authoritative state or atomic coordination does not by itself
+  rule out useful internal subobjects or other responsibility boundaries.
 
-Use the source already inspected and obtain targeted missing context when
-necessary. This is a design justification, not a demand for implementation,
-runtime proof, or a full refactoring plan. If an essential part remains
-unresolved, report the observation and uncertainty separately rather than
-promoting the proposal into the main table. A plausible concern may be
-worth investigating without being ready to recommend for implementation.
+Separate a supported direction from a settled implementation scope:
 
-Assess the observed problem separately from the supported extent of its
-remedy. If a wider proposal is only partly supported, retain a useful,
-responsibility-complete core as the implementation recommendation and
-present the uncertain extension as a linked open candidate. Do this only
-when the core offers a worthwhile improvement on its own; do not invent
-a tiny extraction merely to keep an implementation item in the report.
+- **Direction supported; scope needs design:** The responsibility,
+  practical drawback, and benefit of the direction are grounded in source.
+  Specific transitions, collaboration details, or the exact extent still
+  need design. Include this recommendation in the main table, identify
+  those details, and explain how they could constrain the implementation.
+- **Scope supported:** The proposed extent and material collaborations
+  are sufficiently examined to recommend a bounded implementation step.
+  This still does not promise a complete or verified implementation plan.
+- If the missing evidence could overturn whether the proposed separation
+  is useful at all, or the central responsibility is unclear, keep the
+  candidate outside the main table and explain the unresolved question.
 
-Localize uncertainty: name the particular assumption or decision that
-remains open and explain which part of the proposal it affects. An open
-extension does not invalidate a supported core, and a supported core does
-not establish that its extension is worthwhile.
+Do not discard a valuable direction merely because its full implementation
+has not been designed. Conversely, a plausible problem does not justify
+a broad proposed owner. Narrow or qualify an overextended recommendation
+without pretending that the entire design is settled. Do not manufacture
+a trivial extraction just to retain a finding.
+
+Use inspected source and targeted missing context proportionately. Before
+calling something an open product decision, check relevant existing
+contracts and distinguish an unanswered question from conflicting evidence.
+This is a design review, not a demand for runtime proof or implementation.
 
 Retain interesting opportunities that are not yet sufficiently understood
 as explicitly conditional observations. Identify the missing context that
@@ -347,25 +336,23 @@ hypotheses as confirmed defects.
 ## Output
 
 Write in the user's language. Begin with a brief statement of the scope
-examined. Present qualifying implementation recommendations in their
-overview table with matching explanations. Give worthwhile open candidates
-their own clearly labeled overview and explanations as described below.
-Omit either section when it has no entries.
+examined, then provide a compact overview table followed by explanations
+using the same finding references.
 
-The implementation table supports quick comparison and selection. Its
-explanations give the evidence and reasoning needed to accept, defer, or
-reject a proposal. Include only recommendations that meet the
-problem-and-remedy requirements in "Evidence and Recommendations". An
-appealing description or a severity label cannot substitute for a
-supported target boundary.
+The table supports quick comparison and selection. The explanations give
+the evidence and reasoning needed to accept, defer, or reject a proposal.
+Include supported directions and bounded implementation recommendations
+that meet the evidence
+requirements in "Evidence and Recommendations". An appealing description
+or a severity label cannot substitute for a supported target boundary.
 
-### Implementation Recommendations — Overview Table
+### Overview Table
 
 Use these columns, translating their labels naturally when appropriate:
 
-| Ref | Severity | Responsibility and proposed change | Assessment | Brief rationale |
-| --- | --- | --- | --- | --- |
-| A | High | <specific responsibility or subobject>: <concrete proposed change> | <expected benefit; estimated effort> | <why this change is worthwhile> |
+| Ref | Severity | Responsibility and proposed change | Maturity | Assessment | Brief rationale |
+| --- | --- | --- | --- | --- | --- |
+| A | High | <specific responsibility or subobject>: <concrete proposed change> | <direction supported; scope needs design OR scope supported> | <expected benefit; estimated effort> | <why this change is worthwhile> |
 
 The responsibility-and-change column must be understandable on its own.
 Name the domain responsibility, technical part, or subobject concerned
@@ -386,6 +373,13 @@ ten words may suit the assessment and rationale cells, but do not enforce
 a word limit or shorten the responsibility description until it becomes
 ambiguous. Put detailed evidence and explanations below the table.
 
+Use the maturity column to distinguish "Direction supported; scope needs
+design" from "Scope supported", translated naturally. Make the first
+step match that status: bounded design work for the former, a justified
+implementation step for the latter. Neither severity nor maturity is an
+automatic instruction to implement. A reference selects the recommendation
+at its stated maturity, not permission to assume away open design details.
+
 Use the assessment column for qualitative expected benefit and estimated
 effort. State when effort is unknown; do not invent precise estimates.
 Use the rationale column for the concrete reason behind the assessment,
@@ -404,8 +398,8 @@ Severity describes the weight of the observed problem, not implementation
 effort or a mandatory implementation order. Do not equate a large proposed
 change with high severity, and do not require a runtime defect to justify
 a substantial changeability concern. Severity does not establish confidence
-in the proposed remedy; a serious concern can still have an unresolved
-solution that belongs outside the implementation-recommendation table.
+in the proposed remedy. A supported direction may have unresolved design
+details; an unsubstantiated direction belongs outside the main table.
 
 Order the table by severity, with the most consequential findings first.
 Use expected benefit and estimated effort to order findings of similar
@@ -419,19 +413,14 @@ Do not produce findings to populate every severity level.
 Assign simple references such as A, B, and C. Use each reference in its
 table row and in a corresponding heading such as "A) <specific title>".
 
-Use one reference sequence across recommendations and open candidates.
 Each reference must identify one coherent, independently discussable
-recommendation or candidate. Group symptoms with the same cause and
-improvement direction; keep independently selectable changes separate.
+proposal. Group symptoms with the same cause and improvement direction;
+keep independently selectable changes separate.
 
 Keep assigned references stable when updating the same report. Do not
 renumber remaining findings after a subset is selected or completed, and
 do not reuse a reference for an unrelated finding. Give new findings new
 references.
-
-Keep a reference when its entry moves between open candidates and
-implementation recommendations. Its current section determines its status;
-the reference preserves its identity.
 
 This should let the user select findings by reference, for example
 "implement D, E, and G", without requiring the report to be reconstructed.
@@ -439,7 +428,7 @@ If a proposal depends on another finding, state that dependency briefly
 in its table row and explain it below. Identify mutually exclusive
 alternatives so they cannot be mistaken for independent work items.
 
-### Explanation for Each Implementation Recommendation
+### Explanation for Each Finding
 
 Under the matching reference heading, use concise paragraphs or bullets
 covering these four aspects:
@@ -451,68 +440,47 @@ covering these four aspects:
 - **Proposed change:** Contrast the current and proposed boundaries.
   Identify the responsibility concerned, its state and rules, and the
   operations its consumers would use. Explain what would become more
-  local and which collaboration would remain necessary. Briefly explain
-  why the proposed extent is preferable to retaining the current structure
-  or using a credible less extensive alternative.
+  local and which collaboration would remain necessary.
 - **Reason for the assessment:** Justify the severity, expected benefit,
   and effort estimate or its uncertainty. Give enough reasoning for the
   user to form their own judgment.
 - **Trade-offs and first step:** State material costs, constraints,
-  preservation requirements, dependencies, and a bounded first step for
-  implementation with relevant verification. Include the meaningful result
-  of the contrasting-case check and any effect on the recommendation's
-  extent. Do not use "investigate later" to defer establishing the central
-  responsibility or feasibility of the proposed boundary. Do not turn
-  every finding into a full implementation plan or invent a minimum
-  number of tasks.
+  preservation requirements, dependencies, and a bounded first step
+  appropriate to the stated maturity, with relevant
+  verification. For a supported direction, identify the specific design
+  questions and their effect on scope. Do not use "investigate later" to
+  conceal uncertainty about the central responsibility or the benefit itself.
+  Do not turn every finding into a full implementation
+  plan or invent a minimum number of tasks.
 
 Add explanatory value rather than expanding the table row word for word.
 Keep detail proportionate to the finding and avoid empty mandatory fields.
 
-### Open Candidates — Clarification Needed
+### Unresolved Recommendations and Other Outcomes
 
-Present conditional opportunities and insufficiently justified remedies
-separately from implementation recommendations. State what is observed,
+Present conditional opportunities whose problem or improvement direction
+is not yet sufficiently justified separately from supported recommendations.
+State what is observed,
 what remains uncertain, and which missing evidence or design decision
 would materially change the assessment. A supported problem may remain
 supported even when its remedy is unresolved; do not hide the problem or
 present an unsettled solution as ready to implement.
 
-Keep these entries outside the implementation table. Use a compact second
-table, translating the labels naturally:
-
-| Ref | Responsibility and observation | What is supported | What remains open | Next clarification |
-| --- | --- | --- | --- | --- |
-
-State whether the supported basis is an observed structure, an established
-practical problem, or a conditional opportunity. Where a problem's impact
-is already supported, retain that assessment in the explanation even when
-the remedy is unsettled. Do not assign confirmed impact to a hypothesis.
-
-Under matching reference headings, provide the relevant source evidence
-and explain the missing context or design decision that could change the
-assessment. A focused investigation step is appropriate here. Selecting
-an open reference identifies a subject for clarification, not a supported
-implementation recommendation.
-
-Link an open extension to its supported core when relevant. Explain the
-additional unresolved scope without duplicating the same concern as a
-second finding. Preserve useful candidates without filling the section
-with every conceivable redesign. Do not turn a hypothesis into a confirmed
+Keep these entries outside the main severity-rated table. A focused
+investigation step is appropriate here, clearly distinguished from an
+implementation recommendation. Do not turn a hypothesis into a confirmed
 defect.
-
-### Other Outcomes
 
 Mention notable existing boundaries only when they help explain the
 assessment or prevent a misleading recommendation. Do not produce an
 exhaustive catalog of correct locations.
 
-If no supported recommendation qualifies, omit the empty implementation
-table and its finding sections. Briefly state that no supported
-boundary-change recommendation was established within the examined scope.
-Useful open candidates may still follow in their separate section;
-distinguish this outcome from a review with neither recommendations nor
-useful candidates.
+If no supported recommendation qualifies, omit the empty table and finding
+sections. Briefly state that no supported boundary-change recommendation
+was established within the examined scope. Relevant unresolved observations
+or conditional opportunities may still follow in their separate section;
+distinguish this outcome from a review with neither findings nor useful
+opportunities.
 
 When missing context prevents an assessment, state that limitation
 explicitly. Do not confuse insufficient evidence with a completed review
