@@ -5,303 +5,452 @@ description: Use for a read-only review when the user requests an assessment of 
 
 # Review Abstraction and Responsibility Boundaries
 
-Untersuche, ob zusammengehöriges Verhalten, Zustand und Regeln einen
-erkennbaren Verantwortungsbereich bilden und wirksam gekapselt sind.
+Examine whether related behavior, state, and rules form an identifiable
+area of responsibility and are effectively encapsulated.
 
-Der praktische Maßstab lautet:
+Use this practical criterion:
 
-> Lässt sich eine gewöhnliche Änderung dieses Verhaltens überwiegend im
-> zuständigen Bereich durchführen, ohne dafür unnötig andere
-> Verantwortungen verstehen oder bearbeiten zu müssen?
+> Can an ordinary change to this behavior be made mostly within the
+> responsible area, without unnecessarily having to understand or modify
+> other responsibilities?
 
-Suche sowohl nach fehlenden Grenzen als auch nach Grenzen, die
-zusammengehörige Verantwortung unnötig zerstreuen.
+Look both for missing boundaries and for boundaries that unnecessarily
+scatter a coherent responsibility across separate units.
 
-## Aktivierung und Arbeitsmodus
+## Activation and Working Mode
 
-Verwende diesen Skill bei ausdrücklichem Aufruf oder einer ausdrücklich
-angeforderten Prüfung von Abstraktionsgrenzen, Verantwortungstrennung
-oder Kapselung.
+Use this skill when explicitly invoked or when a review of abstraction
+boundaries, responsibility separation, or encapsulation is explicitly
+requested.
 
-Ein allgemeiner Implementierungs-, Bugfix- oder Review-Auftrag aktiviert
-diesen speziellen Review nicht automatisch.
+A general implementation, bugfix, or review request does not automatically
+activate this specialized review.
 
-Arbeite ausschließlich lesend und berichtend:
-- Lies vorhandenen Quellcode und relevante Verträge.
-- Lies bei Bedarf Tests, Dokumentation und Änderungshistorie als Evidenz.
-- Verändere keine Dateien und erzeuge keine Patches.
-- Führe keinen Projektcode, keine Builds, Tests oder Generatoren aus.
-- Implementiere keine vorgeschlagene Alternative.
+Work exclusively by reading and reporting:
 
-Halte den Untersuchungsumfang am Auftrag ausgerichtet. Verfolge
-Abhängigkeiten nur so weit, wie es für eine belastbare Einschätzung
-der betrachteten Verantwortung erforderlich ist.
+- Read existing source code and relevant contracts.
+- Read tests, documentation, and change history as evidence when needed.
+- Do not modify files or produce patches.
+- Do not execute project code, builds, tests, or generators.
+- Do not implement any proposed alternative.
 
-## Schwerpunkt
+Keep the investigation aligned with the request. Follow dependencies only
+as far as necessary to make a well-supported assessment of the
+responsibility under review.
 
-Prüfe fachliche und technische Teilverantwortungen innerhalb vorhandener
-Software, insbesondere:
+## Focus
 
-- zusammengehöriges Verhalten und dessen Zustand,
-- Regeln und zulässige Zustandsänderungen,
-- Subobjekte, Komponenten, Module und Systeme,
-- Algorithmus- und Verhaltensgrenzen,
-- Zusammenarbeit zwischen unterschiedlichen Verantwortungen,
-- mehrere Ebenen von Abstraktion und Komposition.
+Examine domain and technical sub-responsibilities within existing software,
+particularly:
 
-Betrachte technische Mechanismen danach, welche Verantwortung sie
-tatsächlich begrenzen.
+- related behavior and its state,
+- rules and valid state changes,
+- subobjects, components, modules, and systems,
+- algorithm and behavior boundaries,
+- collaboration between distinct responsibilities,
+- multiple levels of abstraction and composition.
 
-Eine Klasse, ein Interface, eine Datei oder eine Methodenzerlegung
-schafft allein noch keine wirksame Verantwortungsgrenze.
+Assess technical mechanisms by the responsibilities they actually delimit.
 
-Dies ist kein allgemeiner Stil-, Fehler-, Performance- oder
-Gesamtarchitekturreview. Berücksichtige solche Aspekte, wenn sie die
-betrachtete Grenze oder eine vorgeschlagene Alternative wesentlich
-beeinflussen.
+A class, interface, file, or decomposition into methods does not, by itself,
+create an effective responsibility boundary.
 
-## Leitgedanken
+This is not a general review of style, defects, performance, or overall
+architecture. Consider those aspects when they materially affect the
+boundary under review or a proposed alternative.
 
-### Verantwortung konkret benennen
+## Guiding Principles
 
-Eine Verantwortung besitzt eine verständlich beschreibbare Aufgabe
-und die dafür maßgeblichen Entscheidungen oder Regeln.
+### Name the Specific Responsibility
 
-Benenne beispielsweise:
-- welche Ergebnisse ein Bereich bestimmt,
-- welchen Zustand er verwaltet,
-- welche gültigen Übergänge er schützt,
-- welchen Mechanismus er kapselt,
-- welche Zusammenarbeit er koordiniert.
+A responsibility covers a clearly describable task and the decisions or
+rules that govern it.
 
-Bezeichnungen wie „verarbeitet Daten“ oder „enthält Geschäftslogik“
-reichen zur Begründung einer neuen Grenze nicht aus.
+For example, identify:
 
-Ein Arbeitsschritt ist nicht automatisch eine eigenständige
-Verantwortung. Umgekehrt können mehrere Methoden gemeinsam eine
-Teil­verantwortung bilden, deren Zustand und Regeln bisher mit anderen
-Aufgaben vermischt sind.
+- which outcomes an area determines,
+- which state it manages,
+- which valid transitions it safeguards,
+- which mechanism it encapsulates,
+- which collaboration it coordinates.
 
-### Kapselung an ihrer Wirkung beurteilen
+Labels such as "processes data" or "contains business logic" are not enough
+to justify a new boundary.
 
-Eine wirksame Grenze erlaubt ihren Nutzern, mit einer Aufgabe zu
-arbeiten, ohne deren interne Durchführung ständig rekonstruieren
-zu müssen.
+A processing step is not automatically a separate responsibility.
+Conversely, several methods may together implement a sub-responsibility
+whose state and rules are currently mixed with other tasks.
 
-Prüfe deshalb:
-- Was erledigt der Bereich eigenständig?
-- Welche Operationen bietet er dafür an?
-- Welchen Zustand darf er verändern?
-- Welche internen Regeln müssen andere Bereiche weiterhin kennen?
-- Können andere Bereiche seine vorgesehenen Operationen umgehen?
+### Assess Encapsulation by Its Effect
 
-Private Felder allein garantieren diese Wirkung nicht.
-Gemeinsame Speicherung schließt sie nicht aus.
+An effective boundary lets its consumers use a capability without
+repeatedly reconstructing how it works internally.
 
-### Form dem Problem anpassen
+Therefore, ask:
 
-Eine passende Grenze kann durch ein Objekt, Subobjekt, eine Funktion,
-ein Modul, ein System oder einen anderen geeigneten Mechanismus
-entstehen.
+- What does this area handle on its own?
+- Which operations does it provide for that purpose?
+- Which state is it allowed to change?
+- Which internal rules must other areas still know?
+- Can other areas bypass its intended operations?
 
-Ein eigenes Objekt kann Zustand und Regeln einer Teilverantwortung
-zusammenführen. Ein System kann dieselbe Verantwortung für einen
-gemeinsamen Datenbestand erfüllen.
+Private fields alone do not guarantee this effect.
+Shared storage does not rule it out.
 
-Ein Interface kann einen nützlichen Vertrag ausdrücken. Es ist weder
-Voraussetzung noch Beweis gelungener Kapselung.
+### Choose a Form That Fits the Problem
 
-## Vorgehen
+A suitable boundary may be provided by an object, subobject, function,
+module, system, or another appropriate mechanism.
 
-### 1. Tatsächliche Verantwortungen rekonstruieren
+A dedicated object can bring together the state and rules of a
+sub-responsibility. A system can fulfill the same responsibility over a
+shared data set.
 
-Lies die relevante Implementierung und den notwendigen Nutzungskontext.
+An interface can express a useful contract. It is neither a prerequisite
+for nor proof of effective encapsulation.
 
-Ermittle:
-- welche unterschiedlichen Aufgaben und Entscheidungen vorkommen,
-- welcher Zustand jeweils dazu gehört,
-- welche Regeln gültige Änderungen bestimmen,
-- wer diesen Zustand tatsächlich liest und verändert,
-- wie die Verantwortungen zusammenarbeiten.
+## Procedure
 
-Orientiere dich an tatsächlichem Verhalten und Zugriffen. Namen,
-Dateigrenzen und Kommentare sind Hinweise, keine abschließenden Belege.
+### 1. Reconstruct the Actual Responsibilities
 
-Berücksichtige Konstruktion, Lebensdauer und Aufräumen, soweit sie
-den Zuschnitt beeinflussen.
+Read the relevant implementation and the context needed to understand its
+use.
 
-### 2. Zusammengehörige Teilverantwortungen suchen
+Determine:
 
-Achte auf Bereiche, in denen Verhalten, Zustand und Regeln erkennbar
-zusammengehören, aber bislang über fremde Aufgaben verteilt sind.
+- which distinct tasks and decisions are present,
+- which state belongs to each,
+- which rules govern valid changes,
+- who actually reads and modifies that state,
+- how the responsibilities collaborate.
 
-Prüfe insbesondere:
-- Vermischt eine Einheit mehrere unabhängig verständliche Aufgaben?
-- Benötigen bestimmte Methoden eine zusammengehörige Zustandsgruppe?
-- Müssen fremde Bereiche diese Zustandsgruppe nach deren internen
-  Regeln bearbeiten?
-- Muss eine gewöhnliche Änderung einer Aufgabe durch andere Aufgaben
-  hindurchgeführt werden?
-- Könnte ein eigener Verantwortungsbereich sinnvolle Operationen
-  anbieten und interne Entscheidungen selbst übernehmen?
+Base the assessment on actual behavior and access paths. Names, file
+boundaries, and comments are clues, not conclusive evidence.
 
-Eine solche Möglichkeit kann auch ohne bisherigen Bug, dokumentierte
-Änderungsserie oder zweite Implementierung relevant sein.
+Consider construction, lifetime, and cleanup where they affect the
+responsibility boundaries.
 
-Begründe ihren Nutzen anhand des gelesenen Codes. Die bloße Möglichkeit,
-Code in eine neue Klasse zu verschieben, genügt nicht.
+### 2. Look for Coherent Sub-Responsibilities
 
-### 3. Bestehende Grenzen auf Wirksamkeit prüfen
+Look for areas where behavior, state, and rules clearly belong together
+but are currently scattered among other tasks.
 
-Untersuche bei ausgelagerten Einheiten:
-- Besitzen sie ihre Aufgabe tatsächlich?
-- Oder arbeiten sie weiterhin beliebig in den Interna ihres
-  bisherigen Eigentümers?
-- Erhalten sie genau die benötigten Informationen und Fähigkeiten?
-- Müssen ihre Nutzer interne Zustände oder Aufrufreihenfolgen kennen?
-- Verbergen sie eine eigenständige Entscheidung oder verschieben sie
-  hauptsächlich Code und Navigation?
+In particular, ask:
 
-Verfolge auch indirekte Zugriffe über veränderbare Collections,
-Rückverweise, Contexts, globale Zugriffe, Callbacks und Events,
-wenn sie für die Grenze relevant sind.
+- Does one unit mix several tasks that can be understood independently?
+- Do certain methods operate on a coherent group of state?
+- Must other areas manipulate that state according to its internal rules?
+- Must an ordinary change to one task cut across other tasks?
+- Could a dedicated area of responsibility offer meaningful operations
+  and take ownership of its internal decisions?
 
-Eine breite Referenz ist ein Untersuchungssignal. Entscheidend sind
-ihre tatsächliche Verwendung und die dadurch entstehenden Abhängigkeiten.
+Such an opportunity can be relevant even without a previous bug, a
+documented history of changes, or a second implementation.
 
-Unterscheide syntaktische Verschachtelung, Laufzeitkomposition und
-fachliche Teilverantwortung. Keine dieser Formen beweist automatisch
-die jeweils anderen.
+Ground its benefit in the code you have read. The mere possibility of
+moving code into a new class is not enough.
 
-### 4. Eine passende Änderungsgegenprobe durchführen
+### 3. Check Whether Existing Boundaries Are Effective
 
-Prüfe interessante Grenzen anhand einer gewöhnlichen, nachvollziehbaren
-Änderung des betreffenden Verhaltens.
+For extracted units, ask:
 
-Nutze vorhandene Anforderungen, Varianten oder bekannte Änderungen.
-Eine ausdrücklich hypothetische Gegenprobe ist ebenfalls zulässig.
-Erfinde daraus keine Produktplanung.
+- Do they actually own their task?
+- Or do they still freely manipulate the internals of their former owner?
+- Do they receive just the information and capabilities they need?
+- Must their consumers know internal states or call sequences?
+- Do they hide a distinct decision, or mainly relocate code and add
+  navigation between units?
 
-Verfolge:
-- Welche Entscheidung würde sich ändern?
-- Welche Bereiche müsste man dafür verstehen?
-- Welche Bereiche müsste man tatsächlich bearbeiten?
-- Warum wäre jeder dieser Bereiche betroffen?
+Also trace indirect access through mutable collections, back-references,
+contexts, global access, callbacks, and events when relevant to the
+boundary.
 
-Unterscheide notwendige Zusammenarbeit von vermeidbarer Verflechtung.
+A broad reference is a signal to investigate. What matters is how it is
+actually used and which dependencies it creates.
 
-Eine Anforderung kann mehrere Verantwortungen berechtigterweise
-verändern. Problematisch wird es, wenn ein Bereich dafür unnötig
-fremde Implementierungsdetails verstehen oder dieselbe fremde Regel
-erneut interpretieren muss.
+Distinguish syntactic nesting, runtime composition, and domain
+sub-responsibilities. None of these forms automatically establishes the
+others.
 
-Zähle betroffene Dateien nicht als Qualitätsmaß.
+### 4. Check the Boundary Against a Suitable Change Scenario
 
-### 5. Eine konkrete alternative Grenze beschreiben
+Examine boundaries of interest through an ordinary, plausible change to
+the behavior concerned.
 
-Bei einer empfohlenen Trennung erläutere:
-- welche Aufgabe der neue Bereich übernimmt,
-- welcher Zustand und welche Regeln dazu gehören,
-- welche Operationen seine Nutzer benötigen,
-- welche internen Entscheidungen dadurch verborgen bleiben,
-- welche gewöhnlichen Änderungen dadurch lokaler werden.
+Use existing requirements, variants, or known changes. An explicitly
+hypothetical scenario is also acceptable. Do not turn it into an invented
+product roadmap.
 
-Prüfe auch, ob zusammengehörige Regeln zum bisherigen Besitzer
-zurückgeführt oder bestehende Einheiten zusammengelegt werden sollten.
+Trace:
 
-Wähle die passende technische Form erst danach.
+- Which decision would change?
+- Which areas would need to be understood?
+- Which areas would actually need to be modified?
+- Why would each area be affected?
 
-„Service extrahieren“ oder „Interface hinzufügen“ ist keine
-ausreichende Empfehlung.
+Distinguish necessary collaboration from avoidable entanglement.
 
-Ein zusätzlicher Variationsmechanismus braucht einen konkreten Nutzen.
-Unterschiedliche Werte können durch Daten ausgedrückt werden;
-unterschiedliche Regeln können eine eigene Verhaltensgrenze
-rechtfertigen.
+A requirement may legitimately change several responsibilities. The
+problem arises when an area unnecessarily needs to understand another
+area's implementation details or re-derive a rule owned elsewhere.
 
-### 6. Die Alternative gegen die Praxis prüfen
+Do not use the number of affected files as a quality measure.
 
-Beurteile die relevante Gesamtwirkung:
-- Entfällt tatsächlich fremdes Wissen?
-- Werden Zustandsänderungen klarer verantwortet?
-- Bleibt notwendige Zusammenarbeit verständlich?
-- Entstehen zusätzliche Weiterleitungen oder versteckte Abhängigkeiten?
-- Werden Initialisierung und Lebensdauer schwieriger?
-- Wandern bisher geschützte Regeln zu den Aufrufern?
-- Bleiben notwendige Konsistenz und gemeinsame Operationen erhalten?
-- Sind relevante Laufzeit- und Speicherbedingungen berücksichtigt?
+### 5. Describe a Specific Alternative Boundary
 
-Prüfe naheliegende Gegenargumente, bevor du eine Empfehlung festhältst.
+When recommending a separation, explain:
 
-Verlange keine vollständige Neuarchitektur. Empfehle einen angemessenen
-Zuschnitt, der das konkrete Problem vollständig genug adressiert.
+- which task the new area would take over,
+- which state and rules belong to it,
+- which operations its consumers need,
+- which internal decisions would become hidden,
+- which ordinary changes would become more local.
 
-## Regeln gegen Fehlurteile
+Also consider whether related rules should return to their existing
+owner or whether existing units should be combined.
 
-Erzeuge kein Finding allein wegen:
-- großer Klassen oder langer Methoden,
-- vieler oder weniger Dateien,
-- fehlender Interfaces oder Patterns,
-- nur einer produktiven Implementierung,
-- gemeinsamer Daten oder mehrerer Schreiber,
-- zentraler Koordination,
-- verschachtelter Typen,
-- einer Verzweigung,
-- mehrerer betroffener Bereiche bei einer Änderung.
+Choose the appropriate technical form only after that analysis.
 
-Beachte beide Richtungen:
-- Methoden können eine zusammenhängende Aufgabe bereits passend gliedern.
-- Eine eigene Teilverantwortung kann trotz sauberer Methodenstruktur
-  noch wirksamere Kapselung benötigen.
-- Eine neue Klasse kann dieselbe Verflechtung fortsetzen.
-- Mehrere kleine Einheiten können eine einzige Regel unnötig zerstreuen.
-- Ein dünner Adapter kann eine reale Vertragsgrenze schützen.
-- Zentrale Koordination kann eine notwendige Gesamtverantwortung besitzen.
+"Extract a service" or "add an interface" is not a sufficient
+recommendation.
 
-Erzwinge weder zusätzliche Abstraktion noch maximale Direktheit.
+An additional variation mechanism needs a concrete benefit. Different
+values can be expressed as data; different rules may justify a separate
+behavior boundary.
 
-## Evidenz und Empfehlungen
+### 6. Evaluate the Alternative in Practice
 
-Stütze Feststellungen auf konkrete Symbole, Zugriffe und Verträge.
+Assess the relevant overall effect:
 
-Trenne:
-- beobachtete Struktur,
-- daraus abgeleitetes Änderungs- oder Verständnisproblem,
-- vorgeschlagene Verbesserung.
+- Does it actually remove the need to know another area's internals?
+- Does ownership of state changes become clearer?
+- Does necessary collaboration remain understandable?
+- Does it add forwarding layers or hidden dependencies?
+- Does initialization or lifetime management become harder?
+- Do previously protected rules move out to callers?
+- Are required consistency guarantees and joint operations preserved?
+- Are relevant runtime and memory constraints accounted for?
 
-Eine sinnvolle Empfehlung benötigt keinen nachgewiesenen Laufzeitfehler.
-Sie benötigt eine nachvollziehbare Verantwortung, einen konkreten
-praktischen Nachteil und eine plausible Verbesserung.
+Check plausible counterarguments before settling on a recommendation.
 
-Erhalte interessante, noch nicht ausreichend geklärte Möglichkeiten
-als ausdrücklich bedingte Hinweise. Benenne den fehlenden Kontext,
-der ihre Bewertung wesentlich verändern würde.
+Do not demand a complete architectural redesign. Recommend a proportionate
+set of boundaries that adequately addresses the concrete problem.
 
-Verlange keine mathematische Beweisvollständigkeit und stelle
-Vermutungen nicht als bestätigte Mängel dar.
+## Rules Against Misjudgment
 
-## Ausgabe
+Do not produce a finding solely because of:
 
-Beginne mit einer knappen Einordnung des untersuchten Umfangs.
+- large classes or long methods,
+- many or few files,
+- missing interfaces or patterns,
+- only one production implementation,
+- shared data or multiple writers,
+- central coordination,
+- nested types,
+- a conditional branch,
+- several areas being affected by one change.
 
-Stelle anschließend die wesentlichen Befunde dar. Jeder Befund soll
-verständlich verbinden:
+Consider both directions:
 
-1. Fundstelle und betroffene Verantwortung.
-2. Konkrete Vermischung oder unwirksame Grenze.
-3. Praktische Auswirkung auf Verständnis oder Änderungen.
-4. Vorgeschlagener Zuschnitt einschließlich Zustand und Operationen.
-5. Gewonnene Lokalität sowie wesentliche Kosten oder Einschränkungen.
+- Methods may already organize a coherent task appropriately.
+- A distinct sub-responsibility may still need more effective
+  encapsulation despite a clear method structure.
+- A new class may preserve the same entanglement.
+- Several small units may unnecessarily scatter a single rule.
+- A thin adapter may protect a real contract boundary.
+- Central coordination may own a necessary overall responsibility.
 
-Nutze passende Quellverweise. Halte das Format dem Befund angemessen;
-erzeuge keine leeren Pflichtfelder.
+Do not force either additional abstraction or maximum directness.
 
-Fasse Befunde mit derselben Ursache zusammen. Trenne bedingte
-Möglichkeiten von ausreichend gestützten Empfehlungen.
+## Evidence and Recommendations
 
-Nenne bemerkenswerte bestehende Grenzen, wenn dies die Bewertung
-erklärt. Erzeuge keinen vollständigen Katalog korrekter Stellen.
+Ground observations in specific symbols, access paths, and contracts.
 
-Keine feste Anzahl von Findings und kein Architektur-Score.
-Ein Review ohne relevante Verbesserungsempfehlung ist ein gültiges
-Ergebnis.
+Distinguish:
+
+- the observed structure,
+- the resulting change or comprehension problem,
+- the proposed improvement.
+
+A useful recommendation does not require a demonstrated runtime defect.
+It requires an identifiable responsibility, a concrete practical drawback,
+and a sufficiently supported improvement direction. A correct observation
+does not by itself establish that the proposed new boundary is better.
+
+Before presenting a proposal as a selectable implementation recommendation,
+establish both the problem and the proposed remedy:
+
+- **Problem:** Show which decision, rule, or state responsibility is
+  unnecessarily mixed, exposed, or scattered. Several lifecycle stages
+  handling the same operation is not enough; explain which knowledge or
+  authority is unnecessarily shared between them.
+- **Target:** Identify the proposed owner, its rules, relevant state, and
+  consumer operations. A stateless boundary is valid when appropriate.
+  Do not leave the central ownership decision to a later investigation.
+- **Improvement:** Trace a concrete ordinary change before and after the
+  proposed boundary. Explain which external knowledge or coordinated
+  edits disappear and why. Moving code or adding a shared contract alone
+  does not establish this benefit.
+- **Preservation:** Challenge the remedy against the actual differences
+  between the responsibilities and their required collaboration. Show why
+  it preserves relevant behavior, consistency, and meaningful distinctions
+  instead of merely giving distinct responsibilities a shared name or
+  moving their coordination burden elsewhere.
+
+Use the source already inspected and obtain targeted missing context when
+necessary. This is a design justification, not a demand for implementation,
+runtime proof, or a full refactoring plan. If an essential part remains
+unresolved, report the observation and uncertainty separately rather than
+promoting the proposal into the main table. A plausible concern may be
+worth investigating without being ready to recommend for implementation.
+
+Retain interesting opportunities that are not yet sufficiently understood
+as explicitly conditional observations. Identify the missing context that
+would materially change their assessment.
+
+Do not demand mathematical completeness of proof, and do not present
+hypotheses as confirmed defects.
+
+## Output
+
+Write in the user's language. Begin with a brief statement of the scope
+examined, then provide a compact overview table followed by explanations
+using the same finding references.
+
+The table supports quick comparison and selection. The explanations give
+the evidence and reasoning needed to accept, defer, or reject a proposal.
+Include only implementation recommendations that meet the problem-and-remedy
+requirements in "Evidence and Recommendations". An appealing description
+or a severity label cannot substitute for a supported target boundary.
+
+### Overview Table
+
+Use these columns, translating their labels naturally when appropriate:
+
+| Ref | Severity | Responsibility and proposed change | Assessment | Brief rationale |
+| --- | --- | --- | --- | --- |
+| A | High | <specific responsibility or subobject>: <concrete proposed change> | <expected benefit; estimated effort> | <why this change is worthwhile> |
+
+The responsibility-and-change column must be understandable on its own.
+Name the domain responsibility, technical part, or subobject concerned
+and describe what should change about it. A reader must be able to tell
+what a proposal concerns before opening its explanation.
+
+For example, illustrative wording is:
+"Document revision history: Encapsulate revision state and transition
+rules in a dedicated component."
+
+Avoid generic titles such as "improve encapsulation", "separate
+responsibilities", or "extract a service". A file or class name alone
+does not explain the proposal. Identifiers may supplement the plain
+description when useful.
+
+Keep cells short, usually a phrase or a short sentence. Roughly five to
+ten words may suit the assessment and rationale cells, but do not enforce
+a word limit or shorten the responsibility description until it becomes
+ambiguous. Put detailed evidence and explanations below the table.
+
+Use the assessment column for qualitative expected benefit and estimated
+effort. State when effort is unknown; do not invent precise estimates.
+Use the rationale column for the concrete reason behind the assessment,
+rather than repeating the proposal or its severity.
+
+### Severity and Ordering
+
+Use exactly these severity labels:
+
+- **Critical:** A severe problem with immediate, grave consequences.
+- **High:** Substantial impact on safe changes or important workflows.
+- **Medium:** A concrete, relevant burden within a bounded area.
+- **Low:** A small but demonstrable practical drawback.
+
+Severity describes the weight of the observed problem, not implementation
+effort or a mandatory implementation order. Do not equate a large proposed
+change with high severity, and do not require a runtime defect to justify
+a substantial changeability concern. Severity does not establish confidence
+in the proposed remedy; a serious concern can still have an unresolved
+solution that belongs outside the implementation-recommendation table.
+
+Order the table by severity, with the most consequential findings first.
+Use expected benefit and estimated effort to order findings of similar
+severity. If dependencies or a better benefit-to-effort balance suggest
+starting elsewhere, state that implementation recommendation separately
+and briefly explain it. Keep finding references stable when reordering.
+Do not produce findings to populate every severity level.
+
+### Finding References
+
+Assign simple references such as A, B, and C. Use each reference in its
+table row and in a corresponding heading such as "A) <specific title>".
+
+Each reference must identify one coherent, independently discussable
+proposal. Group symptoms with the same cause and improvement direction;
+keep independently selectable changes separate.
+
+Keep assigned references stable when updating the same report. Do not
+renumber remaining findings after a subset is selected or completed, and
+do not reuse a reference for an unrelated finding. Give new findings new
+references.
+
+This should let the user select findings by reference, for example
+"implement D, E, and G", without requiring the report to be reconstructed.
+If a proposal depends on another finding, state that dependency briefly
+in its table row and explain it below. Identify mutually exclusive
+alternatives so they cannot be mistaken for independent work items.
+
+### Explanation for Each Finding
+
+Under the matching reference heading, use concise paragraphs or bullets
+covering these four aspects:
+
+- **Finding and evidence:** Describe the specific mixing of
+  responsibilities or ineffective boundary. Link the relevant source
+  locations and symbols, and explain the practical effect on comprehension
+  or ordinary changes.
+- **Proposed change:** Contrast the current and proposed boundaries.
+  Identify the responsibility concerned, its state and rules, and the
+  operations its consumers would use. Explain what would become more
+  local and which collaboration would remain necessary.
+- **Reason for the assessment:** Justify the severity, expected benefit,
+  and effort estimate or its uncertainty. Give enough reasoning for the
+  user to form their own judgment.
+- **Trade-offs and first step:** State material costs, constraints,
+  preservation requirements, dependencies, and a bounded first step for
+  implementation with relevant verification. Do not use "investigate later"
+  to defer establishing the central responsibility or feasibility of the
+  proposed boundary. Do not turn every finding into a full implementation
+  plan or invent a minimum number of tasks.
+
+Add explanatory value rather than expanding the table row word for word.
+Keep detail proportionate to the finding and avoid empty mandatory fields.
+
+### Unresolved Recommendations and Other Outcomes
+
+Present conditional opportunities and insufficiently justified remedies
+separately from implementation recommendations. State what is observed,
+what remains uncertain, and which missing evidence or design decision
+would materially change the assessment. A supported problem may remain
+supported even when its remedy is unresolved; do not hide the problem or
+present an unsettled solution as ready to implement.
+
+Keep these entries outside the main severity-rated table. A focused
+investigation step is appropriate here, clearly distinguished from an
+implementation recommendation. Do not turn a hypothesis into a confirmed
+defect.
+
+Mention notable existing boundaries only when they help explain the
+assessment or prevent a misleading recommendation. Do not produce an
+exhaustive catalog of correct locations.
+
+If no supported recommendation qualifies, omit the empty table and finding
+sections. Briefly state that no supported boundary-change recommendation
+was established within the examined scope. Relevant unresolved observations
+or conditional opportunities may still follow in their separate section;
+distinguish this outcome from a review with neither findings nor useful
+opportunities.
+
+When missing context prevents an assessment, state that limitation
+explicitly. Do not confuse insufficient evidence with a completed review
+that found no relevant improvement.
+
+There is no finding quota and no architecture score.
