@@ -1,0 +1,110 @@
+{
+  "tournament_id": "T01",
+  "rules_version": 1,
+  "status": "PREPARED_NOT_STARTED",
+  "skill_name": "review-abstraction-and-responsibility-boundaries",
+  "canonical_experiment_path": "C:\\dev\\github.com\\eigenverft\\Eigenverft.Template.Agents\\todo\\review-abstraction-boundaries-tournament-2026-10-24",
+  "source_product_commit": "bca95497f016d6aa5a92cf0e2131eb24796afa55",
+  "reviewer": {
+    "model": "gpt-6-luna",
+    "reasoning_effort": "xhigh",
+    "native_ui_subagents_only": true,
+    "fork_turns": "none"
+  },
+  "evaluation_block": {
+    "batches_per_candidate": 2,
+    "reviewers_per_batch": 3,
+    "valid_runs_per_candidate_per_pass": 6
+  },
+  "scoring": {
+    "negative_weight": 1,
+    "supported_negative_weight": 0,
+    "undecided_negative_weight": 0,
+    "supported_distinct_utility": 0.3,
+    "utility_affects_advancement": false
+  },
+  "maximum_passes_per_encounter": 3,
+  "joint_advancement_on_persistent_tie": true,
+  "candidates": [
+    {
+      "id": "V01",
+      "title": "Historical maturity baseline",
+      "kind": "historical-control",
+      "source_commit": "3480c4d0eab3aa3f72981cdec00d8bcb6ec5bb99",
+      "hypothesis": "Die frühere offene Richtungsbewertung erhält nützliche Kandidaten, kann aber Workflow-Zusammenfassungen zu großzügig empfehlen.",
+      "skill_path": "candidates/V01/review-abstraction-and-responsibility-boundaries/SKILL.md",
+      "sha256": "3A172FA70B68662CADE3BC8F54C0E554284E64D5D817FB640BC137D2E5F94822",
+      "bytes": 21171
+    },
+    {
+      "id": "V02",
+      "title": "Decision ownership baseline",
+      "kind": "historical-control",
+      "source_commit": "c638213018e66cde9ffe6a582b9222a1bde36880",
+      "hypothesis": "Die zuletzt verschärfte Betrachtung von Entscheidungsbesitz und verborgenem Wissen begrenzt unbegründete Zusammenfassungen.",
+      "skill_path": "candidates/V02/review-abstraction-and-responsibility-boundaries/SKILL.md",
+      "sha256": "D59A756115EF59A7C9B9B5019E162C644720ECECEC578EA71F5C81E0F4ECCAC0",
+      "bytes": 23081
+    },
+    {
+      "id": "V03",
+      "title": "State and invariant ownership",
+      "kind": "shared-core-variant",
+      "source_commit": "3480c4d0eab3aa3f72981cdec00d8bcb6ec5bb99",
+      "hypothesis": "Zusammengehörige Zustandsregeln ergeben bessere Grenzen als die gemeinsame Zugehörigkeit zu einem Ablauf.",
+      "skill_path": "candidates/V03/review-abstraction-and-responsibility-boundaries/SKILL.md",
+      "sha256": "AF0A375950E28AF2EE4032E7C45DE83FE4C1DB9A968215A488DE0EE9C9D5836E",
+      "bytes": 21361
+    },
+    {
+      "id": "V04",
+      "title": "Concrete change and propagation",
+      "kind": "shared-core-variant",
+      "source_commit": "3480c4d0eab3aa3f72981cdec00d8bcb6ec5bb99",
+      "hypothesis": "Ein konkreter Vorher-Nachher-Vergleich gewöhnlicher Änderungen entlarvt behauptete, aber nicht tatsächliche Entkopplung.",
+      "skill_path": "candidates/V04/review-abstraction-and-responsibility-boundaries/SKILL.md",
+      "sha256": "C5365CD9BBE06A79B49525486A63CCC5CFFA58C95F777C78E99473F12A0E7087",
+      "bytes": 21386
+    },
+    {
+      "id": "V05",
+      "title": "Consumer contract and hidden knowledge",
+      "kind": "shared-core-variant",
+      "source_commit": "3480c4d0eab3aa3f72981cdec00d8bcb6ec5bb99",
+      "hypothesis": "Der Nutzen wird klarer, wenn die Review-Perspektive von den Operationen und dem Wissen der Verbraucher ausgeht.",
+      "skill_path": "candidates/V05/review-abstraction-and-responsibility-boundaries/SKILL.md",
+      "sha256": "068E906E08901864DD4B45F272D64840923BCCD2715561D1E30B68D090FF5C24",
+      "bytes": 21418
+    },
+    {
+      "id": "V06",
+      "title": "Benefit gate against existing alternatives",
+      "kind": "shared-core-variant",
+      "source_commit": "3480c4d0eab3aa3f72981cdec00d8bcb6ec5bb99",
+      "hypothesis": "Ein ausdrückliches Nutzen-Gate gegen bestehende und kleinere Alternativen reduziert zu große, unbegründete Besitzer.",
+      "skill_path": "candidates/V06/review-abstraction-and-responsibility-boundaries/SKILL.md",
+      "sha256": "7531673C6CC06C3118038FA064FEAEA374484BD147C1CD096DF89F4CA85FB2AF",
+      "bytes": 21453
+    },
+    {
+      "id": "V07",
+      "title": "Internal challenge and falsification",
+      "kind": "shared-core-variant",
+      "source_commit": "3480c4d0eab3aa3f72981cdec00d8bcb6ec5bb99",
+      "hypothesis": "Eine interne Gegenprüfung verwirft schwache Erklärungen, ohne jede Idee schon in der Entdeckung abzuwürgen.",
+      "skill_path": "candidates/V07/review-abstraction-and-responsibility-boundaries/SKILL.md",
+      "sha256": "8C935DD26794953BD7742F63444191DC4F52FDAABE0F3088FEA616E797603156",
+      "bytes": 21453
+    },
+    {
+      "id": "V08",
+      "title": "State, change, and contract combined",
+      "kind": "shared-core-variant",
+      "source_commit": "3480c4d0eab3aa3f72981cdec00d8bcb6ec5bb99",
+      "hypothesis": "Zustand, Änderung und Verbraucher-Vertrag stützen gemeinsam brauchbare Richtungen und begrenzen pauschale Zusammenfassungen.",
+      "skill_path": "candidates/V08/review-abstraction-and-responsibility-boundaries/SKILL.md",
+      "sha256": "1812E6391B47BCBCC6C467B3BDAD98F3DFE02CF4A1E2ED0AE4EDDA14E2CEFDC0",
+      "bytes": 21493
+    }
+  ]
+}

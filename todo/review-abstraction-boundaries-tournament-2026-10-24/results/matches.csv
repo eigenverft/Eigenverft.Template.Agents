@@ -1,0 +1,8 @@
+match_id,stage,input_a,input_b,status,current_pass,qualifiers,decision_reference
+Q01,quarterfinal,V01,V03,PENDING,0,,
+Q02,quarterfinal,V05,V07,PENDING,0,,
+Q03,quarterfinal,V02,V04,PENDING,0,,
+Q04,quarterfinal,V06,V08,PENDING,0,,
+S01,semifinal,qualifiers:Q01,qualifiers:Q02,PENDING,0,,
+S02,semifinal,qualifiers:Q03,qualifiers:Q04,PENDING,0,,
+F01,final,qualifiers:S01,qualifiers:S02,PENDING,0,,

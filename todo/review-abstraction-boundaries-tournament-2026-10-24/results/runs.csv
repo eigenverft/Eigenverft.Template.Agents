@@ -1,0 +1,1 @@
+run_id,match_id,pass_id,candidate_id,batch_id,reviewer_slot,attempt,blind_evidence_id,native_agent_id,model,reasoning_effort,skill_sha256,prompt_sha256,product_commit,status,started_at,finished_at,raw_report,protocol_deviations,invalid_reason
