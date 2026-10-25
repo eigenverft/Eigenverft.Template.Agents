@@ -1,6 +1,6 @@
 ---
 name: auto-execute-product-workhistory-and-documentation
-description: "Apply automatically when working in a software product repository, including exploration, planning, implementation, review, debugging, testing, maintenance, and documentation. Consult relevant documentation at task start. For writable work, preserve applicable local work history and maintain self-contained user, operations, developer, product, and management documentation through task-bounded updates, creation, and consolidation. Prioritize the user's task and respect read-only scope."
+description: "Apply automatically when working in a software product repository, including exploration, planning, implementation, review, debugging, testing, maintenance, and documentation. Consult relevant documentation at task start. For writable work, preserve applicable local work history and maintain self-contained documentation in English for user, operations, developer, product, and management audiences through task-bounded updates, creation, and consolidation. Prioritize the user's task and respect read-only scope."
 ---
 
 # Auto Execute Product Work History and Documentation
@@ -90,7 +90,7 @@ A first document must identify the product and topic sufficiently for its audien
 
 Extend a fitting page. Give a topic its own page when no existing page can hold its explanation coherently, not merely because it is a new task or feature. Make new content findable through ordinary documentation navigation. If no entry point exists, the first useful page may serve as one; add suitable navigation as the content grows. No fixed filename or template is required.
 
-Follow an explicit user language requirement. Otherwise preserve the target publication's established language; for a new area, follow the product's documentation language or a clear repository documentation convention. If neither exists, use the task's language consistently. Do not translate existing material merely to normalize languages.
+Write all new, revised, and consolidated audience documentation in English, regardless of the conversation language or the existing document's language. When working with non-English material, translate the complete affected explanation and its necessary context while preserving meaning, qualifications, and decision status; do not expand into unrelated content merely to translate it. Preserve identifiers, commands, paths, and quotations that require their original form.
 
 For every claim you write, revise, or absorb, preserve whether it is observed behavior, a wish, a provisional working objective, an approved decision, or an unresolved assumption. State this naturally where it matters; no compulsory per-file status schema is needed. Record user intent at the strength expressed: a tentative remark or scoped implementation request does not by itself establish an adopted product-wide requirement or strategy.
 
