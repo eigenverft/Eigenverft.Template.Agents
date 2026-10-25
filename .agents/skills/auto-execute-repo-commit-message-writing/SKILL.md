@@ -44,6 +44,8 @@ Example (illustrative only, not a fixed template):
 bugfix, backend, validation
 ```
 
+## Message Detail and Formatting
+
 Prefer informative commit messages over overly short summaries. When supported by the actual changes, expand each section with additional concrete technical details and explanations, aiming for substantive sentences rather than brief one-line summaries. Avoid repeating the same explanation in each section.
 
 When practical, prefix the commit subject with the current local date:
