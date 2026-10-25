@@ -1,64 +1,70 @@
 ---
 name: auto-execute-product-workhistory-and-documentation
-description: "Apply automatically when doing any task involving a software product repository, including reading, exploring, planning, implementing, reviewing, debugging, testing, refactoring, and maintenance, even without a documentation request or explicit invocation. Consult this skill at task start; for completed writable work, maintain local-only dated product tracing in persistent checkouts when applicable, and useful self-contained documentation for applicable user, operations, developer, and product audiences. Prioritize the user's task, verify facts, and respect read-only restrictions."
+description: "Apply automatically when working in a software product repository, including exploration, planning, implementation, review, debugging, testing, maintenance, and documentation. Consult relevant documentation at task start. For writable work, preserve applicable local work history and maintain self-contained user, operations, developer, product, and management documentation through task-bounded updates, creation, and consolidation. Prioritize the user's task and respect read-only scope."
 ---
 
 # Auto Execute Product Work History and Documentation
 
-Maintain concise local tracing of delivered work in persistent checkouts **and** useful, current product documentation as part of ordinary software work. These are separate duties: a local work-history entry shows what happened; audience documentation explains the product to its readers. Neither depends on an explicit documentation request.
+**Development status:** Internal beta for practical evaluation. Static package validation does not establish reliable automatic activation or documentation quality in practice.
 
-**Ownership hierarchy: Product → Audience → Content.** Keep local-only work tracing at the product level (`docs/<product>/workhistory.md`); organize reader documentation under `docs/<product>/<audience>/`. Each audience's documentation is independently understandable and publishable. Prefer intentional, maintained duplication over shared-content systems or cross-audience reference resolution.
+Maintain useful, current product documentation and concise local tracing of delivered work as part of ordinary software work. These are separate duties: work history records what happened; audience documentation explains the product for future use and development. Neither depends on an explicit documentation request.
 
-This is not a documentation-generation campaign, a full repository inventory, an activity diary, or a mandate to describe every internal implementation detail.
+**Ownership hierarchy: Product -> Audience -> Content.** Keep local-only work tracing at `docs/<product>/workhistory.md`; organize reader documentation under `docs/<product>/<audience>/`. Each audience publication must be independently understandable. Intentional, audience-appropriate repetition is valid and creates a maintenance obligation.
+
+Build coverage incrementally from verified knowledge. Do not turn a small task into a complete documentation campaign or produce a file for every implementation detail.
 
 ## Operating Contract
 
-At task start, consult relevant existing product, audience, and applicable local work-history context without turning the request into a repository-wide audit. For each product affected by ordinary **writable** development work:
+At task start, identify the affected product and consult its relevant documentation and applicable local work-history context. Use the discovery procedure in Section 6 without performing a repository-wide audit.
 
-1. **Identify the product.** Reuse a fitting existing `docs/<product>/` identity. Discover a missing product boundary from delivery and consumption evidence.
-2. **Evaluate all four audiences.** `user`, `operations`, `developer`, and `product` are explicit coverage checkpoints, not an open-ended menu of optional suggestions.
-3. **Complete the user's task.** Determine and verify what was actually delivered before recording the outcome.
-4. **Maintain audience documentation.** Establish missing applicable coverage using verified facts; update any content made inaccurate or incomplete by the work. A shared-component change may affect several products or audiences.
-5. **Record the delivered work locally when applicable.** In a persistent checkout, append one short, date-and-sequence-numbered entry to each affected product's `docs/<product>/workhistory.md`, even when no audience documentation needed changing. Skip this trace for short-lived published-and-cleaned edit worktrees as specified in Section 4.
-6. **Account for omissions.** If a normally required audience area or product assignment cannot be established, distinguish *not applicable*, *insufficient evidence*, and *prohibited by scope*. Never silently assume that missing documentation is unnecessary.
+For ordinary **writable** product work:
 
-The user's main task always takes priority. Keep both follow-up duties proportional to the change. For read-only tasks or tasks explicitly forbidding documentation edits, do not write a history entry or change documentation; provide relevant findings only when useful. Do not create empty directories, placeholders, or invented content to manufacture compliance.
+1. **Identify the product.** Reuse an established product identity or determine its boundary from delivery and consumption evidence.
+2. **Consider all five audiences.** Check `user`, `operations`, `developer`, `product`, and `management` for relevant knowledge and consequences. This does not require five separate investigations or five new documents.
+3. **Complete the primary work.** Establish and verify its actual outcome. Documentation may be written earlier when needed for the task or when it records already confirmed knowledge; do not describe pending outcomes as delivered.
+4. **Fulfill the writing triggers.** Before declaring completion, correct affected explanations, write useful missing explanations, and consolidate relevant fragmented material as required by Section 6. A shared-component change can affect several products or audiences.
+5. **Record delivered work locally where applicable.** Follow Section 4, including its temporary-checkout exception. Work history never substitutes for audience documentation.
+6. **Handle actual blockers explicitly.** Complete independently supported portions and identify the specific evidence, authority, product assignment, or writable-scope limitation preventing the remainder.
+
+For an explicit documentation assignment, follow its selected topic, audiences, and requested outcome. Research may be broader when documentation is the primary task. Do not turn a request limited to one documentation area into permission to edit other areas; report material consequences outside the allowed scope.
+
+Read-only tasks permit relevant reading and reporting, not documentation or history edits. Keep all duties proportional to the user's task. Do not create empty directories, speculative content, or bookkeeping merely to demonstrate compliance.
 
 ## 1. Identify the Product
 
-A documentation product is primarily an **independently delivered and consumed software offering**. Buildable projects, solutions, executables, packages, deployments, and source directories are evidence, but none of them alone defines a product.
+A documentation product is primarily an **independently delivered and consumed software offering**. A project, solution, executable, package, deployment, or directory is evidence, not a sufficient definition by itself.
 
-1. Check existing product areas under `docs/<product>/`. Reuse an established identity when it matches the actual offering, rather than creating a synonymous product.
-2. If no matching product exists, discover its boundary from the current task, package or publication configuration, deployment and distribution arrangements, exposed interfaces, and observed consumption. Investigate only what is needed to make a justified decision.
-3. Treat internal, statically embedded, or otherwise inseparable libraries and components as part of the offering they implement.
-4. Treat separately published and independently consumed deliverables, such as a standalone NuGet package or distributable CLI, as distinct documentation products when warranted.
-5. Group multiple technical outputs under one product when they together serve one independently consumed offering. A separately deployed backend is not automatically a separate product.
-6. Consider all affected products when a shared component changes. If assignment is genuinely ambiguous, do not invent a product identity: use an established justified target, or report the specific unresolved boundary.
+1. Check existing `docs/<product>/` areas and reuse a fitting identity rather than creating a synonym.
+2. If the boundary is missing, use the current task, publication and delivery configuration, exposed interfaces, and actual consumption. Investigate only enough to establish the affected offering.
+3. Treat internal or inseparable components as part of the offering they implement.
+4. Treat separately published and independently consumed deliverables, such as a library package or distributable tool, as separate products when warranted.
+5. Group technical outputs that together deliver one offering. A separately deployed backend is not automatically a separate product.
+6. Consider all affected products when an implementation is shared. If ownership remains ambiguous, use a justified established target or identify the unresolved boundary; do not invent one.
 
-A monorepo can contain several products. A product can have several build outputs.
+A repository can contain several products, and a product can have several technical outputs.
 
 ## 2. Establish the Target Audiences
 
-**Use exactly these four broad audiences as the default software documentation vocabulary.** The classification depends on a reader's relationship to the *specific product*, not their profession. Combine related concerns within these areas instead of splitting into many narrow role-based trees.
+Use these **five broad audiences** as the default vocabulary. Classify readers by their relationship to this product, not their job title. One person may need several perspectives.
 
-| Audience | Readers and documentation responsibility | Coverage rule |
+| Audience | Readers and documentation responsibility | Coverage expectation |
 | --- | --- | --- |
-| **`user`** | Consumers of the delivered product: application end users, or external developers consuming a library, SDK, CLI, or API. Explain purpose, getting started, use, interfaces, examples, constraints, and consumer troubleshooting as appropriate. | **Expected for every independently consumed product.** |
-| **`operations`** | Installers, administrators, deployers, operators, and technical support. Explain setup, deployment, configuration, security administration, monitoring, recovery, and operational troubleshooting as applicable. | **Required when distinct operational or administrative responsibilities exist.** For products without them, do not invent an operations manual. |
-| **`developer`** | People who develop, change, test, maintain, or architect the product itself. Explain development setup, repository entry points, tests, technical structure, architecture, and important design rationale. | **Expected for a product whose implementation is maintained in the repository.** |
-| **`product`** | Product owners and product managers responsible for product intent and evolution. Explain purpose, scope, capabilities, important requirements, business rules, constraints, and supported product decisions. Not general executive reporting. | **Expected for every identifiable product.** |
+| **`user`** | Product consumers, including external developers integrating a library, SDK, CLI, or API. Explain offered capabilities, use, integration, examples, constraints, and troubleshooting. | Expected for independently consumed products. |
+| **`operations`** | Installers, administrators, operators, and technical support. Explain setup, deployment, configuration, monitoring, recovery, and operational safeguards. | Applicable when meaningful operational or administrative duties exist. |
+| **`developer`** | People maintaining or changing the product. Explain development setup, architecture, ownership, interfaces, verification, and non-obvious implementation rationale. | Expected for implementations maintained in the repository. |
+| **`product`** | Readers defining and understanding concrete product capabilities and domain behavior. Explain scope, requirements, business rules, constraints, supported product decisions, and unresolved functional questions. | Expected for identifiable products. |
+| **`management`** | Readers directing the product's evolution. Explain supported vision, strategic direction, priorities, guardrails, and documented trade-offs or transitional decisions. | Consider for every product; write supported direction when a trigger applies, without inventing strategy. |
 
-### Required Coverage Decisions
+### Coverage Decisions
 
-- **Check all four for every affected product.** Do not use the lack of an existing directory as a reason to skip an audience.
-- **Presume `user`, `developer`, and `product` apply** to software products built and maintained here. Omit one only when its purpose is genuinely inapplicable in the specific repository context, not merely because no document was written before.
-- **Include `operations` whenever operational duties are meaningful.** Combine administrator, operator, deployment, and support concerns in this one audience. Do not split them by title.
-- **Consolidate before splitting.** A developer integrating a published library belongs to that library's `user` audience; a developer maintaining the library belongs to its `developer` audience. Architects belong to `developer`; product owners and product managers belong to `product`.
-- **Prefer the four standard names for new areas.** Preserve an established equivalent name if renaming would cause unnecessary disruption. Do not create parallel synonyms or narrower audiences merely because a specialist reader exists.
-- **Treat exceptions as deliberate.** Only create an additional audience for a demonstrated need that cannot coherently fit an existing one. A new job title alone is insufficient.
-- **Do not silently omit missing expected documentation.** In writable scope, provide a useful minimum document when verified material exists. When it does not, report the concrete gap briefly rather than filling it with assumptions.
+- Check all five perspectives for every affected product. Missing directories do not establish inapplicability or justify ignoring a writing trigger.
+- Distinguish an audience being inapplicable from lacking evidence for a particular explanation. Do not invent operational duties, strategy, or product intent to populate an area.
+- A library consumer belongs to that library's `user` audience; a library maintainer or architect belongs to `developer`. Product and strategic concerns remain distinct even when the same person owns both.
+- Prefer the five standard names for new areas. Preserve established equivalent names when renaming would cause unnecessary disruption; do not create parallel synonyms or split audiences by job title.
+- An additional audience needs a demonstrated reader need that cannot coherently fit the existing perspectives. Vision is a topic within `management`, not a sixth audience.
+- Coverage is a cumulative product goal. Each ordinary task must fulfill Section 6 within its investigated subject, not establish a complete baseline for every audience. A missing overview or unrelated chapter does not prevent a useful first contribution.
 
-## 3. Documentation Layout and Minimum Content
+## 3. Documentation Layout and First Content
 
 Use this ownership layout for newly established documentation:
 
@@ -73,21 +79,20 @@ docs/
     developer/
       <documentation for product maintainers>
     product/
-      <documentation for product owners>
+      <documentation for concrete product behavior and decisions>
+    management/
+      <documentation for direction, priorities, and guardrails>
 ```
 
-This illustrates audience ownership, **not an instruction to create empty folders**. `workhistory.md` is a local-only product-wide work trace, not an audience publication dependency or a versioned publication file. Every created audience area must immediately contain actual, useful Markdown content. An overview or README is a reasonable entry point; neither a fixed filename nor an elaborate template is mandatory.
+This describes ownership, not a requirement to create empty folders. The work-history file is local-only and must not become a publication dependency.
 
-When first establishing an applicable audience, provide at least a clear explanation of its relationship to the product and the most important **verified** information needed to begin. Prefer these content priorities:
+A first document must identify the product and topic sufficiently for its audience, answer a concrete reader question, and include the verified context, prerequisites, and material limits needed to understand or act on that answer. It may cover one useful subject; do not imply comprehensive product coverage. Create the required directories together with real content.
 
-- **`user`:** what the product offers, how a consumer starts using it, and the most relevant usage or integration path.
-- **`operations`:** what must be installed, configured, administered, or operated and the known prerequisites or safeguards.
-- **`developer`:** how to locate, build, test, and safely change the product, insofar as that can be established from repository evidence.
-- **`product`:** why the product exists, what it does and does not cover, and its verified capabilities or constraints.
+Extend a fitting page. Give a topic its own page when no existing page can hold its explanation coherently, not merely because it is a new task or feature. Make new content findable through ordinary documentation navigation. If no entry point exists, the first useful page may serve as one; add suitable navigation as the content grows. No fixed filename or template is required.
 
-Do not fabricate missing workflows, requirements, business intent, commands, support guarantees, or release status. If adequate source material is not available, do not publish a misleading skeleton. Identify the unresolved minimum instead.
+Organize by durable reader questions and workflows, not by task chronology. Integrate new knowledge into the explanation instead of accumulating dated development notes. Preserve historical rationale where it helps, with its status clear.
 
-Do not require ISO frameworks, audience registries, `product.yaml`, `audience.yaml`, metadata catalogs, diagrams, or predefined topic subdirectories. Let substantive content determine the structure *inside* each audience.
+Do not require ISO frameworks, audience registries, `product.yaml`, `audience.yaml`, metadata catalogs, diagrams, or predefined topic subdirectories. Useful content determines the structure inside each audience.
 
 ## 4. Product Work History
 
@@ -110,38 +115,89 @@ Maintain **`docs/<product>/workhistory.md`** as a small, local-only trace of use
 
 ## 5. Independent Documentation and Publication
 
-Treat each `docs/<product>/<audience>/` subtree as a **self-contained publication unit**:
+Treat each `docs/<product>/<audience>/` subtree, or its established equivalent, as a **self-contained publication unit**:
 
-- Readers must not need another product's or audience's documentation tree to understand essential content.
-- Keep required explanations, instructions, examples, assets, and relative links within the audience subtree.
-- Do not depend on shared Markdown includes, symlinks, cross-audience references, centralized fragment registries, or special build-time reference resolution for essential content.
-- **Deliberate duplication is valid.** Repeat or adapt facts where this keeps independent publications clear. Preserve audience-appropriate wording.
-- External links may supplement self-contained material but must not replace essential explanations.
-- A duplicated fact creates a maintenance obligation: later changes to that fact must be reflected in every affected publication unit.
+- Readers must not need another product's or audience's documentation to understand essential content.
+- Keep essential explanations, instructions, examples, and assets within the audience publication. Do not depend on shared includes, symlinks, fragment registries, or special build-time resolution.
+- **Deliberate duplication is valid.** Adapt repeated facts to their readers and keep every affected current representation consistent.
+- External and cross-audience links may provide provenance or further reading, but cannot replace essential explanations.
+- A source reference can establish authority without making the local explanation authoritative over that source. Summarize applicable material accurately and preserve its governing status.
 
-If authoritative documentation already exists outside this layout, do not silently relocate or replace it. Maintain it as appropriate and treat structural migration as a deliberate, separate change; do not create competing copies without a plan.
+When relevant material lives outside the standard layout, apply Section 6 to absorb it by topic into the standard documentation. Reconcile former locations and navigation instead of keeping accidental competing current accounts. This bounded consolidation is part of documentation maintenance; it does not require a separate repository-wide migration request or authorize unrelated restructuring.
 
-## 6. Documentation Changes Are Part of Product Changes
+## 6. Required Incremental Documentation
 
-After completing a meaningful writable product change, **perform a documentation impact check** covering the identified product and its applicable audiences. Check actual behavioral, interface, setup, configuration, compatibility, operational, architectural, and product-scope consequences.
+### 6.1 Find the Existing Knowledge
 
-- **Update documentation that is made inaccurate, incomplete, or materially misleading by the change.** This applies even if the user requested only a code change, provided documentation edits are within scope.
-- **Create missing baseline documentation for applicable audiences** when the repository lacks it and sufficient verified information is available. An empty documentation area is not completion.
-- **Review all affected publication units**, including multiple products sharing the changed implementation. Preserve factual consistency without erasing audience differences.
-- **Prefer extending a fitting existing document** over adding pages for every feature. Create a new page when the content needs an independent place to stay understandable.
-- **Do not document every function, class, refactor, or trivial internal detail.** The obligation concerns useful product knowledge, not maximal file volume.
-- **Do not make gratuitous changes.** When an established audience area is accurate and the task adds nothing meaningful to it, leave its files untouched.
+At task start, read the affected product's documentation entry points and the pages relevant to the work. Include task-related README, operational, design, and decision material outside the standard layout.
 
-A normal writable development task should not finish with a known, actionable documentation gap merely because documentation was not explicitly mentioned. Resolve supported gaps within the allowed scope, or explicitly identify the blocker. Do not turn this into an unlimited audit or unrelated documentation migration.
+If no entry point exists, inspect the product's available introduction and documentation names or headings. Search repository documentation using the affected capability, workflow, interface, configuration, component, and alternative names encountered during the task. Read credible matching passages with enough surrounding context to understand their meaning and status.
+
+Follow references that answer the same reader question, explain a necessary prerequisite or consequence, or establish a claim's authority. Repeat targeted searches when newly discovered relevant facts or names require them. Stop expanding when remaining material concerns other questions. Do not inventory unrelated products or pursue links merely because they exist.
+
+Use implementation, tests, configuration, and task evidence already examined to verify relevant claims. Additional investigation must resolve a concrete uncertainty needed for the selected explanation, not manufacture coverage of untouched areas.
+
+### 6.2 Apply Mandatory Writing Triggers
+
+Before completing writable work, documentation must be changed when any of these conditions holds within the investigated subject:
+
+1. **Changed accuracy:** The delivered work makes an existing explanation false, incomplete for its stated purpose, or materially misleading.
+2. **Missing reusable explanation:** The task establishes a verified, reusable answer to a concrete reader question that suitable documentation does not adequately answer.
+3. **Fragmented explanation:** Relevant supported information must be assembled from scattered or unsuitable locations, and the standard audience documentation does not provide a coherent, independently useful explanation of that subject.
+
+Useful answers can explain how to use, operate, understand, decide about, safely change, or verify the product. Constraints, failure causes, ownership boundaries, recovery steps, and supported rationale can qualify even when behavior did not change. Incidental implementation details and activity summaries alone do not.
+
+For each trigger, identify the audience and question being answered. This is a working decision, not a requirement to create a register or report. Check all five perspectives, but do not create several audience pages by mechanically copying the same fact.
+
+An explicit documentation assignment is governed by its requested outcome and scope; it does not depend on a code change or a newly discovered fact to require work.
+
+### 6.3 Write the Smallest Complete Explanation
+
+Correct or extend a suitable standard document. If none exists, create the first or next useful page in the appropriate product-audience area now. Missing overall structure, an incomplete manual, or absent documentation for other audiences is not a reason to postpone an actionable explanation.
+
+Supply the context, prerequisites, rules, exceptions, consequences, and supported rationale needed to answer the selected question. Keep scope honest. A standalone fragment or unexplained link is not a useful first document; a complete manual is not a prerequisite.
+
+When information is scattered, synthesize its applicable substance into a coherent explanation for the reader. Do not copy excerpts into a pile or replace the explanation with a source list. Preserve meaningful qualifications and evidence references where they help verify authority, status, or disagreement.
+
+When one fact affects several current audience publications or products, update their relevant representations. Keep them independently understandable without forcing identical wording or unnecessary new pages.
+
+### 6.4 Preserve Meaning and Reconcile Former Locations
+
+For every absorbed claim, preserve whether it is observed behavior, a wish, a provisional working objective, an approved decision, or an unresolved assumption. State this naturally where it matters; no compulsory per-file status schema is needed.
+
+Technical evidence can establish current behavior. Approved intent, priorities, and strategic direction require evidence that actually supports that intent. Do not turn an implementation constraint into a product requirement or invent a deliberate transition merely because the code differs from a vision.
+
+Resolve conflicting intent only when explicit supersession or other reliable decision evidence establishes what governs. Newer code or a newer document alone is insufficient. Write useful supported portions, state the precise unresolved disagreement, and preserve the evidence needed to resolve it.
+
+Complete the topic's transition within the permitted writable scope:
+
+- In former current-use documents, transfer useful unique content before replacing superseded passages with a concise pointer or necessary consistent summary. Preserve unrelated sections and relied-upon entry points; do not delete a mixed document because one section was absorbed.
+- Update relevant navigation and known inbound references found in the focused search. Do not leave located current instructions competing with the maintained standard explanation.
+- Preserve historical plans, decisions, and retrospective records with their original meaning and status. Where needed and permitted, add a scoped note pointing to current guidance instead of rewriting the historical record.
+- Do not claim that local consolidation supersedes a separately governing specification or externally maintained source. For external or read-only sources, provide a self-contained account where permitted, identify relevant authority and version or date, and disclose material conflicts or synchronization limits that cannot be corrected.
+- Intentional audience-specific repetition remains valid. Reconcile accidental competing guidance, not every repeated sentence or every historical reference.
+
+### 6.5 Complete or Identify the Specific Blocker
+
+Mandatory writing can normally wait until the primary outcome is verified. Earlier writing is required when it is needed to perform the task correctly; already confirmed knowledge may also be documented during the work. Do not record predicted outcomes as delivered facts.
+
+Before declaring completion, check the three triggers against the outcome and knowledge obtained. Finish every triggered correction, creation, and consolidation within scope. Verify that the explanation matches its evidence, is findable, is independently understandable for its audience, and is consistent with located current representations. For consolidation, also check transferred content, old passages, relevant links, and preserved rationale.
+
+If an independently useful supported portion can be written without misleading readers about an unresolved prerequisite, write it. If no safe useful content can be supported, create no placeholder; identify the exact unanswered question and missing evidence. Do not use unrelated uncertainty to suppress established content.
+
+Leaving documentation unchanged is valid when no trigger holds: suitable documentation already answers the relevant questions accurately and coherently, or the task yields no missing reader-relevant knowledge. A read-only restriction, explicit scope limit, insufficient evidence, or unresolved product ownership can instead block a triggered action. Name that concrete limitation without presenting the obligation as fulfilled.
+
+A known, supported action must not be replaced by a TODO, a work-history entry, an audience check, or a proposal to document it later. Missing folders, unchanged behavior, and incomplete overall coverage are not blockers.
+
+Keep the no-change reasoning internal unless it helps the user. Report meaningful documentation changes and actual blockers or unresolved consequences; do not append a routine documentation compliance report to every small task.
 
 ## Evidence, Priority, and Safety
 
-- Follow explicit user and repository instructions; respect read-only work and restrictions on file changes.
-- The user's primary task takes priority. Documentation duties should accompany product work, not replace it with an unrelated initiative.
-- Ground statements in reliable repository, product, test, configuration, or task evidence. Distinguish observed behavior, intended requirements, and inference.
-- Do not invent product boundaries, audiences, implementation behavior, business goals, or release facts.
-- Do not independently commit, push, publish, or initiate a separate workflow unless authorized by the user's task.
-- Do not alter application behavior or tests for documentation convenience, or persist secrets or sensitive information.
-- Do not claim that evaluating an audience alone fulfills the requirement to provide documentation when it is applicable and can be written.
+- Follow explicit user and repository instructions, writable boundaries, and read-only restrictions. The primary task takes priority; documentation work accompanies it within the authorized scope.
+- Do not invent product boundaries, audiences, workflows, commands, requirements, business intent, support guarantees, or release facts to fill gaps.
+- Do not alter application behavior or tests for documentation convenience, or record secrets, sensitive details, or raw conversations.
+- Do not independently commit, push, publish, or start a separate workflow without authorization.
+- Do not claim complete product coverage or repository-wide consistency from a bounded task. Untouched areas may remain undocumented and require later work or an explicit documentation assignment.
+- These instructions define behavior when the skill is considered. Static validation or written activation rules do not demonstrate reliable loading or practical compliance by every agent environment.
 
-**Success means that completed writable product work has an accurate, concise product-scoped local trace where that trace applies; every applicable product-audience unit has a useful, evidence-grounded documentation baseline; and ordinary development keeps affected units accurate and independently publishable.**
+**Success means that completed writable work leaves every triggered product explanation accurate, useful, findable, and independently understandable, with located competing current guidance reconciled and any remaining obligation specifically identified as blocked. Local work tracing is maintained where applicable.**
