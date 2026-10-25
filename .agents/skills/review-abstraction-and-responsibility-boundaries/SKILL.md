@@ -83,30 +83,19 @@ whose state and rules are currently mixed with other tasks.
 
 ### Assess Encapsulation by Its Effect
 
-An effective boundary gives coherent domain or technical decisions a
-clear owner. Its consumers can use the capability without reconstructing
-its internal rules or managing its state transitions themselves.
+An effective boundary lets its consumers use a capability without
+repeatedly reconstructing how it works internally.
 
 Therefore, ask:
 
-- Which related decisions or mechanism does this area own?
-- Which state gets its meaning from those rules and transitions?
-- Which operations let collaborators use the capability?
-- Who currently needs to know, repeat, or coordinate its internal rules?
-- What knowledge would those collaborators no longer need after a change?
+- What does this area handle on its own?
+- Which operations does it provide for that purpose?
+- Which state is it allowed to change?
+- Which internal rules must other areas still know?
 - Can other areas bypass its intended operations?
 
-Assess the gain against existing operations and ownership, including
-boundaries within the same class or module. Files and new types are not
-the unit of comparison. Private fields alone do not guarantee this effect;
-shared storage does not rule it out. A stateless rule can also have a
-meaningful owner.
-
-A workflow can legitimately coordinate several distinct responsibilities.
-Sharing an outcome, lifecycle, or consistency requirement does not alone
-establish that its participants should become one owner. Coordination can
-itself deserve encapsulation when a concrete coordination rule is exposed
-or repeatedly reconstructed; identify that rule and the resulting gain.
+Private fields alone do not guarantee this effect.
+Shared storage does not rule it out.
 
 ### Choose a Form That Fits the Problem
 
@@ -192,20 +181,12 @@ Use existing requirements, variants, or known changes. An explicitly
 hypothetical scenario is also acceptable. Do not turn it into an invented
 product roadmap.
 
-Compare the current organization with the proposed direction:
+Trace:
 
-- Which specific decision or rule would change?
-- Who currently needs to understand or implement that rule?
-- Which of those obligations would disappear behind the proposed boundary?
-- Which collaborators would still need to supply facts, authorize actions,
-  perform effects, or coordinate a joint operation, and why?
-
-Make the gain concrete enough to distinguish reduced internal knowledge
-from the same collaboration relocated into a new unit. A short explanation
-can suffice; final APIs and a complete transition design are not required.
-Do not assume that every change to a broadly named workflow touches all
-of its participants. Check the actual operations that already own the
-selected decision.
+- Which decision would change?
+- Which areas would need to be understood?
+- Which areas would actually need to be modified?
+- Why would each area be affected?
 
 Distinguish necessary collaboration from avoidable entanglement.
 
@@ -308,24 +289,17 @@ direction of improvement:
   unnecessarily mixed, exposed, or scattered. Several lifecycle stages
   handling the same operation is not enough; explain which knowledge or
   authority is unnecessarily shared between them.
-- **Direction:** Identify the coherent decisions or mechanism, relevant
-  state and rules, and meaningful operations a suitable owner could
-  provide. Explain what should remain with collaborators. An end-to-end
-  workflow label alone is not an ownership argument. Exact API signatures,
+- **Direction:** Identify the coherent responsibility, its relevant state
+  and rules, and meaningful operations a suitable owner could provide.
+  Explain what should remain with collaborators. Exact API signatures,
   complete transition designs, and final class boundaries are not required.
-- **Benefit:** Trace an ordinary change against the existing operations.
-  Name who currently needs which internal rule and why the proposed
-  direction would remove or materially reduce that need. State the
-  collaboration that remains. Moving code, grouping related stages, or
-  giving them a shared name does not establish this gain.
+- **Benefit:** Trace an ordinary change sufficiently to explain which
+  external knowledge or coordinated edits the proposed direction could
+  remove. Moving code or sharing a name alone does not establish benefit.
 - **Limits:** Check material differences and necessary collaboration.
   State what the evidence supports and which parts still need design.
   Shared authoritative state or atomic coordination does not by itself
   rule out useful internal subobjects or other responsibility boundaries.
-
-First assess whether the direction offers a concrete gain over existing
-ownership. Then assess how far its implementation scope is understood.
-Maturity cannot establish or compensate for an unsupported benefit.
 
 Separate a supported direction from a settled implementation scope:
 
@@ -368,8 +342,8 @@ using the same finding references.
 The table supports quick comparison and selection. The explanations give
 the evidence and reasoning needed to accept, defer, or reject a proposal.
 Include supported directions and bounded implementation recommendations
-that meet the evidence requirements in "Evidence and Recommendations".
-An appealing description
+that meet the evidence
+requirements in "Evidence and Recommendations". An appealing description
 or a severity label cannot substitute for a supported target boundary.
 
 ### Overview Table
@@ -408,7 +382,7 @@ at its stated maturity, not permission to assume away open design details.
 
 Use the assessment column for qualitative expected benefit and estimated
 effort. State when effort is unknown; do not invent precise estimates.
-Use the rationale column for the concrete gain over current ownership,
+Use the rationale column for the concrete reason behind the assessment,
 rather than repeating the proposal or its severity.
 
 ### Severity and Ordering
@@ -466,19 +440,18 @@ covering these four aspects:
 - **Proposed change:** Contrast the current and proposed boundaries.
   Identify the responsibility concerned, its state and rules, and the
   operations its consumers would use. Explain what would become more
-  local. Name the internal knowledge or transition rules that collaborators
-  would no longer need, and the collaboration that remains necessary.
+  local and which collaboration would remain necessary.
 - **Reason for the assessment:** Justify the severity, expected benefit,
   and effort estimate or its uncertainty. Give enough reasoning for the
   user to form their own judgment.
 - **Trade-offs and first step:** State material costs, constraints,
   preservation requirements, dependencies, and a bounded first step
-  appropriate to the stated maturity, with relevant verification. For a
-  supported direction, identify the specific design
+  appropriate to the stated maturity, with relevant
+  verification. For a supported direction, identify the specific design
   questions and their effect on scope. Do not use "investigate later" to
   conceal uncertainty about the central responsibility or the benefit itself.
-  Do not turn every finding into a full implementation plan or invent a
-  minimum number of tasks.
+  Do not turn every finding into a full implementation
+  plan or invent a minimum number of tasks.
 
 Add explanatory value rather than expanding the table row word for word.
 Keep detail proportionate to the finding and avoid empty mandatory fields.
@@ -487,8 +460,8 @@ Keep detail proportionate to the finding and avoid empty mandatory fields.
 
 Present conditional opportunities whose problem or improvement direction
 is not yet sufficiently justified separately from supported recommendations.
-State what is observed, what remains uncertain, and which missing evidence
-or design decision
+State what is observed,
+what remains uncertain, and which missing evidence or design decision
 would materially change the assessment. A supported problem may remain
 supported even when its remedy is unresolved; do not hide the problem or
 present an unsettled solution as ready to implement.

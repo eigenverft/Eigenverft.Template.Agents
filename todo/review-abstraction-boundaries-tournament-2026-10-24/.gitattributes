@@ -1,2 +1,0 @@
-# Immutable skill snapshots use stable bytes across Windows and Unix checkouts.
-candidates/**/SKILL.md text eol=lf
