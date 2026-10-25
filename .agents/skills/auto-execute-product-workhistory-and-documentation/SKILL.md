@@ -41,7 +41,7 @@ A documentation product is primarily an **independently delivered and consumed s
 5. Group technical outputs that together deliver one offering. A separately deployed backend is not automatically a separate product.
 6. Consider all affected products when an implementation is shared. If ownership remains ambiguous, use a justified established target or identify the unresolved boundary; do not invent one.
 
-A repository can contain several products, and a product can have several technical outputs.
+A repository can contain several products, and a product can have several technical outputs. A local work-history path is only a clue to product identity; confirm the offering against shared documentation, delivery and consumption evidence, or explicit user decisions rather than treating the local path alone as authoritative.
 
 ## 2. Establish the Target Audiences
 
@@ -90,6 +90,10 @@ A first document must identify the product and topic sufficiently for its audien
 
 Extend a fitting page. Give a topic its own page when no existing page can hold its explanation coherently, not merely because it is a new task or feature. Make new content findable through ordinary documentation navigation. If no entry point exists, the first useful page may serve as one; add suitable navigation as the content grows. No fixed filename or template is required.
 
+Follow an explicit user language requirement. Otherwise preserve the target publication's established language; for a new area, follow the product's documentation language or a clear repository documentation convention. If neither exists, use the task's language consistently. Do not translate existing material merely to normalize languages.
+
+For every claim you write, revise, or absorb, preserve whether it is observed behavior, a wish, a provisional working objective, an approved decision, or an unresolved assumption. State this naturally where it matters; no compulsory per-file status schema is needed. Record user intent at the strength expressed: a tentative remark or scoped implementation request does not by itself establish an adopted product-wide requirement or strategy.
+
 Organize by durable reader questions and workflows, not by task chronology. Integrate new knowledge into the explanation instead of accumulating dated development notes. Preserve historical rationale where it helps, with its status clear.
 
 Do not require ISO frameworks, audience registries, `product.yaml`, `audience.yaml`, metadata catalogs, diagrams, or predefined topic subdirectories. Useful content determines the structure inside each audience.
@@ -123,7 +127,7 @@ Treat each `docs/<product>/<audience>/` subtree, or its established equivalent, 
 - External and cross-audience links may provide provenance or further reading, but cannot replace essential explanations.
 - A source reference can establish authority without making the local explanation authoritative over that source. Summarize applicable material accurately and preserve its governing status.
 
-When relevant material lives outside the standard layout, apply Section 6 to absorb it by topic into the standard documentation. Reconcile former locations and navigation instead of keeping accidental competing current accounts. This bounded consolidation is part of documentation maintenance; it does not require a separate repository-wide migration request or authorize unrelated restructuring.
+When a Section 6 trigger requires a coherent explanation whose relevant material lives outside the standard layout, absorb that topic into the standard audience documentation or an established equivalent. A different path alone is not a reason to move a useful, coherent publication. Reconcile former locations and navigation while preserving their independent reader and publication roles. This bounded consolidation is part of documentation maintenance; it does not require a separate repository-wide migration request or authorize unrelated restructuring.
 
 ## 6. Required Incremental Documentation
 
@@ -139,13 +143,17 @@ Use implementation, tests, configuration, and task evidence already examined to 
 
 ### 6.2 Apply Mandatory Writing Triggers
 
-Before completing writable work, documentation must be changed when any of these conditions holds within the investigated subject:
+The documentation subject is the behavior, interface, workflow, configuration, or decision the task changes or needs to verify, together with material prerequisites, constraints, and consequences needed to explain it. Reading a surrounding component does not make all of its contents documentation work. Do not expand into neighboring topics merely because the investigation encountered them.
+
+Before completing writable work, documentation must be changed when any of these conditions holds within that subject:
 
 1. **Changed accuracy:** The delivered work makes an existing explanation false, incomplete for its stated purpose, or materially misleading.
 2. **Missing reusable explanation:** The task establishes a verified, reusable answer to a concrete reader question that suitable documentation does not adequately answer.
-3. **Fragmented explanation:** Relevant supported information must be assembled from scattered or unsuitable locations, and the standard audience documentation does not provide a coherent, independently useful explanation of that subject.
+3. **Fragmented explanation:** Current supported information needed to answer the selected reader question is divided across sources, or exists only in material that does not serve that reader, and no suitable maintained audience publication explains the subject coherently. A nonstandard path alone does not satisfy this trigger.
 
-Useful answers can explain how to use, operate, understand, decide about, safely change, or verify the product. Constraints, failure causes, ownership boundaries, recovery steps, and supported rationale can qualify even when behavior did not change. Incidental implementation details and activity summaries alone do not.
+Useful answers must support a concrete use, operation, product decision, maintenance, or verification need. Constraints, failure causes, ownership boundaries, recovery steps, and supported rationale can qualify even when behavior did not change. A first encountered but material constraint can qualify; a prior request or repeated incident is not required. Do not invent hypothetical reader questions merely to create documentation. Incidental implementation details and activity summaries alone do not.
+
+Proportionality limits the subject and necessary explanation; it does not cancel a writing trigger inside that subject. Do not impose a fixed number of audiences or pages, or leave known triggered work undone merely because another audience was prioritized.
 
 For each trigger, identify the audience and question being answered. This is a working decision, not a requirement to create a register or report. Check all five perspectives, but do not create several audience pages by mechanically copying the same fact.
 
@@ -153,7 +161,7 @@ An explicit documentation assignment is governed by its requested outcome and sc
 
 ### 6.3 Write the Smallest Complete Explanation
 
-Correct or extend a suitable standard document. If none exists, create the first or next useful page in the appropriate product-audience area now. Missing overall structure, an incomplete manual, or absent documentation for other audiences is not a reason to postpone an actionable explanation.
+Correct or extend a suitable standard document or established equivalent publication. If none exists, create the first or next useful page in the appropriate product-audience area now. Missing overall structure, an incomplete manual, or absent documentation for other audiences is not a reason to postpone an actionable explanation.
 
 Supply the context, prerequisites, rules, exceptions, consequences, and supported rationale needed to answer the selected question. Keep scope honest. A standalone fragment or unexplained link is not a useful first document; a complete manual is not a prerequisite.
 
@@ -163,15 +171,18 @@ When one fact affects several current audience publications or products, update 
 
 ### 6.4 Preserve Meaning and Reconcile Former Locations
 
-For every absorbed claim, preserve whether it is observed behavior, a wish, a provisional working objective, an approved decision, or an unresolved assumption. State this naturally where it matters; no compulsory per-file status schema is needed.
+Apply Section 3's statement-status rule to all writing, including initial creation and accuracy corrections, not only consolidation.
 
-Technical evidence can establish current behavior. Approved intent, priorities, and strategic direction require evidence that actually supports that intent. Do not turn an implementation constraint into a product requirement or invent a deliberate transition merely because the code differs from a vision.
+Technical evidence can establish current behavior, including domain behavior described in `product` documentation as implemented behavior rather than an approved requirement. Approved intent, priorities, and strategic direction require evidence that actually supports that intent. Do not turn an implementation constraint into a product requirement or invent a deliberate transition merely because the code differs from a vision.
+
+When implementation does not meet a documented requirement or decision, retain that intent with its supported status and identify the discrepancy. Correct an inaccurate account of current behavior without silently superseding the intended rule.
 
 Resolve conflicting intent only when explicit supersession or other reliable decision evidence establishes what governs. Newer code or a newer document alone is insufficient. Write useful supported portions, state the precise unresolved disagreement, and preserve the evidence needed to resolve it.
 
 Complete the topic's transition within the permitted writable scope:
 
 - In former current-use documents, transfer useful unique content before replacing superseded passages with a concise pointer or necessary consistent summary. Preserve unrelated sections and relied-upon entry points; do not delete a mixed document because one section was absorbed.
+- Preserve each entry document's independent publication role. Retain the self-contained introduction, prerequisites, and essential instructions its readers need; do not replace required content with links unavailable in that publication or reduce a useful entry document to a pointer merely because detailed material was absorbed.
 - Update relevant navigation and known inbound references found in the focused search. Do not leave located current instructions competing with the maintained standard explanation.
 - Preserve historical plans, decisions, and retrospective records with their original meaning and status. Where needed and permitted, add a scoped note pointing to current guidance instead of rewriting the historical record.
 - Do not claim that local consolidation supersedes a separately governing specification or externally maintained source. For external or read-only sources, provide a self-contained account where permitted, identify relevant authority and version or date, and disclose material conflicts or synchronization limits that cannot be corrected.
@@ -183,9 +194,11 @@ Mandatory writing can normally wait until the primary outcome is verified. Earli
 
 Before declaring completion, check the three triggers against the outcome and knowledge obtained. Finish every triggered correction, creation, and consolidation within scope. Verify that the explanation matches its evidence, is findable, is independently understandable for its audience, and is consistent with located current representations. For consolidation, also check transferred content, old passages, relevant links, and preserved rationale.
 
-If an independently useful supported portion can be written without misleading readers about an unresolved prerequisite, write it. If no safe useful content can be supported, create no placeholder; identify the exact unanswered question and missing evidence. Do not use unrelated uncertainty to suppress established content.
+If a triggered explanation or explicit documentation assignment lacks evidence needed to finish it, write independently useful supported portions without misleading readers about unresolved prerequisites. If no safe useful content can be supported, create no placeholder; identify the exact required question and missing evidence. Do not use unrelated uncertainty to suppress established content.
 
 Leaving documentation unchanged is valid when no trigger holds: suitable documentation already answers the relevant questions accurately and coherently, or the task yields no missing reader-relevant knowledge. A read-only restriction, explicit scope limit, insufficient evidence, or unresolved product ownership can instead block a triggered action. Name that concrete limitation without presenting the obligation as fulfilled.
+
+Absence of evidence for an unstated product intent or management strategy does not by itself trigger writing or create a blocker to report. This does not excuse an unresolved material conflict encountered in the selected topic or an unfulfilled explicit documentation request.
 
 A known, supported action must not be replaced by a TODO, a work-history entry, an audience check, or a proposal to document it later. Missing folders, unchanged behavior, and incomplete overall coverage are not blockers.
 
