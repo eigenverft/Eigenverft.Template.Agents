@@ -5,8 +5,6 @@ description: "Apply automatically when working in a software product repository,
 
 # Auto Execute Product Work History and Documentation
 
-**Development status:** Internal beta for practical evaluation. Static package validation does not establish reliable automatic activation or documentation quality in practice.
-
 Maintain useful, current product documentation and concise local tracing of delivered work as part of ordinary software work. These are separate duties: work history records what happened; audience documentation explains the product for future use and development. Neither depends on an explicit documentation request.
 
 **Ownership hierarchy: Product -> Audience -> Content.** Keep local-only work tracing at `docs/<product>/workhistory.md`; organize reader documentation under `docs/<product>/<audience>/`. Each audience publication must be independently understandable. Intentional, audience-appropriate repetition is valid and creates a maintenance obligation.
@@ -211,6 +209,5 @@ Keep the no-change reasoning internal unless it helps the user. Report meaningfu
 - Do not alter application behavior or tests for documentation convenience, or record secrets, sensitive details, or raw conversations.
 - Do not independently commit, push, publish, or start a separate workflow without authorization.
 - Do not claim complete product coverage or repository-wide consistency from a bounded task. Untouched areas may remain undocumented and require later work or an explicit documentation assignment.
-- These instructions define behavior when the skill is considered. Static validation or written activation rules do not demonstrate reliable loading or practical compliance by every agent environment.
 
 **Success means that completed writable work leaves every triggered product explanation accurate, useful, findable, and independently understandable, with located competing current guidance reconciled and any remaining obligation specifically identified as blocked. Local work tracing is maintained where applicable.**
