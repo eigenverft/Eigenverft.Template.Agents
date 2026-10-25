@@ -55,15 +55,15 @@ This example illustrates the full message structure. Replace the placeholders wi
 ```text
 [YYYY-MM-DD] <Concrete implementation-focused subject>
 
-## Changes
+### Changes
 <Describe the specific modifications and the affected components or symbols.>
 
-## Description
+### Description
 <Explain how the modifications affect behavior, structure, or workflow, with relevant technical context.>
 
-## Intent
+### Intent
 <Explain the supported purpose or benefit from the user's perspective.>
 
-## Tags
+### Tags
 <applicable lowercase tags, separated by commas>
 ```
