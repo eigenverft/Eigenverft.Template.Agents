@@ -15,21 +15,21 @@ This skill defines message content only. Do not regroup changes or independently
 
 Base each message on the exact diff being committed and verified context. Refresh it if that diff changes. Unless requested, do not introduce a separate draft-approval step.
 
-Use a clear subject and the following sections in the commit body whenever practical:
+Use a clear subject. The commit body must include Changes, Description, and Tags. Include Intent only when supported by context, as described below:
 
-### Changes
+### Changes (required)
 
 Summarize the concrete technical modifications, not just their overall theme. Identify affected paths, components, or symbols where they help locate and understand the changes, and state relevant additions, removals, changed conditions, or interfaces. Group repetitive modifications into a compact summary rather than listing every touched file.
 
-### Description
+### Description (required)
 
 Explain how those modifications affect the implementation, behavior, structure, or workflow. Keep it reasonably concise, with enough concrete technical context to understand the change without inspecting the diff, rather than merely repeating Changes.
 
-### Intent
+### Intent (when supported by context)
 
 Explain the purpose of the change from the user's perspective: the desired outcome or benefit, not a record of the user's request or the conversation. Include Intent only when that purpose is supported by explicit instructions, repository context, or other verified information; otherwise omit it entirely. Do not invent or speculate about missing context.
 
-### Tags
+### Tags (required)
 
 Add a compact set of descriptive, lowercase tags that classify the actual changes in the commit. Use any tags that accurately describe the committed changes, including change types, technical areas, or other relevant characteristics. Tags such as `feature`, `bugfix`, `enhancement`, `refactor`, `performance`, `configuration`, `documentation`, `maintenance`, `ui`, `backend`, `api`, `database`, or `security` are illustrative examples only, not a predefined or exhaustive list.
 
@@ -37,12 +37,6 @@ Include all meaningful tags that directly apply to the commit, without imposing 
 
 These tags are plain text within the commit message body only. Do not create or modify Git tags, branches, or repository metadata.
 
-Example (illustrative only, not a fixed template):
-
-```text
-### Tags
-bugfix, backend, validation
-```
 
 ## Message Detail and Formatting
 
@@ -53,3 +47,23 @@ When practical, prefix the commit subject with the current local date:
 `[YYYY-MM-DD] Implementation-focused subject`
 
 Follow any explicit user requirements for message language or format. Do not add unperformed verification or unrelated changes to the message.
+
+## Complete Message Example
+
+This example illustrates the full message structure. Replace the placeholders with details supported by the actual changes. Omit the entire Intent section when its purpose is not supported by context; use the date prefix when practical. The parenthetical requirement notes in the instructions above are not part of the commit message headings.
+
+```text
+[YYYY-MM-DD] <Concrete implementation-focused subject>
+
+### Changes
+<Describe the specific modifications and the affected components or symbols.>
+
+### Description
+<Explain how the modifications affect behavior, structure, or workflow, with relevant technical context.>
+
+### Intent
+<Explain the supported purpose or benefit from the user's perspective.>
+
+### Tags
+<applicable lowercase tags, separated by commas>
+```
