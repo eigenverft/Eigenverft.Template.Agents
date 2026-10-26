@@ -45,21 +45,23 @@ A repository can contain several products, and a product can have several techni
 
 Use these **five broad audiences** as the default vocabulary. Classify readers by their relationship to this product, not their job title. One person may need several perspectives.
 
+**Audience perspective determines the explanation; statement status determines what may be claimed.** These areas represent reader groups, not exclusive categories of facts. Describe the product for the questions, context, and level of detail each group needs. Actual capabilities, intended behavior, requirements, priorities, goals, and decisions may be relevant to several audiences. Adapt their explanations to each readership and preserve their status and authority under Section 3; do not populate every area with every type of statement.
+
 | Audience | Readers and documentation responsibility | Coverage expectation |
 | --- | --- | --- |
 | **`user`** | Product consumers, including external developers integrating a library, SDK, CLI, or API. Explain offered capabilities, use, integration, examples, constraints, and troubleshooting. | Expected for independently consumed products. |
 | **`operations`** | Installers, administrators, operators, and technical support. Explain setup, deployment, configuration, monitoring, recovery, and operational safeguards. | Applicable when meaningful operational or administrative duties exist. |
 | **`developer`** | People maintaining or changing the product. Explain development setup, architecture, ownership, interfaces, verification, and non-obvious implementation rationale. | Expected for implementations maintained in the repository. |
-| **`product`** | Readers defining and understanding concrete product capabilities and domain behavior. Explain scope, requirements, business rules, constraints, supported product decisions, and unresolved functional questions. | Expected for identifiable products. |
-| **`management`** | Readers directing the product's evolution. Explain supported vision, strategic direction, priorities, guardrails, and documented trade-offs or transitional decisions. | Consider for every product; write supported direction when a trigger applies, without inventing strategy. |
+| **`product`** | Readers responsible for shaping and understanding the product's capabilities and domain behavior. Explain what the product actually provides, its scope, properties, domain rules, and limits, as well as supported desired capabilities, requirements, priorities, decisions, and open functional questions. | Expected for identifiable products. |
+| **`management`** | Readers assessing and steering the product's overall development. Explain what the product delivers and why it matters, relevant consequences, risks, dependencies, and development prospects, as well as supported vision, goals, strategic direction, priorities, guardrails, and trade-offs. | Consider for every product; write when a trigger applies to this readership. |
 
 ### Coverage Decisions
 
 - Check all five perspectives for every affected product. Missing directories do not establish inapplicability or justify ignoring a writing trigger.
 - Distinguish an audience being inapplicable from lacking evidence for a particular explanation. Do not invent operational duties, strategy, or product intent to populate an area.
-- A library consumer belongs to that library's `user` audience; a library maintainer or architect belongs to `developer`. Product and strategic concerns remain distinct even when the same person owns both.
+- A library consumer belongs to that library's `user` audience; a library maintainer or architect belongs to `developer`. Product and management readers may need different explanations of the same topic, even when one person holds both responsibilities.
 - Prefer the five standard names for new areas. Preserve established equivalent names when renaming would cause unnecessary disruption; do not create parallel synonyms or split audiences by job title.
-- An additional audience needs a demonstrated reader need that cannot coherently fit the existing perspectives. Vision is a topic within `management`, not a sixth audience.
+- An additional audience needs a demonstrated reader need that cannot coherently fit the existing perspectives. Vision is primarily a topic within `management`, not a sixth audience; other audiences may need its relevant context to understand their subject.
 - Coverage is a cumulative product goal. Each ordinary task must fulfill Section 6 within its investigated subject, not establish a complete baseline for every audience. A missing overview or unrelated chapter does not prevent a useful first contribution.
 
 ## 3. Documentation Layout and First Content
@@ -77,9 +79,9 @@ docs/
     developer/
       <documentation for product maintainers>
     product/
-      <documentation for concrete product behavior and decisions>
+      <documentation for readers responsible for product capabilities and domain behavior>
     management/
-      <documentation for direction, priorities, and guardrails>
+      <documentation for readers assessing and steering the product's development>
 ```
 
 This describes ownership, not a requirement to create empty folders. The work-history file is local-only and must not become a publication dependency.
@@ -94,7 +96,7 @@ Within the selected structure, extend a fitting page. Give a topic its own page 
 
 Write all new, revised, and consolidated audience documentation in English, regardless of the conversation language or the existing document's language. When working with non-English material, translate the complete affected explanation and its necessary context while preserving meaning, qualifications, and decision status; do not expand into unrelated content merely to translate it. Preserve identifiers, commands, paths, and quotations that require their original form.
 
-For every claim you write, revise, or absorb, preserve whether it is observed behavior, a wish, a provisional working objective, an approved decision, or an unresolved assumption. State this naturally where it matters; no compulsory per-file status schema is needed. Record user intent at the strength expressed: a tentative remark or scoped implementation request does not by itself establish an adopted product-wide requirement or strategy.
+For every claim you write, revise, or absorb, preserve whether it is observed behavior, a wish, a provisional working objective, an approved decision, a reasoned assessment or proposal, or an unresolved assumption. State this naturally where it matters; no compulsory per-file status schema is needed. Record user intent at the strength expressed: a tentative remark or scoped implementation request does not by itself establish an adopted product-wide requirement or strategy.
 
 Organize by durable reader questions and workflows, not by task chronology. Integrate new knowledge into the explanation instead of accumulating dated development notes. Preserve historical rationale where it helps, with its status clear.
 
@@ -139,6 +141,8 @@ Within the selected subject, maintain independently used or published documentat
 
 At task start, read the affected product's documentation entry points and the pages relevant to the work. Include task-related README, operational, design, and decision material outside the standard layout.
 
+Use these explanations to understand the product before implementation. They may provide broad orientation, describe actual behavior, or state desired behavior and requirements at different levels of specificity. Preserve their expressed status and authority under Section 3 rather than treating every description as a fixed requirement.
+
 If no entry point exists, inspect the product's available introduction and documentation names or headings. Search repository documentation using the affected capability, workflow, interface, configuration, component, and alternative names encountered during the task. Read credible matching passages with enough surrounding context to understand their meaning and status.
 
 Follow references that answer the same reader question, explain a necessary prerequisite or consequence, or establish a claim's authority. Repeat targeted searches when newly discovered relevant facts or names require them. Stop expanding when remaining material concerns other questions. Do not inventory unrelated products or pursue links merely because they exist.
@@ -155,7 +159,7 @@ Before completing writable work, documentation must be changed when any of these
 2. **Missing reusable explanation:** The task establishes a verified, reusable answer to a concrete reader question that the selected audience documentation structure does not adequately answer.
 3. **Missing structured coverage or fragmented explanation:** Supported information needed to answer the selected reader question is present in isolated or scattered documents, or in material organized for another readership, while the standard audience documentation or a qualifying established equivalent does not explain the subject coherently. An adequate standalone explanation still requires absorption when this structured coverage is missing. A different path within a qualifying established equivalent does not itself trigger relocation.
 
-Useful answers must support a concrete use, operation, product decision, maintenance, or verification need. Constraints, failure causes, ownership boundaries, recovery steps, and supported rationale can qualify even when behavior did not change. A first encountered but material constraint can qualify; a prior request or repeated incident is not required. Do not invent hypothetical reader questions merely to create documentation. Incidental implementation details and activity summaries alone do not.
+Useful answers must support a concrete need for use, operation, product understanding, product decisions, overarching assessment or steering, maintenance, or verification. Capabilities, properties, constraints, failure causes, ownership boundaries, recovery steps, and supported rationale or consequences can qualify even when behavior did not change. A first encountered but material constraint can qualify; a prior request or repeated incident is not required. Do not invent hypothetical reader questions merely to create documentation. Incidental implementation details and activity summaries alone do not.
 
 Proportionality limits the subject and necessary explanation; it does not cancel a writing trigger inside that subject. Do not impose a fixed number of audiences or pages, or leave known triggered work undone merely because another audience was prioritized.
 
@@ -167,7 +171,7 @@ An explicit documentation assignment is governed by its requested outcome and sc
 
 Correct or extend a fitting page within the standard product-audience structure or a qualifying established equivalent (Section 3). If no such page exists, create the first or next useful page in the appropriate product-audience area now. Missing overall structure, an incomplete manual, or absent documentation for other audiences is not a reason to postpone an actionable explanation.
 
-Supply the context, prerequisites, rules, exceptions, consequences, and supported rationale needed to answer the selected question. Keep scope honest. A standalone fragment or unexplained link is not a useful first document; a complete manual is not a prerequisite.
+Build each explanation from verified task knowledge and relevant existing descriptions, using Section 2's reader perspective. Supply the context, prerequisites, rules, exceptions, consequences, and supported rationale needed to answer the selected question. Keep scope honest. A standalone fragment or unexplained link is not a useful first document; a complete manual is not a prerequisite.
 
 When absorbing information from isolated or scattered sources, synthesize its applicable substance into a coherent explanation for the reader. Do not copy excerpts into a pile or replace the explanation with a source list. Preserve meaningful qualifications and evidence references where they help verify authority, status, or disagreement.
 
@@ -177,7 +181,7 @@ When one fact affects several current audience publications or products, update 
 
 Apply Section 3's statement-status rule to all writing, including initial creation and accuracy corrections, not only consolidation.
 
-Technical evidence can establish current behavior, including domain behavior described in `product` documentation as implemented behavior rather than an approved requirement. Approved intent, priorities, and strategic direction require evidence that actually supports that intent. Do not turn an implementation constraint into a product requirement or invent a deliberate transition merely because the code differs from a vision.
+Use technical evidence to explain verified capabilities, properties, behavior, and limits to any relevant audience under Section 2. Distinguish these facts from claims about adopted requirements, priorities, or strategic direction, which require evidence that supports that authority. Reasoned assessments and proposals may explain implications when their basis and material uncertainties are clear; they do not establish an adopted decision. Do not turn an implementation constraint into a product requirement or invent a deliberate transition merely because the code differs from a vision.
 
 When implementation does not meet a documented requirement or decision, retain that intent with its supported status and identify the discrepancy. Correct an inaccurate account of current behavior without silently superseding the intended rule.
 
@@ -202,7 +206,7 @@ If a triggered explanation or explicit documentation assignment lacks evidence n
 
 Leaving documentation unchanged is valid when no trigger holds: the selected audience documentation structure and affected independent publications already answer the relevant questions accurately and coherently, or the task yields no reader-relevant knowledge requiring correction, creation, or absorption. An adequate standalone file alone does not establish fulfilled structured coverage. A read-only restriction, explicit scope limit, insufficient evidence, or unresolved product ownership can instead block a triggered action. Name that concrete limitation without presenting the obligation as fulfilled.
 
-Absence of evidence for an unstated product intent or management strategy does not by itself trigger writing or create a blocker to report. This does not excuse an unresolved material conflict encountered in the selected topic or an unfulfilled explicit documentation request.
+Absence of evidence for an unstated product intent or management strategy does not by itself trigger writing or create a blocker to report. When another trigger applies, document supported product knowledge and reasoned assessments for those readers without inventing the missing intent. This does not excuse an unresolved material conflict encountered in the selected topic or an unfulfilled explicit documentation request.
 
 A known, supported action must not be replaced by a TODO, a work-history entry, an audience check, or a proposal to document it later. Missing folders, unchanged behavior, and incomplete overall coverage are not blockers.
 
