@@ -1,9 +1,15 @@
 ---
 name: review-security
-description: Evidence-driven review of existing source code for concrete security vulnerabilities, with adversarial verification and a prioritized, traceable report. Not a general architecture or code-quality review.
+description: Use for a read-only security review when the user explicitly requests examination of existing source code for concrete vulnerabilities. Verify candidates against source evidence and report prioritized, traceable findings. Not for generic code-quality or architecture reviews.
 ---
 
 # Security Review
+
+## Activation and read-only contract
+
+Use this skill when the user explicitly requests a source-code security review or names `review-security`. Do not activate it for generic code reviews, architecture assessments, or inferred security relevance alone.
+
+This is a **report-only review**: do not modify reviewed source files, repository state, or external systems. Do not apply fixes, create commits, or publish changes as part of the review. Target-controlled code may be executed only when the user has authorized the specific validation activity and adequate isolation prevents changes outside a disposable test environment. Otherwise rely on source-level evidence and disclose what remains unvalidated.
 
 ## Objective and boundaries
 
@@ -114,6 +120,7 @@ Use the following identifiers and priorities consistently throughout the report.
 
 - Assign every **confirmed** vulnerability a unique ID `F-001`, `F-002`, ... and a priority `P0`–`P3`. Use the same ID consistently in the heading, all references, and final summary table.
 - Assign serious **unresolved** leads `V-001`, `V-002`, ...; mark them `NEEDS_VALIDATION` and leave priority as `—` (**not** a speculative P-score). Rejected leads are not published as findings.
+- Deduplicate confirmed findings by underlying root cause. Describe related affected paths within one finding when they share the same fix; use separate IDs for independently remediable security failures.
 - Evaluate and sort confirmed findings **before numbering**: `P0` first, then `P1`, `P2`, `P3`; number them in that order. Do not renumber within the same report.
 
 | Priority | Meaning | Evidence-oriented anchor |
