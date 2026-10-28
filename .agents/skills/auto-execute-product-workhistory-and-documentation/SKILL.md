@@ -1,6 +1,6 @@
 ---
 name: auto-execute-product-workhistory-and-documentation
-description: "Apply automatically when working in a software product repository, including exploration, planning, implementation, review, debugging, testing, maintenance, and documentation. Consult relevant documentation at task start, including during read-only work. Read-only tasks permit reading and reporting only. For tasks that permit changes, preserve applicable local work history and maintain self-contained documentation in English for user, operations, developer, product, and management audiences through task-bounded updates, creation, and consolidation. Prioritize the user's task and its authorized scope."
+description: "Apply automatically when working in a software product repository, including exploration, planning, implementation, review, debugging, testing, proofs, benchmarks, maintenance, and documentation. Read this skill at task start; no documentation request, behavior change, passing result, or final acceptance required. Consult relevant docs; for writable work, maintain local work history and self-contained English audience docs. Read-only means reading and reporting only. Respect the user's scope."
 ---
 
 # Auto Execute Product Work History and Documentation
