@@ -69,43 +69,51 @@ Before inventing a new grouping, look for an **existing suitable owner, home, or
 
 Possible recommendations include keeping the arrangement, clarifying navigation or ownership, relocating an artifact, consolidating dispersed content, removing an unnecessary separate home, splitting a misleading grouping, or introducing a justified boundary.
 
-Prefer the **least disruptive change that obtains the organizational benefit**, not the smallest change regardless of whether it resolves the issue. Existing destinations are not automatically better, and a name such as "shared" is not evidence of suitability. No universal example directory structure belongs in the review.
+Select the arrangement that best addresses the identified organizational concern. Between alternatives with comparable benefits, prefer the less disruptive one; when a stronger option involves broader changes, describe that trade-off rather than substituting an inferior cheap fix. Existing destinations are not automatically better, and a name such as "shared" is not evidence of suitability. No universal example directory structure belongs in the review.
 
 A proposed exact path must exist in or be reasonably derived from the inspected repository; never invent precise paths for apparent completeness. When different destinations are plausible, compare them briefly. If ownership or the better destination cannot yet be resolved, present it as an open decision, not as an implementation-ready move.
 
 Also test whether improved links, naming, documentation navigation, or an ownership note would solve the identified organizational problem without moving anything. Prefer those when appropriate; do not use a cosmetic fix to conceal genuinely fragmented ownership.
 
-### 5. Consider relocation impact proportionately
+### 5. Assess the overall change cost proportionately
 
-Once a recommendation involves a move or regrouping, identify its **likely change boundary** and meaningful consequences. Follow relevant imports, namespaces, relative or configured paths, tests and discovery, generated artifacts, build and package rules, public interfaces, scripts, CI/CD, deployment, documentation links, and consumers where they are actually implicated.
+First judge the proposed organization by its fit and expected benefit. Then give the reader a separate, qualitative sense of the **overall change cost** involved in realizing it: the likely amount and spread of modifications, affected consumers and references, coordination across owners or projects, compatibility exposure, and required verification. Consider these dimensions together, not just the count of files moved or imports edited.
 
-Separate **confirmed accompanying changes** from **possible risks needing implementation-time verification**. Mention important compatibility or coordination constraints and a sensible way to check the eventual result.
+For moves or regroupings, trace relevant imports, namespaces, relative or configured paths, tests and discovery, generated artifacts, build and package rules, public interfaces, scripts, CI/CD, deployment, documentation links, and consumers where actually implicated. Distinguish known associated work from dependencies and risks that require implementation-time verification.
 
-This is an assessment, **not** a full migration plan or permission to implement. For a straightforward organizational move, one short migration note can suffice. For a risky reorganization, explain why the cost may outweigh the benefit. Do not treat the number of path edits as a direct measure of organizational value.
+Describe a broad but valuable improvement alongside its larger change cost so the user can weigh and schedule it. A straightforward correction may need only a short note; a complex one may warrant a fuller explanation of why implementation involves several areas. This is a review-level estimate, **not** a time quote, full migration plan, or permission to implement.
 
 ### 6. Decide what deserves a finding
 
 Use the following evidence states:
 
 - **Actionable organization recommendation (F-):** the current arrangement and relevant relationships are understood, a practical improvement is credibly explained, an appropriate correction is bounded, and major counterarguments have been considered. This is a *reasoned design proposal*, not necessarily a proven defect.
-- **Open organizational question (V-):** the observed arrangement suggests a potentially useful improvement, but a material ownership choice, destination, missing evidence, or migration constraint prevents a responsible recommendation. State what must be resolved.
+- **Open organizational question (V-):** the observed arrangement suggests a potentially useful improvement, but a material ownership choice, destination, or evidence gap leaves the correction itself undecided. State what must be resolved.
 - **Dismissed lead:** the apparent inconsistency is harmless, justified, too speculative, purely stylistic, or outside placement scope. Do not report it as a finding.
 
 Group artifacts that form one coherent improvement into **one selectable finding**; avoid many tiny findings for symptoms of the same scattering problem. Keep independently executable improvements separate. Do not turn one broad redesign into an unbounded list of file moves.
 
-## IDs, priorities, and implementation readiness
+## Finding IDs, severity, change cost, and implementation readiness
 
 Assign stable `F-001`, `F-002`, etc. to actionable recommendations. Preserve IDs in the report and in follow-up work. Assign `V-001` etc. to open decisions; do not imply that `V-` items are safe to implement as-is.
 
-Use restrained, **organizational-value priorities**, not security-style severity or fix difficulty:
+Use four qualitative **severity** levels for the significance of the current organizational concern and the practical improvement a sound correction offers. Severity is about **organizational impact**, not technical-defect urgency, release gating, or migration difficulty:
 
-- **P1 — High:** A substantial, well-supported organizational mismatch or scattering across important workflows, responsibilities, or maintainers; reorganizing is likely to materially improve clarity or maintenance locality.
-- **P2 — Medium:** A meaningful, supported opportunity to consolidate, relocate, or clarify responsibility with practical benefit, but without P1-level reach.
-- **P3 — Low:** A bounded, modest but defensible organizational improvement. Do not report mere cosmetic preferences as P3 findings.
+- **Critical:** An exceptional, evidenced breakdown of placement or ownership across essential responsibilities or workflows, with far-reaching practical consequences. Reserve for genuinely systemic cases, not merely a large proposed move.
+- **High:** Substantial scattering, competing ownership, or misgrouping in important workflows where a clearer organization would materially improve how work is located or maintained.
+- **Medium:** A meaningful, well-supported opportunity to improve responsibility clarity, grouping, or maintenance locality without High-level reach.
+- **Low:** A bounded, modest yet concrete organizational improvement. Do not report purely cosmetic preferences.
 
-P1 is not a release blocker or emergency by default. Do not make the amount of migration work, reviewer confidence, and organizational value one number. State notable uncertainty and migration cost separately where they affect the decision.
+Also estimate **change cost** independently for each actionable recommendation. Use **Low / Medium / High / Unclear** as qualitative, overall implementation-cost bands, not hours or numerical scores:
 
-A selectable `F-` item must define a **coherent proposed correction**. If an unresolved choice materially changes what would be implemented, classify it as `V-` until resolved. Exact implementation details may still require revalidation later.
+- **Low:** Localized changes with few known dependents and straightforward verification.
+- **Medium:** Changes across several artifacts or areas, or moderate reference updates, coordination, or verification.
+- **High:** Broad cross-component moves, significant compatibility exposure, coordinated ownership changes, or substantial validation work.
+- **Unclear:** Insufficient evidence to size the overall implementation footprint responsibly; name the main unknowns.
+
+Assess cost from the combined likely change scope, dependencies, coordination, compatibility considerations, and validation—not just coding effort. Explain the key cost drivers briefly. Treat **severity** and **change cost** as two independent decision aids; a substantial organizational improvement can be reported with High change cost. Do not inflate severity because implementation is large or reduce it because implementation is inconvenient. Keep evidence uncertainty distinct from both.
+
+A selectable `F-` item must define a **coherent proposed correction**. If an unresolved choice materially changes what would be implemented, classify it as `V-` until resolved. Exact implementation details and cost may still require revalidation later.
 
 ## Required Markdown review output
 
@@ -117,14 +125,15 @@ Briefly say what was reviewed, which conventions or constraints matter, and any 
 
 ### 2. Organization findings
 
-Use the heading `### F-001 [P2] Clear organizational suggestion` for every actionable item.
+Use the heading `### F-001 [High] Clear organizational suggestion` for every actionable item. The bracketed value is organizational severity, not implementation cost.
 
 Prefer this concise, decision-friendly order:
 
 - **Observation:** What appears scattered, redundant in organizational ownership, misplaced, or awkwardly grouped? Name actual affected paths or responsibilities and the relevant evidence.
 - **I would organize it this way:** State the specific proposed regrouping, consolidation, ownership clarification, or placement. Name the suitable existing destination where justified; distinguish a new grouping from an established one.
 - **Why this is better:** Explain the expected practical improvement and why the current arrangement or a plausible alternative is less useful. Mark inferred benefits and assumptions as such.
-- **If implemented:** State the necessary or likely accompanying changes, important compatibility risks, and suitable validation. Keep technical details proportional to the proposal.
+- **Change cost:** Low, Medium, High, or Unclear; briefly explain the overall change footprint and main cost drivers, including material uncertainty.
+- **If implemented:** State necessary or likely accompanying changes, important compatibility or coordination considerations, and suitable validation. Keep technical details proportional to the proposal; avoid repeating the change-cost explanation.
 
 These are content requirements, not a demand for four lengthy paragraphs on every minor item. Include exact paths and source locations when helpful to substantiate a recommendation; do not replace the recommendation with a path-by-path technical audit.
 
@@ -142,10 +151,10 @@ Briefly note meaningful review gaps, cross-finding dependencies, or migration co
 
 End with a compact table of actionable `F-` recommendations. Use the original IDs so the user can later select specific proposals:
 
-| ID | Priority | Organizational observation | Suggested change | Implementation note |
-| --- | --- | --- | --- | --- |
+| ID | Severity | Change cost | Organizational observation | Suggested change | Implementation note |
+| --- | --- | --- | --- | --- | --- |
 
-Order by expected organizational value, not by the ease of proving a technical defect. Do not add a second general recap after the table. If there are no actionable findings, explicitly say so instead of creating filler rows.
+Order by organizational severity, not by change cost or the ease of proving a technical defect. Use the same cost labels and scope in the table as in each detailed finding. Do not add a second general recap after the table. If there are no actionable findings, explicitly say so instead of creating filler rows.
 
 ## Handoff for selected implementation
 
@@ -162,8 +171,9 @@ Before reporting, ask:
 - Is the current relationship grounded in the repository, and is the proposed benefit reasoned rather than invented?
 - Have legitimate reasons for the present grouping and simpler non-move options been considered?
 - Did I look for suitable **existing** locations before proposing new structures?
-- Is each correction specific and bounded enough to be selected later by ID, with material migration risks noted?
-- Have I avoided universal folder rules, superficial inconsistency findings, duplicate findings, inflated priorities and unnecessary architecture redesign?
+- Is each correction specific and bounded enough to be selected later by ID, with material migration considerations and overall change cost explained?
+- Are severity and change cost assessed independently using the stated levels, with cost based on the full change footprint rather than a guess in hours?
+- Have I avoided universal folder rules, superficial inconsistency findings, duplicate findings, inflated severity and unnecessary architecture redesign?
 - Does the final table accurately match the detailed recommendations, and are open decisions separated?
 
 **The goal is useful organizational judgment, not a high finding count or proof that the repository is broken.**
