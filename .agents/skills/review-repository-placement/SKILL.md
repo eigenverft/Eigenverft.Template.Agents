@@ -17,6 +17,8 @@ Approach the repository as an experienced maintainer asking:
 
 **Which existing artifacts or responsibilities would be clearer, easier to find or maintain, or more coherently owned if they were placed or grouped differently?**
 
+Treat repository organization as a **working interface** for human maintainers and coding agents. A good arrangement helps them locate the responsible artifacts, recognize the authoritative source, and understand what belongs together without repeatedly reconstructing the repository map. Evaluate the cumulative value of easier orientation, discovery and maintenance over future tasks, not only immediate correctness. Ground expected gains in concrete workflows; do not invent time or token savings or assume more folders automatically help.
+
 Make practical, repository-specific **organization recommendations**, not a technical defect inventory. A recommendation may be valuable even when the current layout still builds and no incident has occurred. However, distinguish an observed organizational fact from an inferred improvement; do not claim measured harm or guaranteed benefits without evidence.
 
 Do not impose universal directory trees, favorite architecture patterns, or uniformity for its own sake. Directory names, file types, imports, file counts, and conventional locations are clues, not placement rules. A deliberately distributed structure may be correct. No useful recommendations is an acceptable result.
@@ -29,7 +31,7 @@ Keep the scope on **where existing things belong and how existing responsibiliti
 
 Resolve the exact artifact, component, product, or repository scope from the user's request and context. Build a **small working picture** of relevant areas, their purpose, their consumers and existing ownership conventions.
 
-Use repository instructions, representative artifacts, references, build and packaging metadata, documentation and history where relevant. Distinguish mandatory tool/framework locations, explicit repository policies, recurring local practice, and assumptions. Do not inventory every file as a prerequisite. Expand into adjacent areas only when comparison or evidence calls for it; disclose meaningful coverage limits.
+Use repository instructions, representative artifacts, references, build and packaging metadata, documentation and history where relevant. Distinguish mandatory tool/framework locations, explicit repository policies, recurring local practice, and assumptions. **Assess the usefulness of established conventions themselves**, not only compliance with them. Determine which locations are technically required, which are published conventions that could be revised, and which reflect historical choices. A documented, working arrangement is evidence of current usage, not by itself evidence that the organization is best. Do not inventory every file as a prerequisite. Expand into adjacent areas only when comparison or evidence calls for it; disclose meaningful coverage limits.
 
 ### 2. Actively discover organizational opportunities
 
@@ -43,7 +45,7 @@ Explore these **candidate lenses**, choosing those useful to the repository:
 - **Mixed ownership:** a location combines unrelated responsibilities in a way that obscures where future work belongs.
 - **Needless fragmentation:** many small separate locations or boundaries create navigation or coordination cost without preserving useful independence.
 - **Outdated organization:** historical or transitional placement no longer reflects current consumers, ownership, or maintenance workflows.
-- **Discoverability and maintenance locality:** finding or changing one coherent concern involves avoidable cross-area searching or edits.
+- **Discoverability and maintenance locality:** finding or changing one coherent concern involves avoidable cross-area searching, ambiguous entry points, repeated context reconstruction, or edits.
 
 Use local patterns, manifests, content, consumers, references, tests, change history, and relevant documentation to generate **hypotheses**, not conclusions. Differences are often legitimate. Shared consumption does not prove shared ownership. Do not create findings just to cover every lens.
 
@@ -61,6 +63,8 @@ For each promising candidate, determine:
 
 **A technically valid present arrangement can still have a well-justified organizational improvement.** Conversely, an unusual but coherent arrangement deserves no finding. If the improvement is only a subjective layout preference without a meaningful organizing rationale, discard it.
 
+For a plausible recurring task, compare how a new maintainer or coding agent would find the owner, identify relevant neighbors, and make a coherent change under the current arrangement versus the alternative. Consider cumulative maintenance value without claiming guaranteed efficiency gains. Working links or searchability can help, but do not automatically settle whether the grouping is useful; equally, a move with no clearer workflow may add nothing.
+
 Do not require issues, failed builds, or historical incidents to corroborate a reasoned improvement. Require enough repository evidence to make the current relationship and proposed alternative credible.
 
 ### 4. Compare existing destinations and alternatives
@@ -75,9 +79,11 @@ A proposed exact path must exist in or be reasonably derived from the inspected 
 
 Also test whether improved links, naming, documentation navigation, or an ownership note would solve the identified organizational problem without moving anything. Prefer those when appropriate; do not use a cosmetic fix to conceal genuinely fragmented ownership.
 
+Distinguish **where an artifact is stored**, **where a command is invoked**, and **which paths are documented or consumed externally**. These may coincide but need not. Assess whether a cleaner location and updated entry points would better serve ongoing work; account for adapting documented commands and dependent paths in change cost. Respect actual fixed runtime or external contracts rather than assuming every existing path is immovable.
+
 ### 5. Assess the overall change cost proportionately
 
-First judge the proposed organization by its fit and expected benefit. Then give the reader a separate, qualitative sense of the **overall change cost** involved in realizing it: the likely amount and spread of modifications, affected consumers and references, coordination across owners or projects, compatibility exposure, and required verification. Consider these dimensions together, not just the count of files moved or imports edited.
+First judge the proposed organization by its fit and expected benefit, including recurring discovery and maintenance gains where credible. Then give the reader a separate, qualitative sense of the **overall change cost** involved in realizing it: the likely amount and spread of modifications, affected consumers and references, coordination across owners or projects, compatibility exposure, and required verification. Consider these dimensions together, not just the count of files moved or imports edited.
 
 For moves or regroupings, trace relevant imports, namespaces, relative or configured paths, tests and discovery, generated artifacts, build and package rules, public interfaces, scripts, CI/CD, deployment, documentation links, and consumers where actually implicated. Distinguish known associated work from dependencies and risks that require implementation-time verification.
 
@@ -131,7 +137,7 @@ Prefer this concise, decision-friendly order:
 
 - **Observation:** What appears scattered, redundant in organizational ownership, misplaced, or awkwardly grouped? Name actual affected paths or responsibilities and the relevant evidence.
 - **I would organize it this way:** State the specific proposed regrouping, consolidation, ownership clarification, or placement. Name the suitable existing destination where justified; distinguish a new grouping from an established one.
-- **Why this is better:** Explain the expected practical improvement and why the current arrangement or a plausible alternative is less useful. Mark inferred benefits and assumptions as such.
+- **Why this is better:** Explain the expected practical improvement, including repeated discovery, orientation or maintenance benefits where relevant, and why the current arrangement or a plausible alternative is less useful. Mark inferred benefits and assumptions as such.
 - **Change cost:** Low, Medium, High, or Unclear; briefly explain the overall change footprint and main cost drivers, including material uncertainty.
 - **If implemented:** State necessary or likely accompanying changes, important compatibility or coordination considerations, and suitable validation. Keep technical details proportional to the proposal; avoid repeating the change-cost explanation.
 
@@ -169,7 +175,8 @@ Before reporting, ask:
 - Did I actively look for **scattering, duplication of organizational responsibility, misleading grouping, and consolidation opportunities**, not just broken paths?
 - Does each finding actually recommend a **better organization**, rather than merely fix an unrelated technical defect?
 - Is the current relationship grounded in the repository, and is the proposed benefit reasoned rather than invented?
-- Have legitimate reasons for the present grouping and simpler non-move options been considered?
+- Have I questioned whether existing documented conventions themselves help people and coding agents locate and maintain related work, while distinguishing fixed requirements from changeable practice?
+- Have I considered recurring navigation and maintenance benefits, legitimate reasons for the present grouping, and simpler non-move options?
 - Did I look for suitable **existing** locations before proposing new structures?
 - Is each correction specific and bounded enough to be selected later by ID, with material migration considerations and overall change cost explained?
 - Are severity and change cost assessed independently using the stated levels, with cost based on the full change footprint rather than a guess in hours?
