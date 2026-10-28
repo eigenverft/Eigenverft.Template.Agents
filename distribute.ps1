@@ -432,6 +432,7 @@ $destinationNames = @(
     'Eigenverft.App.McpServer'
     'Eigenverft.App.ReverseProxy'
     'Eigenverft.Distributed.Drydock'
+    'Eigenverft.Lib.PortSpan'
     'Eigenverft.Manifested.Agent'
     'Eigenverft.Manifested.Drydock'
     'Eigenverft.Manifested.Package'
