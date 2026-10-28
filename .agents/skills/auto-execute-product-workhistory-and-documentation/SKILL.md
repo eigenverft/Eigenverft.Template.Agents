@@ -121,9 +121,11 @@ Maintain **`docs/<product>/workhistory.md`** as a small, local-only trace of use
 - Work history can mention relevant audience-documentation updates, but does not substitute for maintaining those documents. Audience publications must not depend on links to the work-history file.
 - Do not record secrets, sensitive user details, raw conversations, unsupported motives, or unrelated activity. Respect read-only and explicitly restricted work. If no product can be responsibly identified, report that uncertainty rather than inventing a product path.
 
-## 5. Independent Documentation and Publication
+## 5. Independent Audience Documentation
 
-Treat each `docs/<product>/<audience>/` subtree, or the corresponding audience area in an established equivalent defined in Section 3, as a **self-contained publication unit**:
+Treat each `docs/<product>/<audience>/` subtree, or the corresponding audience area in an established equivalent defined in Section 3, as a **self-contained documentation unit**:
+
+Audience documentation is repository-maintained product knowledge, not automatically software distribution content. Its inclusion in release artifacts requires explicit selection by the applicable publishing process.
 
 - Readers must not need another product's or audience's documentation to understand essential content.
 - Keep essential explanations, instructions, examples, and assets within the audience publication. Do not depend on shared includes, symlinks, fragment registries, or special build-time resolution.
