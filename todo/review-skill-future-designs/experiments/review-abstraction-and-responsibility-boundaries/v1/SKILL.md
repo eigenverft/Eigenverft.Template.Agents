@@ -1,15 +1,15 @@
 ---
 name: review-abstraction-and-responsibility-boundaries-v1
-description: Use for a read-only review when the user explicitly selects this experimental variant to assess abstraction boundaries and responsibility separation in existing code. Examine whether related behavior, state, and rules are effectively encapsulated and ordinary changes remain local. Report evidence-grounded recommendations only in chat, without modifying files or executing project code.
+description: Use for a read-only review when the user requests an assessment of abstraction boundaries and responsibility separation in existing code. Examine whether coherent behavior, state, and rules are effectively encapsulated and ordinary changes remain local. Evaluate practical boundary improvements from source evidence without prescribing patterns. Return findings only in chat and leave code and repository state unchanged.
 ---
 
-# Review Abstraction and Responsibility Boundaries — Experiment
+# Review Abstraction and Responsibility Boundaries
 
-Experimental adaptation of the active `review-abstraction-and-responsibility-boundaries` skill to the five-phase review design. This copy lives under `todo/` and does not replace or automatically activate the original skill. The two experimental copies share the same review question, authorization, evaluation, and output contract. Only **03 – Investigation** varies.
+Assess whether coherent behavior, state, and rules have effective responsibility boundaries, and whether ordinary changes stay local without unnecessary knowledge of other responsibilities. Ground proposals in actual source behavior rather than preferred abstraction patterns.
 
 ## 01 – Skill Selection
 
-**Identity / Applicability.** Use only when this particular experimental variant is explicitly selected for a review of abstraction boundaries, responsibility separation, or encapsulation. Do not activate for an ordinary coding request, a generic code review, or merely because the file was read. An experimental invocation must identify the variant explicitly; do not assume that placing a file under `todo/` registers an invocable skill.
+**Identity / Applicability.** This review concerns abstraction boundaries, responsibility separation, and encapsulation in existing code. Apply its criteria to the supplied review target without turning it into an unrelated audit.
 
 ## 02 – Review Setup
 
@@ -35,7 +35,7 @@ Examine both **missing boundaries** and **unnecessary fragmentation** of one coh
 
 ## 03 – Investigation
 
-**V1: Direct candidate investigation, with evaluation-led return when evidence is missing.**
+**Direct candidate investigation, with evaluation-led return when evidence is missing.**
 
 1. **Reconstruct responsibilities from source.** Read the selected implementation and enough context to identify concrete tasks and decisions, state ownership, valid transitions, external readers and writers, internal rules, interactions, construction, lifetime, and cleanup when relevant. Do not infer responsibilities from file or type names alone.
 2. **Notice and formulate plausible candidates while reading.** Look for mixed but independently understandable tasks; behavior, state, and rules scattered between owners; callers that must reconstruct internal rules; bypassed operations; excessive navigation or forwarding layers; unnecessarily exposed mutable state; and one coherent responsibility split across ineffective units. Also question whether an apparent extraction really owns a distinct decision.
@@ -46,7 +46,7 @@ A candidate may still be vague or wrong at this stage. Only Evaluation establish
 
 ## 04 – Evaluation
 
-Use the **same** procedure for every candidate reaching this phase, regardless of experimental variant. Do not treat relevance, an unusual code shape, or a conceivable refactoring as proof of a boundary problem.
+Evaluate each candidate reaching this phase against the evidence and criteria below. Do not treat relevance, an unusual code shape, or a conceivable refactoring as proof of a boundary problem.
 
 **4.1 Validation — establish the actual situation.**
 
@@ -54,7 +54,7 @@ Use the **same** procedure for every candidate reaching this phase, regardless o
 - Distinguish syntactic nesting, runtime composition, and domain sub-responsibility. Shared storage, multiple writers, broad references, and central coordination can be legitimate; what matters is their actual use and ownership.
 - Test the concern against an ordinary plausible change scenario: which decisions change, what must be understood, which areas really need edits, and why? Separate necessary multi-area collaboration from avoidable leaking of rules or implementation knowledge. Do not count files as a proxy for quality.
 - Check relevant counterevidence. An apparently large class, long method, missing interface, single implementation, nested type, conditional branch, or several changed areas **alone** is not a finding. Avoid conclusions based solely on names, patterns, imagined future needs, or an unverified intent.
-- If a candidate requires more material context, return selectively to Investigation as permitted by the variant. If decisive evidence cannot be obtained within authority and scope, preserve an honest limitation or conditional observation.
+- If a candidate requires more material context, return selectively to Investigation when additional inquiry could change the conclusion. If decisive evidence cannot be obtained within authority and scope, preserve an honest limitation or conditional observation.
 
 **4.2 Assessment — is a better boundary justified?**
 
@@ -75,7 +75,7 @@ Group symptoms with the same underlying responsibility and improvement direction
 
 ## 05 – Review Reporting
 
-**Result Selection / Output Contract.** Write in the user's language and return only in chat. Begin with the reviewed scope and meaningful context or coverage limits. Choose findings, supporting explanation, alternatives, actions, and limitations only when justified; do not invent a universal verdict, fill empty sections, or publish rejected hypotheses as findings. The **same result and reporting rules** apply to both experiment variants.
+**Result Selection / Output Contract.** Write in the user's language and return only in chat. Begin with the reviewed scope and meaningful context or coverage limits. Choose findings, supporting explanation, alternatives, actions, and limitations only when justified; do not invent a universal verdict, fill empty sections, or publish rejected hypotheses as findings.
 
 **Overview table when supported recommendations exist:**
 
