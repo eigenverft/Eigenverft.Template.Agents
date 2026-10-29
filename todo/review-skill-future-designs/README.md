@@ -236,9 +236,9 @@ flowchart TD
 - **Abschluss nach Aussagekraft, nicht Queue-Leere:** Ein abgearbeiteter Kandidatenbestand beweist keine ausreichende Abdeckung. Umgekehrt darf ein Review bei verhältnismäßig erschlossenem Suchraum, ausreichender Prüfung und transparenten Grenzen enden.
 - **Keine Änderung der Befugnisse:** Discovery, Subanalyse und Evaluation bleiben innerhalb des jeweiligen Scope, der Authority und der bestehenden Sicherheitsgrenzen; aus einem Kandidaten folgt keine Erlaubnis zur Umsetzung.
 
-### Geplante praktische Gegenprobe: V1 gegen V2
+### Praktische Gegenprobe: V1 gegen V2
 
-Der nächste Schritt ist **nicht** die sofortige Einführung von V2 als Standard, sondern ein kontrollierter Versuch mit einem **bestehenden Review-Skill**:
+V2 wird nicht allein aufgrund des Entwurfs als Standard übernommen. Als erste Grundlage wurde `review-abstraction-and-responsibility-boundaries` gewählt; zwei methodisch vergleichbare Fassungen liegen unter `todo/review-skill-future-designs/experiments/review-abstraction-and-responsibility-boundaries/` (V1 und V2). Der Vergleich soll sich am tatsächlichen Review-Verhalten orientieren:
 
 1. Einen fachlich geeigneten Review-Skill auswählen und **zwei experimentelle Varianten** auf derselben Ausgangsbasis herstellen: eine nach V1, eine nach V2. Ziel, fachliche Review-Lens, Authority und wesentliche Ergebnisanforderungen möglichst konstant halten. Die aktive Originalfassung nicht stillschweigend ersetzen.
 2. Beide Varianten an **denselben realistischen Review-Aufgaben und demselben Repository-/Revisionsstand** erproben; die Durchläufe möglichst unabhängig halten, damit die Ergebnisse sich nicht gegenseitig vorprägen.
@@ -246,4 +246,10 @@ Der nächste Schritt ist **nicht** die sofortige Einführung von V2 als Standard
 4. Auch Gegenbeispiele erfassen: Wo bringt V2 mehr Breite und bessere Befunde, wo erzeugt es unnötige Kandidaten, Mehraufwand oder sogar schlechtere Entscheidungen? Wo ist V1 mindestens gleich gut?
 5. Erst aus dem **beobachteten Verhalten** entscheiden, ob V2 übernommen, vereinfacht, verändert oder verworfen werden sollte.
 
-**Noch nicht durchgeführt:** Es gibt bisher keinen solchen Variantenversuch, keine Vergleichsdaten und keinen Nachweis, dass der Kandidatenbaum V1 übertrifft. Dieses Dokument bewahrt beide Entwürfe, damit wir die Unterschiede in der Praxis prüfen können.
+### Vorläufige Beobachtung aus den Praxistests (2026-10-29)
+
+- **Schwächere Modelle:** Laut bisheriger praktischer Erprobung des Nutzers zeigen die beiden Skill-Fassungen **keinen nennenswerten Unterschied** im Ergebnis. Für diese getesteten Modelle ist derzeit **kein erkennbarer Mehrwert (Gain) von V2 gegenüber V1** festzustellen.
+- **Leistungsfähigere Modelle:** Die Erprobung läuft noch; ein Ergebnis liegt noch nicht vor.
+- **Einordnung:** Dies ist ein qualitatives Zwischenfazit, keine abgeschlossene oder quantifizierte Gegenprobe. Modellbezeichnungen, Testfälle, Einzelresultate und Messwerte sind hier noch nicht dokumentiert. Insbesondere folgt daraus weder eine allgemeine Gleichwertigkeit beider Designs noch ein Vorteil für V2 bei stärkeren Modellen.
+
+Die beiden Entwürfe bleiben für die weitere Erprobung erhalten; über eine Übernahme wird erst anhand der praktischen Unterschiede entschieden.
