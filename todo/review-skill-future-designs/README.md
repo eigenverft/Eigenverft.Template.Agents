@@ -253,3 +253,11 @@ V2 wird nicht allein aufgrund des Entwurfs als Standard übernommen. Als erste G
 - **Einordnung:** Dies ist ein qualitatives Zwischenfazit, keine abgeschlossene oder quantifizierte Gegenprobe. Modellbezeichnungen, Testfälle, Einzelresultate und Messwerte sind hier noch nicht dokumentiert. Der leicht bessere Eindruck bei leistungsfähigeren Modellen ist kein Nachweis eines allgemeinen oder messbar großen V2-Vorteils.
 
 Die beiden Entwürfe bleiben für die weitere Erprobung erhalten; über eine Übernahme wird erst anhand der praktischen Unterschiede entschieden.
+
+### Praxistest: Early Exit Prevention Gate (2026-10-29)
+
+**Beobachtung:** In den bisherigen Durchläufen mit dem schwächeren Modell wurden jeweils **zwei Findings** berichtet, auch nach einer umfangreicheren, später wieder verworfenen Nachschärfung der Investigation. Mit einer **einzelnen zusätzlichen Intensitäts- und Nichtabbruch-Regel** in Phase 03 von V2 (`6c10fb7`) ergab der nächste Test **drei Findings**. Diese drei entsprachen nach Einschätzung des Nutzers ungefähr den Findings des leistungsfähigeren Modells. Das ist ein **positives Einzelresultat**, noch keine abgesicherte allgemeine Verbesserung; Zahl und Qualität der Findings sind getrennt zu beurteilen.
+
+**Abstraktes Wirkprinzip – Early Exit Prevention Gate:** Ein Review soll Discovery und Evaluation mit der für den gewählten Scope angemessenen **Tiefe eines sehr intensiven Reviews** fortführen. Bereits gefundene plausible oder validierte Findings sind **kein Abschlusskriterium**. Vor dem Übergang zum Reporting prüft das Modell kritisch, ob relevante Untersuchungsrichtungen, Kandidaten, Gegenbelege oder noch sinnvoll überprüfbare Fragen übergangen wurden, und setzt Discovery beziehungsweise Evaluation bei wesentlichen Lücken gezielt fort. Der Abschluss hängt von der **hinreichenden Untersuchung**, nicht von einer Mindest- oder Höchstzahl an Findings ab. Scope, Evidenzanforderungen und die Möglichkeit von null Findings bleiben erhalten.
+
+Das ist zunächst eine **experimentell interessante Gate-Idee**, keine technische Laufzeitsperre, kein universell validierter Skill-Standard und kein Ersatz für V1/V2 als Grunddesign. Der genaue Promptwortlaut bleibt bewusst außerhalb der allgemeinen Konzeptbeschreibung, damit weitere isolierte Varianten des Early-Exit-Schutzes vergleichbar erprobt werden können.
