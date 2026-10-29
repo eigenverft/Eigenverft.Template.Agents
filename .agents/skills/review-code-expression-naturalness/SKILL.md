@@ -1,12 +1,6 @@
 ---
 name: review-code-expression-naturalness
-description: >
-  Independently review source code for artificial, awkward, or unnecessarily
-  elaborate implementation expression. Examine how well control flow, local
-  structure, language constructs, names, and comments communicate the actual
-  operation to an experienced developer. Use human-coding and deslop patterns
-  as investigation signals, not authorship evidence or mandatory style rules.
-  Read-only review with findings exclusively in chat.
+description: Use for a read-only review when the user requests an independent examination of source code for artificial, awkward, or unnecessarily elaborate implementation expression. Examine how well control flow, local structure, language constructs, names, and comments communicate the actual operation to an experienced developer. Use human-coding and deslop patterns as investigation signals, not authorship evidence or mandatory style rules. Return findings exclusively in chat.
 ---
 
 # Review Code Expression Naturalness

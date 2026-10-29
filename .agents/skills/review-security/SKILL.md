@@ -1,6 +1,6 @@
 ---
 name: review-security
-description: Use for a read-only security review when the user explicitly requests examination of existing source code for concrete vulnerabilities. Verify candidates against source evidence and report prioritized, traceable findings. Not for generic code-quality or architecture reviews.
+description: Use for a read-only review when the user explicitly requests a security examination of existing source code for concrete vulnerabilities. Verify candidates against source evidence and report prioritized, traceable findings. Not for generic code-quality or architecture reviews.
 ---
 
 # Security Review

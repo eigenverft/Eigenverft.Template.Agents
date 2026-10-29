@@ -652,7 +652,9 @@ function Get-RequiredDescriptionStart {
     if ($SkillNameValue.StartsWith("execute-", [System.StringComparison]::Ordinal)) {
         return "Use when the user requests "
     }
-    if ($SkillNameValue.StartsWith("review-", [System.StringComparison]::Ordinal)) {
+    if ($SkillNameValue.StartsWith("review-", [System.StringComparison]::Ordinal) -or
+        $SkillNameValue.StartsWith("analyze-", [System.StringComparison]::Ordinal) -or
+        $SkillNameValue.StartsWith("view-", [System.StringComparison]::Ordinal)) {
         return "Use for a read-only review when "
     }
     return $null
@@ -664,7 +666,7 @@ function Get-UnclassifiedSkillWarning {
     if ($null -ne (Get-RequiredDescriptionStart -SkillNameValue $SkillNameValue)) {
         return $null
     }
-    return "No recognized category prefix (auto-execute-, execute-, review-); activation and side-effect intent cannot be inferred from the name. Review the description manually."
+    return "No recognized category prefix (auto-execute-, execute-, review-, analyze-, view-); activation and side-effect intent cannot be inferred from the name. Review the description manually."
 }
 
 function Test-SkillValidity {

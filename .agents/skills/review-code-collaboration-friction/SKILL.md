@@ -1,6 +1,6 @@
 ---
 name: review-code-collaboration-friction
-description: Use for a read-only review of source code when the user wants to identify unnecessary friction for experienced human developers working with, understanding, or continuing AI-generated or other code. Evaluate human reading experience and engineering judgment independently of mere project conformity. Return concrete, actionable findings in chat only, without modifying code or repository state.
+description: Use for a read-only review when the user wants to identify unnecessary friction in source code for experienced human developers working with, understanding, or continuing AI-generated or other code. Evaluate human reading experience and engineering judgment independently of mere project conformity. Return concrete, actionable findings in chat only, without modifying code or repository state.
 ---
 
 # Review Code Collaboration Friction
