@@ -19,9 +19,9 @@ Das Modell ist **keine Vorlage, die jeder Skill vollständig abarbeiten muss**. 
 4. **Grenzprüfung der Begriffe:** Ein rein statischer Kategorienbaum wurde in einen zeitlichen Workflow überführt. Dabei wurden problematische Gleichsetzungen aufgelöst: `Applicability` ist nicht `Request Resolution`; `Authority` ist nicht `Output Delivery`; `Verdict` ist nicht `Explanation`; ein `Output Contract` ist nicht das tatsächlich erzeugte Ergebnis.
 5. **Externe Gegenprobe:** Ein zusätzliches Research zu Code-, Security-, Architektur- und Paper-Reviews wurde kritisch mit der Repository-Praxis verglichen. Nicht jede externe Methode wurde übernommen. Als hinreichend bedeutsam blieben zwei Anpassungen: **`Review Basis` als eigenständiger Prüfmaßstab** und **ein Rücksprung von Evaluation zu Investigation**, wenn eine Erkenntnis zusätzliche Evidenz benötigt.
 
-Die folgende Version ist daher **eine begründete Arbeitshypothese für zukünftige Skill-Designs**, nicht das Ergebnis einer formalen Validierung aller Review-Arten.
+Die bisherige Fassung wird für die geplante praktische Gegenprobe im Folgenden als **V1** bezeichnet. Die neue, darauf aufbauende **V2** steht am Ende des Dokuments. Diese Versionsnamen dienen dem Vergleich; beide Ansätze bleiben **Arbeitshypothesen**, keine verbindlichen Regeln. Die Entstehungsgeschichte der ursprünglich als „Arbeitsstand v2“ bezeichneten Fassung bleibt unverändert.
 
-## Workflow: Review Skill (Arbeitsstand v2)
+## V1 – Bisheriger Review-Skill-Workflow
 
 Die Nummerierung markiert die **primäre zeitliche Nutzung**. Sie bedeutet nicht, dass eine Regel erst in ihrer Phase bekannt wird oder nur dort gilt. Die Ergebnisbausteine in Phase 05 sind **mögliche Inhalte, keine zwingend vollständig abzuarbeitende Sequenz**.
 
@@ -180,3 +180,70 @@ Das Raster ist **diagnostisch**, nicht mechanisch. Ein nicht einschlägiger Punk
 **Externe Gegenprobe:** Vom Nutzer bereitgestellte Recherche zu Review-Prozessen, unter anderem Code-Review, Security-Audit, Architektur- und Paper-Review. Die recherchierten Modelle wurden nicht unkritisch übernommen; sie dienten als Hypothesentest für möglicherweise fehlende Aspekte.
 
 **Empfohlene Weiterverwendung:** Bei zukünftigen neuen Review-Skills das Modell als **Design-Checkliste und Diskussionsgrundlage** verwenden, Abweichungen begründen und anhand praktischer Skills weiterentwickeln. Änderungen am Modell sollten eine konkrete zusätzliche Verantwortung, einen relevanten Fehlerfall oder eine bessere Begriffsgrenze erklären können – nicht allein eine weitere Überschrift erzeugen.
+
+## V2 – Experimenteller Workflow mit Kandidatenbaum
+
+> **Status:** Alternative Arbeitshypothese für einen Praxistest, nicht als überlegen bestätigt und keine neue Skill-Konvention.
+> **Bezug zu V1:** Skill Selection, Review Setup, Authority, Review Basis, Output Contract und Reporting bleiben grundsätzlich erhalten. V2 verändert vor allem, **wie vor der eigentlichen Evaluation Kandidaten entdeckt und präzisiert werden**.
+
+### Ausgangsproblem und Hypothese
+
+Bei Reviews können Modelle nach den ersten plausiblen Beobachtungen zu früh in die gründliche Prüfung und Berichterstattung wechseln. Dann sind einzelne Findings möglicherweise gut validiert, während andere relevante Untersuchungsrichtungen nie ernsthaft betrachtet wurden. Ein Rücksprung von Evaluation zu Investigation löst das nicht zuverlässig, wenn das Modell seine bisherige Untersuchung schon für ausreichend hält.
+
+**V2-Hypothese:** Eine zunächst breite, anschließend baumartig verfeinerte Kandidatensuche trennt die **Suche nach lohnenden Fragen** von der **späteren Prüfung ihrer tatsächlichen Gültigkeit**. Das könnte sowohl blinde Flecken als auch vorschnelle Festlegung reduzieren. Ob das in der Praxis tatsächlich besser funktioniert, ist offen.
+
+### Ablaufidee: erst Kandidatenraum, danach wirkliche Evaluation
+
+1. **Discover – mögliche Kandidaten sammeln.** Den relevanten Gegenstand aus mehreren sinnvollen Richtungen betrachten und zunächst potenzielle Auffälligkeiten, Risiken oder Fragen notieren. Nicht die erste plausible Spur direkt zum endgültigen Hauptbefund machen.
+2. **Refine / Subanalyse – Kandidaten auffächern und filtern.** Für einen Kandidaten kurz fragen: Welche spezifischeren Teilfragen stecken darin? Welche Zweige sind für den Review relevant, welche offenbar nicht, welche müssen noch präzisiert werden? Relevanz meint hier nur **Untersuchungswürdigkeit**, nicht bestätigte Richtigkeit.
+3. **Kandidatenbestand bilden.** Nur die verbleibenden lohnenden, hinreichend konkreten Untersuchungsfragen für die eigentliche Prüfung behalten. Ein übergeordneter Kandidat kann vollständig entfallen, obwohl ein einzelner Unterkandidat relevant bleibt. Der Bestand enthält **weiterhin ausschließlich Kandidaten, keine Findings**.
+4. **Evaluate – erst jetzt gründlich prüfen.** Den verbleibenden Kandidaten gezielt Evidenz und Gegenbelege gegenüberstellen, Aussagen validieren, Bedeutung einschätzen und entscheiden, was bestätigt, widerlegt oder ungeklärt bleibt.
+5. **Coverage und Abschluss prüfen.** Sind die wesentlichen Suchrichtungen für Objective, Scope und verfügbaren Aufwand angemessen betrachtet? Sind relevante Kandidaten ausreichend geprüft? Falls Evaluation neue lohnende Zweige oder eine wesentliche Suchlücke sichtbar macht, gezielt zu Discover/Refine zurückkehren. Andernfalls die qualifizierten Ergebnisse gemäß Output Contract berichten, auch mit null Findings oder ausgewiesenen Grenzen.
+
+```mermaid
+flowchart TD
+    A["Review Setup"]
+    B["Discover<br/>Breite Kandidatensuche"]
+    C["Refine / Subanalyse<br/>Kandidat oder Teilzweig"]
+    D{"Lohnt sich weitere<br/>Untersuchung?"}
+    E["Aufteilen oder präzisieren<br/>Unterkandidaten"]
+    F["Zweig verwerfen"]
+    G["Relevanten Kandidaten vormerken"]
+    H{"Suchraum für diesen<br/>Review ausreichend erschlossen?"}
+    I["Evaluate<br/>Evidenz, Gegenprüfung,<br/>Assessment, Decisions"]
+    J{"Neue wesentliche Spur<br/>oder Suchlücke?"}
+    K["Review Reporting"]
+
+    A --> B --> C --> D
+    D -->|"Noch zu allgemein"| E --> C
+    D -->|"Nein"| F --> H
+    D -->|"Vorläufig ja"| G --> H
+    H -->|"Weitere Zweige / Richtungen"| B
+    H -->|"Ja"| I
+    I --> J
+    J -->|"Ja"| B
+    J -->|"Nein / Grenze offenlegen"| K
+```
+
+**Gedankenbeispiel:** Der Ausgangskandidat „Modulstruktur problematisch“ zerfällt in „fachliche Modulgrenzen“ und „gemeinsam verantworteter Datenlebenszyklus“. Der erste Zweig kann als unauffällig oder nicht lohnend ausscheiden, während der zweite als präziser Kandidat überlebt. Der ursprüngliche Pauschalkandidat braucht dann nicht zusätzlich erhalten zu bleiben. Ob der verbliebene Zweig wirklich ein Problem ist, wird **erst in Evaluate** geklärt.
+
+### Leichtgewichtig statt wortprogrammierter Datenstruktur
+
+- **Baum als Denkmodell, nicht als Pflichtartefakt:** Weder ein ausgeschriebener Baum noch eine persistierte Queue, feste Tiefe oder formale Knotenstatus sind erforderlich. Ein kurzer interner Kandidatenbestand genügt, wenn er die Untersuchung trägt.
+- **Breite vor vorschneller Tiefe:** Eine anfängliche Suche soll mehrere sinnvolle Richtungen erschließen. Das aus anderen praktischen Skills bekannte **weiche Suchziel von ungefähr fünf** kann als experimentelle Orientierung dienen, aber weder fünf Ideen noch fünf überlebende Kandidaten erzwingen. Es ist kein Qualitätsnachweis.
+- **Kleine Relevanzprüfung ist noch keine Validation:** In Refine darf mit vorhandenem Kontext grob eingegrenzt, aufgeteilt oder eine klar unpassende Spur verworfen werden; anspruchsvolle Tatsachenbehauptungen werden dadurch nicht als geprüft behandelt. Relevante Unsicherheit ist ein Grund zum Behalten oder gezielten Klären, nicht zum Wegfiltern.
+- **Keine künstliche Vollständigkeit:** Neue Unterzweige entstehen nur, wenn sie echte unterschiedliche Fragen sichtbar machen. Fehlende Evidenz darf nicht durch erfundene Kandidaten ersetzt werden; ebenso wenig soll endlos weitergesucht werden.
+- **Abschluss nach Aussagekraft, nicht Queue-Leere:** Ein abgearbeiteter Kandidatenbestand beweist keine ausreichende Abdeckung. Umgekehrt darf ein Review bei verhältnismäßig erschlossenem Suchraum, ausreichender Prüfung und transparenten Grenzen enden.
+- **Keine Änderung der Befugnisse:** Discovery, Subanalyse und Evaluation bleiben innerhalb des jeweiligen Scope, der Authority und der bestehenden Sicherheitsgrenzen; aus einem Kandidaten folgt keine Erlaubnis zur Umsetzung.
+
+### Geplante praktische Gegenprobe: V1 gegen V2
+
+Der nächste Schritt ist **nicht** die sofortige Einführung von V2 als Standard, sondern ein kontrollierter Versuch mit einem **bestehenden Review-Skill**:
+
+1. Einen fachlich geeigneten Review-Skill auswählen und **zwei experimentelle Varianten** auf derselben Ausgangsbasis herstellen: eine nach V1, eine nach V2. Ziel, fachliche Review-Lens, Authority und wesentliche Ergebnisanforderungen möglichst konstant halten. Die aktive Originalfassung nicht stillschweigend ersetzen.
+2. Beide Varianten an **denselben realistischen Review-Aufgaben und demselben Repository-/Revisionsstand** erproben; die Durchläufe möglichst unabhängig halten, damit die Ergebnisse sich nicht gegenseitig vorprägen.
+3. **Tatsächliche Unterschiede** anhand konkreter Evidenz vergleichen: entdeckte Untersuchungsrichtungen, übersehene relevante Bereiche, Tiefe der Kandidatenprüfung, belastbare und falsche Findings, Umgang mit Unsicherheit, praktischer Erkenntniswert und Aufwand. Weder Kandidatenzahl noch Berichtslänge allein als Erfolg werten.
+4. Auch Gegenbeispiele erfassen: Wo bringt V2 mehr Breite und bessere Befunde, wo erzeugt es unnötige Kandidaten, Mehraufwand oder sogar schlechtere Entscheidungen? Wo ist V1 mindestens gleich gut?
+5. Erst aus dem **beobachteten Verhalten** entscheiden, ob V2 übernommen, vereinfacht, verändert oder verworfen werden sollte.
+
+**Noch nicht durchgeführt:** Es gibt bisher keinen solchen Variantenversuch, keine Vergleichsdaten und keinen Nachweis, dass der Kandidatenbaum V1 übertrifft. Dieses Dokument bewahrt beide Entwürfe, damit wir die Unterschiede in der Praxis prüfen können.
