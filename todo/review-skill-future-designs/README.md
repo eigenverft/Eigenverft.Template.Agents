@@ -230,7 +230,7 @@ flowchart TD
 ### Leichtgewichtig statt wortprogrammierter Datenstruktur
 
 - **Baum als Denkmodell, nicht als Pflichtartefakt:** Weder ein ausgeschriebener Baum noch eine persistierte Queue, feste Tiefe oder formale Knotenstatus sind erforderlich. Ein kurzer interner Kandidatenbestand genügt, wenn er die Untersuchung trägt.
-- **Breite vor vorschneller Tiefe:** Eine anfängliche Suche soll mehrere sinnvolle Richtungen erschließen. Das aus anderen praktischen Skills bekannte **weiche Suchziel von ungefähr fünf** kann als experimentelle Orientierung dienen, aber weder fünf Ideen noch fünf überlebende Kandidaten erzwingen. Es ist kein Qualitätsnachweis.
+- **Breite vor vorschneller Tiefe:** Eine anfängliche Suche soll mehrere sinnvolle Richtungen erschließen. Eine **feste Kandidatenzahl** ist kein geeigneter Abschlussmaßstab; entscheidend sind tatsächlich untersuchte Verantwortungsbereiche, unterschiedliche Suchrichtungen und begründete Kandidaten. Ein weiches Fünferziel wurde in der ersten V2-Fassung erprobt, ist aber keine Voraussetzung der nachgeschärften Methode.
 - **Kleine Relevanzprüfung ist noch keine Validation:** In Refine darf mit vorhandenem Kontext grob eingegrenzt, aufgeteilt oder eine klar unpassende Spur verworfen werden; anspruchsvolle Tatsachenbehauptungen werden dadurch nicht als geprüft behandelt. Relevante Unsicherheit ist ein Grund zum Behalten oder gezielten Klären, nicht zum Wegfiltern.
 - **Keine künstliche Vollständigkeit:** Neue Unterzweige entstehen nur, wenn sie echte unterschiedliche Fragen sichtbar machen. Fehlende Evidenz darf nicht durch erfundene Kandidaten ersetzt werden; ebenso wenig soll endlos weitergesucht werden.
 - **Abschluss nach Aussagekraft, nicht Queue-Leere:** Ein abgearbeiteter Kandidatenbestand beweist keine ausreichende Abdeckung. Umgekehrt darf ein Review bei verhältnismäßig erschlossenem Suchraum, ausreichender Prüfung und transparenten Grenzen enden.
@@ -253,3 +253,14 @@ V2 wird nicht allein aufgrund des Entwurfs als Standard übernommen. Als erste G
 - **Einordnung:** Dies ist ein qualitatives Zwischenfazit, keine abgeschlossene oder quantifizierte Gegenprobe. Modellbezeichnungen, Testfälle, Einzelresultate und Messwerte sind hier noch nicht dokumentiert. Der leicht bessere Eindruck bei leistungsfähigeren Modellen ist kein Nachweis eines allgemeinen oder messbar großen V2-Vorteils.
 
 Die beiden Entwürfe bleiben für die weitere Erprobung erhalten; über eine Übernahme wird erst anhand der praktischen Unterschiede entschieden.
+
+### Nachschärfung der V2-Untersuchungsmethode (2026-10-29)
+
+Die ersten qualitativen Resultate oben beziehen sich auf die **erste, weich formulierte V2-Fassung**. Daraus entstand die Hypothese, dass der Kandidatenbaum ohne eindeutige Phasenoutputs und Abschlussgates insbesondere von schwächeren Modellen kaum anders als V1 ausgeführt wird. Die unter `experiments/review-abstraction-and-responsibility-boundaries/v2/SKILL.md` liegende V2 wurde deshalb für einen erneuten Test gezielt **nur in Phase 03 – Investigation** verschärft:
+
+- Statt ungefähr fünf Kandidaten als Suchorientierung: **arbeitsinterne Coverage-Übersicht** tatsächlicher Verantwortungsträger und Abhängigkeiten im angefragten Scope.
+- **Zwei komplementäre Discovery-Pässe**: zuerst systematisch über die Verantwortungslage, dann aus einer anderen Richtung über gewöhnliche Änderungen, Zustandszugriffe oder Konsumenten; nicht nach wenigen überzeugenden Verdachtsmomenten abbrechen.
+- **Verbindliche Kandidatenverarbeitung**: jeden glaubwürdigen Ausgangskandidaten behalten, in relevante Unterfragen aufteilen, begründet verwerfen oder als unsicher kennzeichnen; vor Evaluation ein konkreter Kandidatenbestand mit Fundstellen und offenen Prüffragen.
+- **Übergangs- und Abschlussgates**: unbeachtete relevante Bereiche nachuntersuchen und vor dem Reporting die eigene Untersuchungsabdeckung skeptisch gegenprüfen. Null Findings ist weiterhin gültig, aber keine Ausrede für vorzeitigen Abbruch.
+
+Diese Verschärfung fordert intensive, verhältnismäßige Untersuchung, **nicht** eine bestimmte Menge an Findings, unendliche Suche, Dateien für den Arbeitsbaum oder Änderungen an der Authority. V1 und die gemeinsamen Phasen vor/nach Investigation bleiben unverändert. **Die nachgeschärfte V2 ist noch nicht getestet**; die bisherigen Ergebnisse dürfen ihr nicht rückwirkend zugeschrieben werden.
