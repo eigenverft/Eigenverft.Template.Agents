@@ -249,7 +249,7 @@ V2 wird nicht allein aufgrund des Entwurfs als Standard übernommen. Als erste G
 ### Vorläufige Beobachtung aus den Praxistests (2026-10-29)
 
 - **Schwächere Modelle:** Laut bisheriger praktischer Erprobung des Nutzers zeigen die beiden Skill-Fassungen **keinen nennenswerten Unterschied** im Ergebnis. Für diese getesteten Modelle ist derzeit **kein erkennbarer Mehrwert (Gain) von V2 gegenüber V1** festzustellen.
-- **Leistungsfähigere Modelle:** Die Erprobung läuft noch; ein Ergebnis liegt noch nicht vor.
-- **Einordnung:** Dies ist ein qualitatives Zwischenfazit, keine abgeschlossene oder quantifizierte Gegenprobe. Modellbezeichnungen, Testfälle, Einzelresultate und Messwerte sind hier noch nicht dokumentiert. Insbesondere folgt daraus weder eine allgemeine Gleichwertigkeit beider Designs noch ein Vorteil für V2 bei stärkeren Modellen.
+- **Leistungsfähigere Modelle:** In der bisherigen praktischen Erprobung des Nutzers schnitt **V2 leicht besser als V1** ab. Der beobachtete Vorteil ist klein; welche konkreten Unterschiede ihn ausmachen, ist hier noch nicht dokumentiert.
+- **Einordnung:** Dies ist ein qualitatives Zwischenfazit, keine abgeschlossene oder quantifizierte Gegenprobe. Modellbezeichnungen, Testfälle, Einzelresultate und Messwerte sind hier noch nicht dokumentiert. Der leicht bessere Eindruck bei leistungsfähigeren Modellen ist kein Nachweis eines allgemeinen oder messbar großen V2-Vorteils.
 
 Die beiden Entwürfe bleiben für die weitere Erprobung erhalten; über eine Übernahme wird erst anhand der praktischen Unterschiede entschieden.
