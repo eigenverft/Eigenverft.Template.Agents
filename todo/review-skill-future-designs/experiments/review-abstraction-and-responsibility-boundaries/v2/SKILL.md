@@ -45,6 +45,8 @@ Examine both **missing boundaries** and **unnecessary fragmentation** of one coh
 
 Breadth is a guard against early fixation, not permission to exceed scope or to replace actual source inspection with a list of speculative labels. A sufficiently explored scope with no surviving candidates can legitimately proceed to Evaluation and a zero-finding result.
 
+**Review depth and completion self-review.** Conduct discovery and evaluation with the depth expected from a **very intensive responsibility-boundary review** of the selected scope. Finding one or several plausible candidates or validated findings is **not a stopping condition**: continue investigating other relevant responsibility boundaries and evaluating material questions while further targeted inspection may change the conclusions. Before reporting, critically self-review whether important in-scope responsibilities, ownership of state and rules, access paths, ordinary change scenarios, or credible counterarguments were overlooked; return to discovery/refinement or evaluation to close material, answerable gaps. Stop only when further relevant investigation is unlikely to change the assessment, or disclose concrete evidence limitations. Do not invent findings or expand beyond the authorized scope.
+
 ## 04 – Evaluation
 
 Evaluate each candidate reaching this phase against the evidence and criteria below. Do not treat relevance, an unusual code shape, or a conceivable refactoring as proof of a boundary problem.
