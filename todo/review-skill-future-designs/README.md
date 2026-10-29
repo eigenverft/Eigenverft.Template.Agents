@@ -1,0 +1,182 @@
+# Review-Skill-Workflow – mögliche Designgrundlage für zukünftige Skills
+
+> **Status:** Arbeitsentwurf / Designgrundlage, keine verbindliche Repository-Regel
+> **Stand:** 2026-10-29
+> **Geltungsbereich:** Zukünftiger Entwurf und kritische Prüfung von Review-Skills
+> **Nicht-Ziel:** Bereits existierende Skills automatisch angleichen oder einen universellen Pflichtablauf erzwingen
+
+## Zweck
+
+Dieses Dokument hält ein praxisbasiert entwickeltes **Meta-Modell für Review-Skills** fest. Es soll beim Entwurf neuer Skills helfen, wichtige Verantwortlichkeiten, Ablaufentscheidungen und Ergebnistypen nicht zu übersehen. Gleichzeitig ist es ein **Prüfraster**, um bestehende oder neue Review-Skills auf unklare Grenzen, fehlende Schritte und widersprüchliche Regeln zu untersuchen.
+
+Das Modell ist **keine Vorlage, die jeder Skill vollständig abarbeiten muss**. Je nach Review-Art können einzelne Schritte entfallen, anders ausgestaltet oder zusammengelegt werden. Insbesondere müssen nicht alle Ergebnisbausteine erzeugt werden. Der tatsächliche Erkenntniszweck steht über formaler Vollständigkeit.
+
+## Wie diese Grundlage entstanden ist
+
+1. **Praxisinventar:** Die 21 vorhandenen `.agents/skills/review-*/SKILL.md`-Dateien wurden vollständig untersucht. Zunächst wurden wiederkehrende Begriffe, Verfahrensregeln und Ergebnisformate verglichen. Wo ein Output-Vertrag ausgelagert ist (beispielsweise bei `review-code-quality`), wurde diese Referenz in die Betrachtung einbezogen.
+2. **Erster Kategorienbaum:** Die Anweisungen ließen sich zunächst in `Skill Definition`, `Review Instance`, `Review Execution` und `Review Result` gruppieren. Diese Sicht half, Meta-Objekte und Ergebnisarten zu erkennen.
+3. **Negative Gegenprobe:** Es wurde geprüft, welche besonderen Regeln der vorhandenen Skills nicht sinnvoll in den Baum passen. Daraus entstand die Einsicht, dass **Vorkommenshäufigkeit kein Beweis für Wichtigkeit oder Vollständigkeit** ist: Die Skills können gemeinsame Designgewohnheiten teilen.
+4. **Grenzprüfung der Begriffe:** Ein rein statischer Kategorienbaum wurde in einen zeitlichen Workflow überführt. Dabei wurden problematische Gleichsetzungen aufgelöst: `Applicability` ist nicht `Request Resolution`; `Authority` ist nicht `Output Delivery`; `Verdict` ist nicht `Explanation`; ein `Output Contract` ist nicht das tatsächlich erzeugte Ergebnis.
+5. **Externe Gegenprobe:** Ein zusätzliches Research zu Code-, Security-, Architektur- und Paper-Reviews wurde kritisch mit der Repository-Praxis verglichen. Nicht jede externe Methode wurde übernommen. Als hinreichend bedeutsam blieben zwei Anpassungen: **`Review Basis` als eigenständiger Prüfmaßstab** und **ein Rücksprung von Evaluation zu Investigation**, wenn eine Erkenntnis zusätzliche Evidenz benötigt.
+
+Die folgende Version ist daher **eine begründete Arbeitshypothese für zukünftige Skill-Designs**, nicht das Ergebnis einer formalen Validierung aller Review-Arten.
+
+## Workflow: Review Skill (Arbeitsstand v2)
+
+Die Nummerierung markiert die **primäre zeitliche Nutzung**. Sie bedeutet nicht, dass eine Regel erst in ihrer Phase bekannt wird oder nur dort gilt. Die Ergebnisbausteine in Phase 05 sind **mögliche Inhalte, keine zwingend vollständig abzuarbeitende Sequenz**.
+
+```mermaid
+flowchart TD
+    S["Review Skill"]
+
+    S --> A["01 · Skill Selection"]
+    A --> B["02 · Review Setup"]
+    B --> C["03 · Investigation"]
+    C --> D["04 · Evaluation"]
+    D --> Q{"Ist die Untersuchung<br/>ausreichend abgeschlossen?"}
+
+    Q -->|"Ja, auch ohne Findings"| E["05 · Review Reporting"]
+    Q -->|"Weitere Evidenz sinnvoll<br/>und verfügbar"| C
+    Q -->|"Wesentliche Lücke<br/>nicht auflösbar"| L["Prüfgrenze / Unsicherheit<br/>festhalten"]
+    L --> E
+
+    A --> A1["1.1 Identity<br/>Skill identifizieren"]
+    A --> A2["1.2 Applicability<br/>Anwendbarkeit feststellen"]
+
+    B --> B1["2.1 Request Resolution<br/>Nutzerauftrag auslegen"]
+    B --> B2["2.2 Objective<br/>Erkenntnisziel bestimmen"]
+    B --> B3["2.3 Target<br/>Untersuchungsgegenstand festlegen"]
+    B --> B4["2.4 Scope<br/>Untersuchungsgrenzen bestimmen"]
+    B --> B5["2.5 Context / Revision<br/>Bezugszustand bestimmen"]
+    B --> B6["2.6 Authority<br/>Zulässige Handlungen abgrenzen"]
+    B --> B7["2.7 Evaluation Lens<br/>Betrachtungsperspektive bestimmen"]
+    B --> BN["2.8 Review Basis<br/>Prüfmaßstab und Anforderungen bestimmen"]
+    B --> B8["2.9 Method Contract<br/>Prüfverfahren festlegen"]
+
+    C --> C1["3.1 Evidence<br/>Informationen erheben"]
+    C --> C2["3.2 Observations / Candidates<br/>Prüfbare Aussagen entwickeln"]
+
+    D --> D1["4.1 Validation<br/>Aussagen verifizieren"]
+    D --> D2["4.2 Assessment<br/>Bedeutung bewerten"]
+    D --> D3["4.3 Decisions<br/>Schlussfolgerungen bestimmen"]
+
+    E --> E1["5.1 Result Selection<br/>Ergebnisbausteine bestimmen"]
+    E --> E2["5.2 Findings<br/>Qualifizierte Befunde"]
+    E --> E3["5.3 Verdict<br/>Zusammenfassende Beurteilung"]
+    E --> E4["5.4 Explanation<br/>Erklärende Synthese"]
+    E --> E5["5.5 Alternatives<br/>Berichtete Optionen"]
+    E --> E6["5.6 Actions<br/>Empfohlene Schritte"]
+    E --> E7["5.7 Limitations<br/>Grenzen der Aussagekraft"]
+    E --> E8["5.8 Output Formatting & Delivery<br/>Output Contract anwenden"]
+
+    classDef phase fill:#dceaf8,stroke:#5488bc,color:#163b62,stroke-width:2px
+    classDef detail fill:#f5f6f8,stroke:#a2aab5,color:#29313a
+    classDef new fill:#daf1e1,stroke:#52976c,color:#174d30,stroke-width:2px
+    classDef decision fill:#fff2d6,stroke:#c99838,color:#654c13,stroke-width:2px
+
+    class A,B,C,D,E phase
+    class A1,A2,B1,B2,B3,B4,B5,B6,B7,B8,C1,C2,D1,D2,D3,E1,E2,E3,E4,E5,E6,E7,E8 detail
+    class BN new
+    class Q,L decision
+```
+
+## Bedeutung der fünf Phasen
+
+| Phase | Primäre Funktion | Abgrenzung |
+| --- | --- | --- |
+| **01 – Skill Selection** | Den passenden Skill anhand von Identität und Anwendbarkeit auswählen. | Noch nicht das Review selbst ausführen. |
+| **02 – Review Setup** | Die konkrete Anfrage auslegen und Ziel, Gegenstand, Grenzen, Bezugszustand, Befugnisse, Perspektive, Prüfmaßstab und Vorgehen bestimmen. | Keine Findings vorwegnehmen und keine unbewiesenen Anforderungen erfinden. |
+| **03 – Investigation** | Relevante Informationen erheben, verstehen und daraus prüfbare Beobachtungen oder Kandidaten bilden. | Kandidaten nicht als bestätigte Findings behandeln. |
+| **04 – Evaluation** | Aussagen validieren, ihre Bedeutung bewerten und fachliche Entscheidungen treffen; bei Bedarf zurück zu Investigation. | Weder unbelegte Befunde bestätigen noch eine nicht abschließbare Prüfung als erfolgreich abgeschlossen ausgeben. |
+| **05 – Review Reporting** | Die für diesen Review erforderlichen Ergebnisbausteine bestimmen und gemäß Output Contract ausgeben. | Keine Empfehlung automatisch umsetzen; nicht alle dargestellten Bausteine erzwingen. |
+
+## Begriffsgrenzen (Boundaries)
+
+| Begriff | Bedeutet | Ist nicht |
+| --- | --- | --- |
+| **Identity** | Erkennbarer Skill-Name und seine Beschreibung. | Der konkrete Review-Auftrag. |
+| **Applicability** | Ob und wann ein Skill verwendet werden soll. | Die Auslegung von Nutzerzusätzen nach der Auswahl. |
+| **Request Resolution** | Den aktuellen Auftrag einschließlich Gesprächskontext, Nutzerwünschen, Modi und relevanter Unklarheiten interpretieren. | Ein unbestimmter Resttopf für Target, Scope, Authority oder Output. |
+| **Objective** | Welche Erkenntnis oder Beurteilung erreicht werden soll. | Der untersuchte Gegenstand oder der Bewertungsmaßstab. |
+| **Target** | Das konkret untersuchte Objekt, beispielsweise ein Modul oder ein Diff. | Die Grenzen der Untersuchung. |
+| **Scope** | Welche Bereiche und Fragen im Review liegen und welche ausgeschlossen sind. | Automatisch eine harte Grenze für sämtliche Belegquellen. |
+| **Context / Revision** | Auf welchen fachlichen, technischen oder zeitlichen Zustand sich das Urteil bezieht. | Die Fragestellung selbst. |
+| **Authority** | Welche Untersuchungsaktionen, Zugriffe und Seiteneffekte erlaubt sind. | Berichtsaufbau, Format oder Ausgabekanal. |
+| **Evaluation Lens** | Unter welchem Gesichtspunkt das Target betrachtet wird, beispielsweise Sicherheit oder Änderbarkeit. | Die konkrete Norm, gegen die geprüft wird. |
+| **Review Basis** | Anforderungen, Spezifikationen, Regeln, Invarianten oder Sollzustände als Maßstab. | Ein stillschweigend erfundener Wunschzustand. Fehlt die Basis, muss das angemessen berücksichtigt werden. |
+| **Method Contract** | Welche Prüfverfahren und Schritte gelten, beispielsweise Source-first oder gezielte Gegenprüfung. | Eine Berechtigung, gesperrte Aktionen trotzdem auszuführen. |
+| **Evidence** | Tatsächlich verfügbare und relevante Informationen. | Bereits eine bestätigte Schlussfolgerung. |
+| **Observations / Candidates** | Beobachtete Auffälligkeiten und daraus entwickelte prüfbare Hypothesen. | Qualifizierte, veröffentlichungsreife Findings. |
+| **Validation** | Ob eine Behauptung durch ausreichende Evidenz gestützt ist. | Bewertung von Tragweite, Nutzen oder Priorität. |
+| **Assessment** | Bedeutung, Auswirkung oder Qualität eines ausreichend verstandenen Sachverhalts beurteilen. | Entscheidung über die endgültige Darstellung. |
+| **Decisions** | Kandidaten oder Deutungen bestätigen, verwerfen, offenlassen und gegebenenfalls priorisieren. | Formatierung des Ergebnisberichts. |
+| **Result Selection** | Bestimmen, welche Ergebnisarten nach Review-Typ und konkretem Ausgang erforderlich und zulässig sind. | Erzwingen aller optionalen Ergebnisarten. |
+| **Findings** | Qualifizierte, berichtsfähige Befunde. | Jegliche ungeprüfte Beobachtung. |
+| **Verdict** | Zusammenfassende Beurteilung. | Eine reine Erklärung der Designabsicht. |
+| **Explanation** | Begründete Erläuterung von Bedeutung, Funktionsweise oder Designrationale. | Zwingend ein Qualitätsurteil. |
+| **Alternatives** | Bewertete und berichtete Lösungs- oder Deutungsoptionen. | Sämtliche intern erwogenen und verworfenen Ideen. |
+| **Actions** | Konkrete empfohlene nächste Schritte. | Deren automatische Umsetzung. |
+| **Limitations** | Wesentliche Grenzen der Aussagekraft, ungeklärte Punkte oder nicht verfügbare Belege. | Eine beliebige Vollständigkeitsfloskel. |
+| **Output Formatting & Delivery** | Die ausgewählten Ergebnisse gemäß Output Contract darstellen und ausliefern. | Definition oder Erhebung der fachlichen Erkenntnisse. |
+
+### Output Contract: übergreifende Regel, nicht erst am Ende bekannt
+
+Ein **Output Contract** kann Inhaltsanforderungen, Pflichtfelder, Struktur, Reihenfolge, bedingte Ausgabeformen (etwa bei null Findings), Sprache, Ausgabeformat und Lieferkanal festlegen. Er ist **nicht gleichbedeutend mit `Output Structure`** und auch **nicht identisch mit dem fertigen `Review Result`**.
+
+Seine Regeln sind bereits bei der Vorbereitung bekannt, damit die Untersuchung notwendige Informationen erheben kann. **In 5.8 werden sie auf die tatsächliche Ausgabe angewendet und kontrolliert.** Die Position in Phase 05 zeigt somit den Anwendungsschwerpunkt, nicht den Entstehungszeitpunkt.
+
+Die Unterscheidung gilt auch für andere Verträge: `Authority` wird im Setup geklärt, gilt aber während der gesamten Ausführung. `Method Contract` wird im Setup bestimmt und in Investigation und Evaluation eingehalten.
+
+**Abgrenzungsbeispiele:**
+
+- `read-only; keine Dateien oder Git-Zustände verändern` → **Authority**.
+- `Ergebnis ausschließlich im Chat ausgeben` → **Output Contract / Delivery**.
+- `Nutzer wünscht statt der Standardtabelle eine kompakte Liste` → **Request Resolution** (Wunsch verstehen) und **Output Contract** (zulässige Ausgabe anwenden).
+- `Nur bei explizitem Review-Auftrag aktivieren` → **Applicability**.
+- `Keine unbestätigte Hypothese als bestätigten Befund berichten` → **Validation / Decisions**, anschließend **Output Contract**.
+
+## Iteration, Unsicherheit und Abschluss
+
+Der Rückweg **Evaluation → Investigation** ist entscheidend: Eine Prüfung kann weitere Quellen, zusätzliche Kontextanalyse oder die Gegenprüfung einer Hypothese erforderlich machen. Die Schleife ist **kein Zwang zu endloser Suche**.
+
+Für den Übergang zu Reporting werden drei Fälle unterschieden:
+
+1. **Ausreichend abgeschlossen:** Die Untersuchung ist für ihren Zweck hinreichend belastbar – ausdrücklich auch dann, wenn es **keine Findings** gibt.
+2. **Weitere Evidenz sinnvoll und verfügbar:** Gezielte Nachuntersuchung statt vorschneller Bewertung.
+3. **Wesentliche Evidenz nicht verfügbar:** Unsicherheit beziehungsweise Prüfgrenze festhalten und das Ergebnis nur mit zutreffender Einschränkung berichten. Ein eingeschränkter Review darf nicht als unbeschränkt abgeschlossen dargestellt werden.
+
+Ein fehlender Befund ist also **nicht automatisch** eine vollständig durchgeführte, uneingeschränkt positive Prüfung.
+
+## Anwendung als Prüfraster für künftige Skills
+
+Beim Entwurf eines neuen Review-Skills sollte geprüft werden:
+
+- Ist klar, **wann** der Skill gewählt wird und **wie** Nutzerzusätze sowie bestehender Gesprächskontext behandelt werden?
+- Sind **Objective**, **Target**, **Scope**, **Context**, **Authority**, **Lens** und gegebenenfalls **Review Basis** voneinander unterscheidbar?
+- Sind die geltenden **Prüfmethoden** ausreichend beschrieben, ohne Berechtigungen oder Seiteneffekte implizit zu erweitern?
+- Trennt der Skill **Beobachtungen**, **Validierung**, **Bewertung** und **Entscheidungen** soweit nötig?
+- Können **Gegenbelege**, **fehlende Informationen** und **Nachuntersuchung** das Ergebnis tatsächlich beeinflussen?
+- Kann ein Review **ohne Findings** abgeschlossen werden? Was geschieht, wenn er **nicht abschließend prüfbar** ist?
+- Sind die **erforderlichen Ergebnistypen** ausgewählt, statt Findings, Verdict, Alternatives und Actions pauschal zu erzwingen?
+- Regelt der **Output Contract** nicht nur das Markdown-Layout, sondern bei Bedarf auch Inhalt, Bedingungen und Delivery?
+- Sind **Empfehlungen** eindeutig von einer gesondert zu autorisierenden **Umsetzung** getrennt?
+
+Das Raster ist **diagnostisch**, nicht mechanisch. Ein nicht einschlägiger Punkt ist kein Designfehler. Spezielle Review-Typen dürfen eigene Verfahren und Ergebnisse besitzen.
+
+## Bewusste Grenzen und offene Fragen
+
+- **Kein universeller Finding-Zwang:** Erklärende oder vergleichende Reviews produzieren möglicherweise primär Explanations, Alternatives oder Verdicts.
+- **Keine erzwungene Phasenlinearität:** Die Hauptreihenfolge ist ein verständliches Standardmodell; einzelne Untersuchungsschritte dürfen bei Bedarf iterieren oder erneut aufgesetzt werden.
+- **Keine automatische Berechtigung:** Eine Methodenvorgabe wie „Test ausführen“ hebt eine bestehende Authority-Grenze nicht auf.
+- **Review Basis ist kontextabhängig:** Nicht jeder Review besitzt eine formelle externe Spezifikation; der Prüfmaßstab muss gegebenenfalls aus tatsächlich belegten Invarianten oder Designzielen ermittelt werden.
+- **Output Contract ist ein phasenübergreifender Vertrag:** Die Abbildung in Phase 05 ist bewusst eine Workflow-Sicht.
+- **Weitere Prüfung sinnvoll:** Insbesondere die Grenze zwischen `Applicability` und `Request Resolution` sowie zwischen `Evaluation Lens` und `Review Basis` sollte an zukünftigen realen Skill-Entwürfen überprüft werden.
+- **Keine verpflichtende Migration:** Dieses Dokument ändert weder vorhandene `SKILL.md`-Dateien noch gilt es automatisch als neue Ausführungsanweisung.
+
+## Herkunft und nächste Verwendung
+
+**Interne empirische Grundlage:** 21 bestehende Review-Skills unter `.agents/skills/review-*/SKILL.md`; deren Methoden und Ergebnisverträge wurden auf wiederkehrende Funktionen und Gegenbeispiele geprüft.
+
+**Externe Gegenprobe:** Vom Nutzer bereitgestellte Recherche zu Review-Prozessen, unter anderem Code-Review, Security-Audit, Architektur- und Paper-Review. Die recherchierten Modelle wurden nicht unkritisch übernommen; sie dienten als Hypothesentest für möglicherweise fehlende Aspekte.
+
+**Empfohlene Weiterverwendung:** Bei zukünftigen neuen Review-Skills das Modell als **Design-Checkliste und Diskussionsgrundlage** verwenden, Abweichungen begründen und anhand praktischer Skills weiterentwickeln. Änderungen am Modell sollten eine konkrete zusätzliche Verantwortung, einen relevanten Fehlerfall oder eine bessere Begriffsgrenze erklären können – nicht allein eine weitere Überschrift erzeugen.
