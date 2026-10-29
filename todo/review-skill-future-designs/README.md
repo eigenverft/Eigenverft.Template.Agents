@@ -147,6 +147,29 @@ Für den Übergang zu Reporting werden drei Fälle unterschieden:
 
 Ein fehlender Befund ist also **nicht automatisch** eine vollständig durchgeführte, uneingeschränkt positive Prüfung.
 
+### Early Exit Prevention Gate – Reviewtiefe und Schutz vor vorzeitigem Abschluss
+
+**Problem:** Ein Modell kann einen Review schon nach den ersten plausiblen oder gut validierten Findings für erledigt halten. Dadurch bleiben weitere relevante Untersuchungsrichtungen unberücksichtigt. Besonders bei schwächeren Modellen kann eine bloß allgemein formulierte Aufforderung zur Gründlichkeit dafür zu wenig sein. Außerdem können bereits gefundene Critical-, High- oder Medium-Probleme kleinere, aber dennoch berechtigte Low-Severity-Befunde aus der weiteren Suche verdrängen.
+
+**Designbaustein:** Ein **Early Exit Prevention Gate** macht ausdrücklich klar, dass weder eine Anzahl gefundener Findings noch deren Schweregrad den Abschluss rechtfertigt. Es setzt einen zur Review-Aufgabe passenden **intensiven Prüfungsanspruch** und fordert vor dem Reporting einen **kritischen Selbstreview** der noch offenen Untersuchungsrichtungen. Bei materiellen, sinnvoll aufklärbaren Lücken muss die Untersuchung gezielt in Investigation und/oder Evaluation fortgesetzt werden. Das Gate ist eine **phasenübergreifende Regel**, keine weitere Pflichtphase und kein Ersatz für den V1-Ablauf oder die V2-Kandidatenverfeinerung.
+
+Das Gate verbindet vier Aufgaben:
+
+1. **Reviewtiefe:** Den relevanten Scope mit einer dem Ziel angemessenen Intensität untersuchen; nicht lediglich die ersten erkannten Auffälligkeiten ausarbeiten.
+2. **Kein Finding-basierter Early Exit:** Erste, mehrere oder besonders schwerwiegende Findings beenden die Suche nicht. Insbesondere dürfen High-/Medium-Findings die Prüfung anderer relevanter, auch niedriger priorisierter Aspekte nicht verdrängen.
+3. **Completion Self-Review:** Vor dem Reporting überprüfen, ob wesentliche Bereiche, andere plausible Kandidaten, Gegenbelege oder noch beantwortbare Fragen übersehen wurden. Materielle Lücken gezielt nachuntersuchen und erneut bewerten.
+4. **Saubere Abschlussgrenze:** Erst bei hinreichend tragfähiger Untersuchung abschließen; fehlende Evidenz und Prüfgrenzen ehrlich angeben. Keine Mindestzahl an Findings, keine Pflicht zu Low-Findings, keine künstliche Eskalation und keine endlose oder unautorisierte Scope-Ausweitung.
+
+**Einordnung im Workflow:** Der Anspruch kann im **Review Setup / Method Contract** festgelegt werden, steuert die tatsächliche Arbeit in **Investigation und Evaluation** und wird beim Übergang zu **Review Reporting** geprüft. Die fachlichen Prüfmaßstäbe, Autorisierung und der Output Contract bleiben eigenständig. Das Gate verlangt keine veröffentlichte Zwischenliste und keine formale Laufzeitsperre; seine Wirkung ist eine zu testende Anweisungswirkung.
+
+**Konkretes, bisher erfolgreich erprobtes Beispiel** für `review-abstraction-and-responsibility-boundaries`, unverändert aus der aktuellen V2-Phase 03 (inklusive Erweiterung für Low-Severity-Findings):
+
+```text
+**Review depth and completion self-review.** Conduct discovery and evaluation with the depth expected from a **very intensive responsibility-boundary review** of the selected scope. Finding one or several plausible candidates or validated findings is **not a stopping condition**: continue investigating other relevant responsibility boundaries and evaluating material questions while further targeted inspection may change the conclusions. Multiple Critical, High, or Medium findings must not crowd out continued investigation of relevant Low-severity concerns; severity is not a search filter or completion criterion, and no severity level needs to be populated artificially. Before reporting, critically self-review whether important in-scope responsibilities, ownership of state and rules, access paths, ordinary change scenarios, or credible counterarguments were overlooked; return to discovery/refinement or evaluation to close material, answerable gaps. Stop only when further relevant investigation is unlikely to change the assessment, or disclose concrete evidence limitations. Do not invent findings or expand beyond the authorized scope.
+```
+
+Das Beispiel ist **domänenspezifisch** und als Ausgangspunkt für weitere isolierte Tests gedacht, nicht als wörtliche Pflichtformulierung für jeden Review-Skill. Ob Intensitätsanspruch, Nichtabbruch-Regel, Severity-Unabhängigkeit oder Selbstreview jeweils notwendig sind, und wie stark sie bei unterschiedlichen Modellen wirken, bleibt weiter zu prüfen.
+
 ## Anwendung als Prüfraster für künftige Skills
 
 Beim Entwurf eines neuen Review-Skills sollte geprüft werden:
@@ -156,6 +179,7 @@ Beim Entwurf eines neuen Review-Skills sollte geprüft werden:
 - Sind die geltenden **Prüfmethoden** ausreichend beschrieben, ohne Berechtigungen oder Seiteneffekte implizit zu erweitern?
 - Trennt der Skill **Beobachtungen**, **Validierung**, **Bewertung** und **Entscheidungen** soweit nötig?
 - Können **Gegenbelege**, **fehlende Informationen** und **Nachuntersuchung** das Ergebnis tatsächlich beeinflussen?
+- Ist bei intensiven Finding-orientierten Reviews ein **Early Exit Prevention Gate** sinnvoll, damit frühe oder höher priorisierte Findings die Untersuchung anderer relevanter Aspekte nicht vorzeitig beenden?
 - Kann ein Review **ohne Findings** abgeschlossen werden? Was geschieht, wenn er **nicht abschließend prüfbar** ist?
 - Sind die **erforderlichen Ergebnistypen** ausgewählt, statt Findings, Verdict, Alternatives und Actions pauschal zu erzwingen?
 - Regelt der **Output Contract** nicht nur das Markdown-Layout, sondern bei Bedarf auch Inhalt, Bedingungen und Delivery?
@@ -248,7 +272,7 @@ V2 wird nicht allein aufgrund des Entwurfs als Standard übernommen. Als erste G
 
 ### Vorläufige Beobachtung aus den Praxistests (2026-10-29)
 
-- **Schwächere Modelle:** Laut bisheriger praktischer Erprobung des Nutzers zeigen die beiden Skill-Fassungen **keinen nennenswerten Unterschied** im Ergebnis. Für diese getesteten Modelle ist derzeit **kein erkennbarer Mehrwert (Gain) von V2 gegenüber V1** festzustellen.
+- **Schwächere Modelle (vor dem Early Exit Prevention Gate):** Laut damaliger praktischer Erprobung des Nutzers zeigten die beiden Skill-Fassungen **keinen nennenswerten Unterschied** im Ergebnis; ein Mehrwert von V2 gegenüber V1 war dabei nicht erkennbar.
 - **Leistungsfähigere Modelle:** In der bisherigen praktischen Erprobung des Nutzers schnitt **V2 leicht besser als V1** ab. Der beobachtete Vorteil ist klein; welche konkreten Unterschiede ihn ausmachen, ist hier noch nicht dokumentiert.
 - **Einordnung:** Dies ist ein qualitatives Zwischenfazit, keine abgeschlossene oder quantifizierte Gegenprobe. Modellbezeichnungen, Testfälle, Einzelresultate und Messwerte sind hier noch nicht dokumentiert. Der leicht bessere Eindruck bei leistungsfähigeren Modellen ist kein Nachweis eines allgemeinen oder messbar großen V2-Vorteils.
 
@@ -256,8 +280,8 @@ Die beiden Entwürfe bleiben für die weitere Erprobung erhalten; über eine Üb
 
 ### Praxistest: Early Exit Prevention Gate (2026-10-29)
 
-**Beobachtung:** In den bisherigen Durchläufen mit dem schwächeren Modell wurden jeweils **zwei Findings** berichtet, auch nach einer umfangreicheren, später wieder verworfenen Nachschärfung der Investigation. Mit einer **einzelnen zusätzlichen Intensitäts- und Nichtabbruch-Regel** in Phase 03 von V2 (`6c10fb7`) ergab der nächste Test **drei Findings**. Diese drei entsprachen nach Einschätzung des Nutzers ungefähr den Findings des leistungsfähigeren Modells. Das ist ein **positives Einzelresultat**, noch keine abgesicherte allgemeine Verbesserung; Zahl und Qualität der Findings sind getrennt zu beurteilen.
+**Beobachtete Testfolge beim schwächeren Modell:** Die früheren Durchläufe berichteten jeweils **zwei Findings**, auch nach einer umfangreicheren, später zurückgenommenen Investigation-Nachschärfung. Mit der isolierten Intensitäts-/Nichtabbruch-Regel in V2 (`6c10fb7`) berichtete das Modell **drei Findings**, die nach Einschätzung des Nutzers ungefähr den Findings des leistungsfähigeren Modells entsprachen. Nach der ebenfalls isolierten Ergänzung gegen Severity-bedingten Early Exit (`8f2ca36`) lieferte das schwächere Modell **alle vier Findings des besten High-Modells: drei Medium und ein Low**. Das ist ein deutlich positives praktisches Vergleichsergebnis, aber keine kontrollierte Ursachenmessung. Insbesondere ist noch nicht nachgewiesen, dass der vierte Befund ausschließlich auf die neue Severity-Formulierung zurückgeht.
 
 **Abstraktes Wirkprinzip – Early Exit Prevention Gate:** Ein Review soll Discovery und Evaluation mit der für den gewählten Scope angemessenen **Tiefe eines sehr intensiven Reviews** fortführen. Bereits gefundene plausible oder validierte Findings sind **kein Abschlusskriterium**. Vor dem Übergang zum Reporting prüft das Modell kritisch, ob relevante Untersuchungsrichtungen, Kandidaten, Gegenbelege oder noch sinnvoll überprüfbare Fragen übergangen wurden, und setzt Discovery beziehungsweise Evaluation bei wesentlichen Lücken gezielt fort. Der Abschluss hängt von der **hinreichenden Untersuchung**, nicht von einer Mindest- oder Höchstzahl an Findings ab. Scope, Evidenzanforderungen und die Möglichkeit von null Findings bleiben erhalten.
 
-Das ist zunächst eine **experimentell interessante Gate-Idee**, keine technische Laufzeitsperre, kein universell validierter Skill-Standard und kein Ersatz für V1/V2 als Grunddesign. Der genaue Promptwortlaut bleibt bewusst außerhalb der allgemeinen Konzeptbeschreibung, damit weitere isolierte Varianten des Early-Exit-Schutzes vergleichbar erprobt werden können.
+Das **Early Exit Prevention Gate** wird oben deshalb als eigenständiger, bereits praktisch erfolgreich erprobter **Designbaustein mit aktuellem konkretem Beispiel** dokumentiert. Es ist noch keine universell validierte Pflichtregel: Weitere isolierte Varianten, Wiederholungen und andere Review-Arten sollen zeigen, welcher Mechanismus wie zuverlässig wirkt. Das allgemeine V1/V2-Grunddesign bleibt davon getrennt.
