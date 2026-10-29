@@ -11,6 +11,21 @@ Dieses Dokument hält ein praxisbasiert entwickeltes **Meta-Modell für Review-S
 
 Das Modell ist **keine Vorlage, die jeder Skill vollständig abarbeiten muss**. Je nach Review-Art können einzelne Schritte entfallen, anders ausgestaltet oder zusammengelegt werden. Insbesondere müssen nicht alle Ergebnisbausteine erzeugt werden. Der tatsächliche Erkenntniszweck steht über formaler Vollständigkeit.
 
+## WICHTIG – Offizielle OpenAI-Prompting- und Skill-Guides als Designreferenz (V1 **und** V2)
+
+**Hohe Priorität beim Entwurf und bei jeder Mutation eines Review-Skills:** Neben der Wahl des Review-Workflows (V1 oder V2) muss **die Formulierung der eigentlichen Agentenanweisungen** anhand der offiziellen OpenAI-Guides geprüft werden. Ein fachlich guter Prozessentwurf garantiert noch nicht, dass ein Modell die beabsichtigte Handlung aus der Formulierung ableitet. Diese Referenzen sind **vor dem Formulieren, Umformulieren und Bewerten einer neuen Skill-Variante ausdrücklich heranzuziehen**, nicht erst bei ausbleibendem Erfolg.
+
+**Offizielle Quellen und ihre konkrete Bedeutung:**
+
+- **[OpenAI – Best practices for prompt engineering with the OpenAI API](https://help.openai.com/en/articles/6654000-best-practices-for-prompt-engineering-with-the-openai-api), insbesondere Regel 7:** *"Instead of just saying what not to do, say what to do instead."* Gewünschtes Verhalten **positiv, konkret und handlungsorientiert** formulieren; Vermeidungsregeln möglichst durch eine klare alternative Handlung ergänzen. Ebenso relevant: präzise Anweisungen statt unscharfer Umschreibungen (Regeln 3 und 6).
+- **[OpenAI Academy – Using skills](https://openai.com/academy/skills/), Abschnitt "Write down the instructions":** Ein Skill soll Aufgabe, nötige Eingaben, verständliche Arbeitsschritte, erwartete Ausgabe und abschließende Qualitätsprüfungen verständlich beschreiben. Diese Bausteine dienen dem gewünschten Verhalten, nicht dem Anhäufen von Prozessprosa.
+- **[OpenAI Developers – Build skills](https://developers.openai.com/plugins/build/skills), Abschnitt "Define the workflow boundary":** Für den jeweiligen Skill deutlich machen, welche Eingaben, Handlungen, Ausgaben und Grenzen gelten; unklare oder widersprüchliche Anweisungen prüfen. Diese Quelle behandelt konkret Plugin-Skills; die Prinzipien sind eine ergänzende Referenz, keine automatische Pflichtstruktur für unsere Review-Skills.
+- **[OpenAI API – Prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering):** Promptverhalten ist modell- und versionsabhängig; Varianten durch praktische Tests und Evaluation vergleichen, statt die Wirkung einer vermeintlich besseren Formulierung nur aus ihrer Plausibilität abzuleiten.
+
+**Praktische Schreibregel für beide Review-Varianten:** Beschreiben, **was das Modell tatsächlich tun soll**, woran es die Aufgabe erkennt, wie es fortsetzt und wann es fertig ist. Bei einer Abbruchregel also nicht nur das vorzeitige Beenden untersagen, sondern die gewünschte **weitere Untersuchung und Validierung relevanter Aspekte** konkret anweisen. Sicherheits-, Authority- und Scope-Grenzen dürfen weiterhin als klare Verbote formuliert werden; die OpenAI-Empfehlung ist **kein pauschales Verbot negativer Sätze**. Neue Formulierungsbeispiele nicht ungeprüft als bereits bewährte Skill-Regeln übernehmen.
+
+**Reproduzierbarkeit:** Bereits getestete Prompts, einschließlich der Wortwahl des aktuellen Early Exit Prevention Gate, **nicht stillschweigend umformulieren**. Alternative positive Formulierungen als **einzelne, getrennt testbare Mutationen** behandeln; Resultate dem tatsächlich getesteten Text zuordnen. Eine elegantere oder abstraktere Umschreibung ist ohne Gegenprobe keine nachgewiesene Verbesserung.
+
 ## Wie diese Grundlage entstanden ist
 
 1. **Praxisinventar:** Die 21 vorhandenen `.agents/skills/review-*/SKILL.md`-Dateien wurden vollständig untersucht. Zunächst wurden wiederkehrende Begriffe, Verfahrensregeln und Ergebnisformate verglichen. Wo ein Output-Vertrag ausgelagert ist (beispielsweise bei `review-code-quality`), wurde diese Referenz in die Betrachtung einbezogen.
@@ -177,6 +192,7 @@ Beim Entwurf eines neuen Review-Skills sollte geprüft werden:
 - Ist klar, **wann** der Skill gewählt wird und **wie** Nutzerzusätze sowie bestehender Gesprächskontext behandelt werden?
 - Sind **Objective**, **Target**, **Scope**, **Context**, **Authority**, **Lens** und gegebenenfalls **Review Basis** voneinander unterscheidbar?
 - Sind die geltenden **Prüfmethoden** ausreichend beschrieben, ohne Berechtigungen oder Seiteneffekte implizit zu erweitern?
+- **WICHTIG – OpenAI-Formulierungsregeln angewandt?** Ist für jede wesentliche Skill-Anweisung die **gewünschte Handlung positiv und konkret** beschrieben (siehe die oben verlinkten offiziellen Prompting- und Skill-Guides), statt lediglich zu erklären, was nicht passieren soll? Sind Änderungen an bereits getesteten Formulierungen als eigene Mutation nachvollziehbar?
 - Trennt der Skill **Beobachtungen**, **Validierung**, **Bewertung** und **Entscheidungen** soweit nötig?
 - Können **Gegenbelege**, **fehlende Informationen** und **Nachuntersuchung** das Ergebnis tatsächlich beeinflussen?
 - Ist bei intensiven Finding-orientierten Reviews ein **Early Exit Prevention Gate** sinnvoll, damit frühe oder höher priorisierte Findings die Untersuchung anderer relevanter Aspekte nicht vorzeitig beenden?
