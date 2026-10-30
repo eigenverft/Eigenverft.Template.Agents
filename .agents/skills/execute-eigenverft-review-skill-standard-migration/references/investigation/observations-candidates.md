@@ -1,13 +1,13 @@
-# 3.2 Observations / Candidates — Prüfbare Aussagen entwickeln
+# 3.2 Broad Discovery / Observations & Candidates — Suchrichtungen erschließen
 
-**Responsibility:** Turn observed facts and patterns into review-relevant questions or hypotheses worth evaluating.
+**Responsibility:** Investigate the selected subject from several relevant directions and identify questions that could reveal useful concerns.
 
 During migration:
-- Specify the kinds of concrete signals that might matter for this review's Evaluation Lens and Review Basis.
-- Describe the suspected concern, affected subject, and practical question to examine, without presenting a hypothesis as an established finding.
-- Explore additional relevant directions after the first plausible candidate; a credible lead is not a completion marker.
-- Allow either direct, evidence-led candidate discovery or a broader candidate space with selective, tree-like refinement. Choose according to the review's method and any user's explicit instructions.
-- Do not require a fixed candidate count, a written tree, or a persistent queue as a default.
-- Pass material, specific candidates to Evaluation; return here selectively if counterevidence exposes a new lead or missing context.
+- Reconstruct behavior, state, rules, interactions, contracts, or other evidence appropriate to the review lens and [Evidence](evidence.md).
+- Explore meaningful areas of the authorized scope, including different paths and smaller problems that may be overlooked when more prominent concerns appear.
+- **After finding several Critical, High, or Medium issues, continue looking for relevant Low-severity problems.** Pursue useful questions on their merits rather than filtering the search by severity.
+- Express emerging concerns as **candidates**: name the observed signal and what still needs checking. Evaluation determines which candidates become supported findings.
+- Keep the search grounded in real evidence and the user's objective. A variety of useful leads matters more than a fixed number of ideas.
+- When an observation contains distinct possible problems, use [Candidate Refinement](candidate-refinement.md) to separate the questions. Return here when subsequent evaluation reveals a meaningful unexplored path.
 
-**Result:** Candidate generation is broad enough to be useful but does not pre-judge the outcome.
+**Result:** A useful range of concrete investigation directions, including concerns of different sizes, before conclusions are drawn.
