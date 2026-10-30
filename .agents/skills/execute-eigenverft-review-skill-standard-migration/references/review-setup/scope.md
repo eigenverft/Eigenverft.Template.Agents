@@ -1,4 +1,4 @@
-# 2.4 Scope — Untersuchungsgrenzen bestimmen
+# 2.4 Scope
 
 **Responsibility:** Determine what is in and out of the review's judgments, and what coverage is expected.
 

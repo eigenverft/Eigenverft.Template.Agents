@@ -1,4 +1,4 @@
-# 2.7 Evaluation Lens — Betrachtungsperspektive bestimmen
+# 2.7 Evaluation Lens
 
 **Responsibility:** State the particular perspective from which the Target is reviewed.
 

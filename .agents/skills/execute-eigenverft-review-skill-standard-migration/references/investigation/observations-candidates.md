@@ -1,4 +1,4 @@
-# 3.2 Broad Discovery / Observations & Candidates — Suchrichtungen erschließen
+# 3.2 Broad Discovery / Observations & Candidates
 
 **Responsibility:** Investigate the selected subject from several relevant directions and identify questions that could reveal useful concerns.
 

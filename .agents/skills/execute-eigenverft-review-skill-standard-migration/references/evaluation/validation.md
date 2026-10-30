@@ -1,4 +1,4 @@
-# 4.1 Validation — Aussagen verifizieren
+# 4.1 Validation
 
 **Responsibility:** Check whether a candidate's factual claim is actually supported.
 

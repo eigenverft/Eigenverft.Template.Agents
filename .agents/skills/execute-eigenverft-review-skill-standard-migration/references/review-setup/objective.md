@@ -1,4 +1,4 @@
-# 2.2 Objective — Erkenntnisziel bestimmen
+# 2.2 Objective
 
 **Responsibility:** Define the question the review should answer and the improvement or understanding sought.
 

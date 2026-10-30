@@ -1,4 +1,4 @@
-# 2.3 Target — Untersuchungsgegenstand festlegen
+# 2.3 Target
 
 **Responsibility:** Identify the concrete object being reviewed: project, component, source tree, diff, document, system, or other supported subject.
 

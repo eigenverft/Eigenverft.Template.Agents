@@ -1,4 +1,4 @@
-# 5.5 Alternatives — Berichtete Optionen
+# 5.5 Alternatives
 
 **Responsibility:** Present meaningful alternative interpretations or improvement directions when they aid a decision.
 

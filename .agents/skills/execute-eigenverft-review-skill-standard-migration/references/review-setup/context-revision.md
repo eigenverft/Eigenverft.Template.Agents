@@ -1,4 +1,4 @@
-# 2.5 Context / Revision — Bezugszustand bestimmen
+# 2.5 Context / Revision
 
 **Responsibility:** Establish the relevant project/repository/revision and the technical or domain state to which conclusions apply.
 

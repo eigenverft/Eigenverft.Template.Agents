@@ -1,4 +1,4 @@
-# 3.3 Tree-like Candidate Refinement — Kandidaten präzisieren
+# 3.3 Tree-like Candidate Refinement
 
 **Responsibility:** Refine broad investigation directions into smaller, meaningful questions before committing to expensive validation.
 

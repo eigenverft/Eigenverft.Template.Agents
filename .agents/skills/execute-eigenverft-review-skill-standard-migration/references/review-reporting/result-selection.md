@@ -1,4 +1,4 @@
-# 5.1 Result Selection — Ergebnisbausteine bestimmen
+# 5.1 Result Selection
 
 **Responsibility:** Choose which output categories are needed for the specific review and its actual outcome.
 

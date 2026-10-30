@@ -1,4 +1,4 @@
-# 4.3 Decisions — Schlussfolgerungen bestimmen
+# 4.3 Decisions
 
 **Responsibility:** Decide which candidates merit reporting, which require further investigation, and what remains uncertain.
 

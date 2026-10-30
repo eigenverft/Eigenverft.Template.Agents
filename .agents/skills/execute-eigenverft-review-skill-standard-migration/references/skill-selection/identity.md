@@ -1,4 +1,4 @@
-# 1.1 Identity — Skill identifizieren
+# 1.1 Identity
 
 **Responsibility:** Establish the review skill's distinct identity, subject, and intended insight.
 

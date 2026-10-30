@@ -1,4 +1,4 @@
-# 2.6 Authority — Zulässige Handlungen abgrenzen
+# 2.6 Authority
 
 **Responsibility:** Define what actions the **reviewing agent** may perform, not how it formats its report.
 

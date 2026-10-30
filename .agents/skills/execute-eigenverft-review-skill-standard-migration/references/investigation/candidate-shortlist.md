@@ -1,4 +1,4 @@
-# 3.4 Candidate Shortlist — Prüfbare Kandidaten auswählen
+# 3.4 Candidate Shortlist
 
 **Responsibility:** Collect the surviving investigation-worthy questions and decide whether there are still important unexplored discovery directions.
 

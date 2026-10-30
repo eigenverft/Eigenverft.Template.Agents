@@ -1,4 +1,4 @@
-# 2.9 Method Contract — Prüfverfahren festlegen
+# 2.9 Method Contract
 
 **Responsibility:** Give the review agent a practical, domain-specific way to investigate relevant questions, evaluate evidence, and report well-supported conclusions.
 

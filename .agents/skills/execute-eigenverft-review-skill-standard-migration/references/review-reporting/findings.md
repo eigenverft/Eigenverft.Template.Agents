@@ -1,4 +1,4 @@
-# 5.2 Findings — Qualifizierte Befunde
+# 5.2 Findings
 
 **Responsibility:** Present validated, meaningful review concerns in a form the reader can assess and act on.
 

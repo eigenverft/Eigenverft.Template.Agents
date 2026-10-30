@@ -1,4 +1,4 @@
-# 5.7 Limitations — Grenzen der Aussagekraft
+# 5.7 Limitations
 
 **Responsibility:** Explain material uncertainty, inaccessible evidence, and actual scope or coverage limits.
 

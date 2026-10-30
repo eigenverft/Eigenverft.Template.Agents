@@ -1,4 +1,4 @@
-# 5.3 Verdict — Zusammenfassende Beurteilung
+# 5.3 Verdict
 
 **Responsibility:** Summarize an overall judgment when the review's purpose warrants one.
 

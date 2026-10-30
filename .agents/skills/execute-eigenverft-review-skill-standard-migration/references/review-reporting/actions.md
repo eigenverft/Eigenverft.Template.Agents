@@ -1,4 +1,4 @@
-# 5.6 Actions — Empfohlene Schritte
+# 5.6 Actions
 
 **Responsibility:** Suggest concrete next steps when the review supports further investigation, design, or implementation.
 

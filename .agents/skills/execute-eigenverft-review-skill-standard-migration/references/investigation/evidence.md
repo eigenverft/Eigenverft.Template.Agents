@@ -1,4 +1,4 @@
-# 3.1 Evidence — Informationen erheben
+# 3.1 Evidence
 
 **Responsibility:** Obtain sufficient relevant information for the review's objective and scope, within the defined authority.
 

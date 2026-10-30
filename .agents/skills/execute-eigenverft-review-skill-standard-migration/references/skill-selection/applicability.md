@@ -1,4 +1,4 @@
-# 1.2 Applicability — Anwendbarkeit feststellen
+# 1.2 Applicability
 
 **Responsibility:** Explain when this review skill is appropriate and when a different skill or action is needed.
 

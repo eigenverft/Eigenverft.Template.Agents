@@ -1,4 +1,4 @@
-# 2.8 Review Basis — Prüfmaßstab und Anforderungen bestimmen
+# 2.8 Review Basis
 
 **Responsibility:** Establish which requirements, guarantees, invariants, contracts, accepted standards, or evidence-backed design goals define a meaningful problem.
 

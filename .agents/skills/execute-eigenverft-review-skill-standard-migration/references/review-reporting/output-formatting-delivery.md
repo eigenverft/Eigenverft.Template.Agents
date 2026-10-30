@@ -1,4 +1,4 @@
-# 5.8 Output Formatting & Delivery — Output Contract anwenden
+# 5.8 Output Formatting & Delivery
 
 **Responsibility:** Define and apply the target review skill's presentation and delivery contract. The contract must be understood during Setup so the review gathers the information it needs; this step applies it to the final response.
 

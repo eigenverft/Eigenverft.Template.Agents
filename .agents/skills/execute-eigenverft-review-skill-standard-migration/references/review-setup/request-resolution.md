@@ -1,4 +1,4 @@
-# 2.1 Request Resolution — Nutzerauftrag auslegen
+# 2.1 Request Resolution
 
 **Responsibility:** Interpret the actual instruction, conversation context, constraints, user-specified review mode, and relevant ambiguity.
 

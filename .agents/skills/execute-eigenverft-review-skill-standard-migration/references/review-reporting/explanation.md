@@ -1,4 +1,4 @@
-# 5.4 Explanation — Erklärende Synthese
+# 5.4 Explanation
 
 **Responsibility:** Explain relevant behavior, rationale, consequences, or relationships so the reader understands the review result.
 

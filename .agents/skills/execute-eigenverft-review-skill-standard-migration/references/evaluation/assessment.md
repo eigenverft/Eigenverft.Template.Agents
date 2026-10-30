@@ -1,4 +1,4 @@
-# 4.2 Assessment — Bedeutung bewerten
+# 4.2 Assessment
 
 **Responsibility:** Evaluate the practical significance of a sufficiently understood situation, not merely whether it looks unusual.
 
