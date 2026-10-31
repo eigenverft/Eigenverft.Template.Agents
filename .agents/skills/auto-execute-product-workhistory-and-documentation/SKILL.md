@@ -57,7 +57,6 @@ Use these **five broad audiences** as the default vocabulary. Classify readers b
 
 ### Coverage Decisions
 
-- The `developer` and `operations` perspectives also cover product-related development and delivery workflows, tooling, and supporting infrastructure, according to the readers' responsibilities.
 - Check all five perspectives for every affected product. Missing directories do not establish inapplicability or justify ignoring a writing trigger.
 - Distinguish an audience being inapplicable from lacking evidence for a particular explanation. Do not invent operational duties, strategy, or product intent to populate an area.
 - A library consumer belongs to that library's `user` audience; a library maintainer or architect belongs to `developer`. Product and management readers may need different explanations of the same topic, even when one person holds both responsibilities.
@@ -154,7 +153,9 @@ Use implementation, tests, configuration, and task evidence already examined to 
 
 ### 6.2 Apply Mandatory Writing Triggers
 
-The documentation subject is the behavior, interface, workflow, configuration, or decision the task changes or needs to verify, together with material prerequisites, constraints, and consequences needed to explain it. Reading a surrounding component does not make all of its contents documentation work. Do not expand into neighboring topics merely because the investigation encountered them.
+The documentation subject is the behavior, interface, workflow, configuration, or decision the task establishes, changes, or needs to verify, together with material prerequisites, constraints, and consequences needed to explain it. Reading a surrounding component does not make all of its contents documentation work. Do not expand into neighboring topics merely because the investigation encountered them.
+
+Include the product-related development, delivery, and operational setup established or used in the task in this subject and check it for reusable knowledge, such as repository and remote arrangements, tooling and relevant versions, and supporting infrastructure. Apply the existing writing triggers for `developer` and `operations` according to the readers' responsibilities.
 
 Before completing writable work, documentation must be changed when any of these conditions holds within that subject:
 
