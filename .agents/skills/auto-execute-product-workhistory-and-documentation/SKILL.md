@@ -57,6 +57,7 @@ Use these **five broad audiences** as the default vocabulary. Classify readers b
 
 ### Coverage Decisions
 
+- The `developer` and `operations` perspectives also cover product-related development and delivery workflows, tooling, and supporting infrastructure, according to the readers' responsibilities.
 - Check all five perspectives for every affected product. Missing directories do not establish inapplicability or justify ignoring a writing trigger.
 - Distinguish an audience being inapplicable from lacking evidence for a particular explanation. Do not invent operational duties, strategy, or product intent to populate an area.
 - A library consumer belongs to that library's `user` audience; a library maintainer or architect belongs to `developer`. Product and management readers may need different explanations of the same topic, even when one person holds both responsibilities.
