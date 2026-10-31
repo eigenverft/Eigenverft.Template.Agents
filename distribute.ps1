@@ -428,6 +428,7 @@ $destinationNames = @(
     'Eigenverft.App.DeskProbe'
     'Eigenverft.App.GlobalServerPwaHost'
     'Eigenverft.App.Lattice'
+    'Eigenverft.App.Maschinist'
     'Eigenverft.NetLib.LlamaCpp'
     'Eigenverft.App.McpServer'
     'Eigenverft.App.ReverseProxy'
