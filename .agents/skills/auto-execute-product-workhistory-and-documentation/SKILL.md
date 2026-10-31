@@ -164,6 +164,8 @@ Before completing writable work, documentation must be changed when any of these
 
 Useful answers must support a concrete need for use, operation, product understanding, product decisions, overarching assessment or steering, maintenance, or verification. Capabilities, properties, constraints, failure causes, ownership boundaries, recovery steps, and supported rationale or consequences can qualify even when behavior did not change. A first encountered but material constraint can qualify; a prior request or repeated incident is not required. Do not invent hypothetical reader questions merely to create documentation. Incidental implementation details and activity summaries alone do not.
 
+For management readers, apply the existing writing triggers to verified product knowledge and development results, including what the product provides and what has been achieved in its development. Explain their supported significance when relevant; management decisions or strategic intent are not prerequisites.
+
 Proportionality limits the subject and necessary explanation; it does not cancel a writing trigger inside that subject. Do not impose a fixed number of audiences or pages, or leave known triggered work undone merely because another audience was prioritized.
 
 For each trigger, identify the audience and question being answered. This is a working decision, not a requirement to create a register or report. Check all five perspectives, but do not create several audience pages by mechanically copying the same fact.
