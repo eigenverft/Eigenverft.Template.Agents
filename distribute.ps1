@@ -432,6 +432,7 @@ $destinationNames = @(
     'Eigenverft.NetLib.LlamaCpp'
     'Eigenverft.App.McpServer'
     'Eigenverft.App.ReverseProxy'
+    'Eigenverft.App.Shuttle'
     'Eigenverft.Distributed.Drydock'
     'Eigenverft.Lib.PortSpan'
     'Eigenverft.Manifested.Agent'
