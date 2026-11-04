@@ -9,7 +9,7 @@ Apply these rules before naming or creating a Git branch within the authorized t
 
 **Check the need first.** Honor explicit user and workflow requirements. Prefer continuing on the current branch. Consider a separate branch where separate development, review, or integration better serves the work. Let the task and available context guide the choice, keeping the organizational effort proportionate. Apply the naming rules below when a new branch is needed.
 
-**Consider checkout isolation separately.** A new branch does not by itself require a linked worktree. Consider a linked worktree for the practical value of an independent working state, keeping the organizational effort proportionate. Let the task and available context guide this choice. Use [Worktree Naming and Placement](../auto-execute-worktree-naming/SKILL.md) for its directory and setup rules.
+**Consider checkout isolation separately.** A new branch does not by itself require a linked worktree. Consider a linked worktree for the practical value of an independent working state, keeping the organizational effort proportionate. Let the task and available context guide this choice.
 
 | Channel | Branch names or families |
 | --- | --- |
