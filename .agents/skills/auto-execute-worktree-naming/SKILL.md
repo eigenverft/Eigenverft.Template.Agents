@@ -1,11 +1,11 @@
 ---
 name: auto-execute-worktree-naming
-description: "Apply automatically when preparing to name or create a worktree."
+description: "Apply automatically when preparing to name or create a linked Git worktree."
 ---
 
 # Worktree Naming and Placement
 
-Apply these rules before naming or creating a linked Git worktree within the authorized task.
+Apply these rules before naming or creating a linked Git worktree within the authorized task. Create additional checkouts with `git worktree add` so they remain linked to the same repository.
 
 **Check the need first.** Honor an explicit request to create a new worktree. Otherwise, continue in the current checkout when its branch, working state, and isolation fit the task; create a separate worktree when the task or active workflow requires one. Apply the naming and setup rules below when a new worktree is needed.
 
