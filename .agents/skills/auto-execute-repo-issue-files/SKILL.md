@@ -31,6 +31,8 @@ Outline practical implementation approaches at a level useful for discussing the
 
 Mark `Ready for implementation` only when the codebase context has been checked, consequential ambiguities are resolved, and the decisions needed to start are made or not required. Otherwise, replace the checked confirmation with concrete unchecked task items for what still needs clarification or a decision. Readiness describes the issue's preparation state; implementation proceeds within the user's authorization.
 
+If implementation reveals a material conflict with the issue's documented assumptions or agreed decisions, describe the conflict in the issue and replace the checked implementation readiness confirmation with concrete unchecked items for resolving it. Keep the issue in `open/` while the conflict remains unresolved. Reassess implementation readiness after the conflict is resolved; move the issue to `done/` only when its work is complete.
+
 ```markdown
 # Short, concrete issue title
 
