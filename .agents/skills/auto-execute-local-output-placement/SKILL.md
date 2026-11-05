@@ -9,4 +9,4 @@ Continue using the locations established by project documentation, scripts, or t
 
 On Windows, when path restrictions prevent work at the intended location, use a short external path under `C:\.artifacts\<repo-name>\<checkout-id>\<purpose>` only for the affected locations. Preserve necessary subdivisions and reuse suitable existing directories there instead of creating additional scattered directories. Choose a short checkout ID that keeps concurrently used checkouts of the same repository separate.
 
-Source-checkout placement is outside this skill. Naming, creation, and placement of linked Git worktrees follow `auto-execute-worktree-naming`.
+Source-checkout placement is outside this skill.
