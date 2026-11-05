@@ -17,6 +17,8 @@ Apply these rules when creating, updating, closing, or deferring repository-loca
 
 Use this structure as a starting point. Reuse established repository or task-specific formats that cover the same information, and keep detail proportionate to the issue.
 
+Treat `Issue shaping and context` as a free-form section. Organize it with whatever issue-specific subsections help explain and develop the issue, such as background, observations, examples, requirements, goals, or constraints.
+
 When creating or refining an issue, compare the request with the relevant code and documentation early, before shaping implementation approaches. Ground the description and affected features in the actual concepts, behavior, and relationships found there.
 
 Keep `Created` as the original creation date and update `Last edited` whenever the issue is edited. Use `YYYY-MM-DD` for both dates; initialize them to the same date when creating an issue.
@@ -39,8 +41,8 @@ If implementation reveals a material conflict with the issue's documented assump
 Created: YYYY-MM-DD
 Last edited: YYYY-MM-DD
 
-## Context and goal
-Problem or request, relevant evidence, and the intended outcome.
+## Issue shaping and context
+Free-form explanation and development of the issue. Add suitable subsections as needed.
 
 ## Ambiguities and possible misunderstandings
 Check the request against the codebase's concepts and behavior. Could the user's terminology or a similar term imply a different intended outcome?
