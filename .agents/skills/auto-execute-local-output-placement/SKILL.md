@@ -1,6 +1,6 @@
 ---
 name: auto-execute-local-output-placement
-description: "Apply automatically when running repository tools that generate output files, intermediate files, logs, reports, or temporary working files, or when path restrictions affect their locations. Read before choosing or changing those locations. Follow existing project and tool conventions; prefer the current checkout for new locations and use the organized external fallback when needed. Covers primary and linked checkouts; linked Git worktree creation and placement follow the worktree skill."
+description: Apply automatically when running repository tools that generate output files, intermediate files, logs, reports, or temporary working files, or when path restrictions affect their locations. Read before choosing or changing those locations. Follow existing project and tool conventions; prefer the current checkout for new locations and use the organized external fallback when needed. Covers primary and linked checkouts; linked Git worktree creation and placement follow the worktree skill.
 ---
 
 # Local Working Files and Tool Outputs

@@ -1,6 +1,6 @@
 ---
 name: execute-product-evolution
-description: "Use when the user requests an autonomous, bounded product-improvement cycle: discover opportunities, assess them, independently select one cohesive increment, document understood intent and effective policies in an issue before implementation, implement, verify, commit, and close with human reviewability. Supports conservative, balanced, and ambitious defaults plus natural-language specialization of each policy. Not for ordinary development requests."
+description: Use when the user requests an autonomous, bounded product-improvement cycle; discover opportunities, assess them, independently select one cohesive increment, document understood intent and effective policies in an issue before implementation, implement, verify, commit, and close with human reviewability. Supports conservative, balanced, and ambitious defaults plus natural-language specialization of each policy. Not for ordinary development requests.
 ---
 
 # Execute Product Evolution

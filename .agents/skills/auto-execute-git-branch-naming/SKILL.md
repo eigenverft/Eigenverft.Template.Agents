@@ -1,6 +1,6 @@
 ---
 name: auto-execute-git-branch-naming
-description: "Apply automatically when preparing to name or create a git branch."
+description: Apply automatically when preparing to name or create a git branch.
 ---
 
 # Git Branch Naming

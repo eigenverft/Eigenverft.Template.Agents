@@ -63,7 +63,7 @@ Use this same skill for both the content of portable agent skills and their tech
 
 1. Confirm the goal, triggers, scope, and important exclusions; derive a meaningful lowercase hyphen-case name and check for collisions.
 2. Plan the smallest useful package under the Git-root `.agents/skills` directory. Use the lifecycle script to scaffold packages and for routine metadata or resource changes.
-3. Write complete `SKILL.md` frontmatter and an actionable body explaining behavior, boundaries, and expected outputs. The description must convey both purpose and **when** the skill should activate.
+3. Write complete `SKILL.md` frontmatter and an actionable body explaining behavior, boundaries, and expected outputs. The description must convey both purpose and **when** the skill should activate. Write `description` as one plain YAML line without outer quotation marks, using the category's exact opening below.
 4. Keep all necessary behavior in `SKILL.md` and any referenced resources. `SKILL.md` is the only required package file; do not require `agents/openai.yaml` or another harness-specific file.
 5. Add scripts, references, or assets only when they materially help. Favor a small, reusable skill over extra scaffolding.
 6. Validate after creating or updating a package; review its final content for completeness, portability, accuracy, and unresolved placeholders.
@@ -112,8 +112,16 @@ Use `references/softskill_checklists.md` for the concise naming, authoring, meta
 - `SKILL.md` frontmatter allows only: `name`, `description`, `license`, `compatibility`, `allowed-tools`, `metadata`.
 - `SKILL.md` frontmatter requires: `name` and `description`.
 - `description` must not contain `<` or `>` and must be at most 1024 characters.
-- Repository-local, case-sensitive description starts: `auto-execute-*` requires `Apply automatically when `; `execute-*` requires `Use when the user requests `; `review-*` requires `Use for a read-only review when `.
-- `validate` and `compatibility-check` reject mismatched starts. Names without these prefixes remain valid but produce a non-failing `[WARN]` because their activation and side-effect intent is not classified by name.
+- Write `description` as a single-line plain YAML string without outer single or double quotation marks: `description: Use when the user requests ...`. Rephrase YAML-sensitive colon-space and whitespace-hash sequences, for example using a semicolon, so the full description remains one string. Internal quotation marks are allowed.
+- Use these exact, case-sensitive description openings, followed by a space and the skill-specific trigger:
+
+  | Skill name family | Required description opening |
+  | --- | --- |
+  | `auto-execute-*` | `Apply automatically when` |
+  | `execute-*` | `Use when the user requests` |
+  | `review-*`, `analyze-*`, `view-*` | `Use for a read-only review when` |
+
+- `update -Description` writes plain text and rejects outer quotation marks or unsafe YAML punctuation before writing. `validate` and `compatibility-check` reject these formats and mismatched starts. Names outside the listed families remain valid but produce a non-failing `[WARN]` because their activation and side-effect intent is not classified by name.
 - These checks enforce only the written convention; semantic compliance with read-only or execution boundaries must be assessed separately, and automatic harness activation is not guaranteed.
 - Description length assessment: `normal` = 0-511 characters, `medium` = 512-767, `long` = 768-1024 (`[WARN]` without failing validation); above 1024 remains a validation error.
 - Both `validate` and `compatibility-check` report the category and length. Compatibility checks additionally summarize the length categories; unknown name categories and long descriptions count as non-failing warnings.

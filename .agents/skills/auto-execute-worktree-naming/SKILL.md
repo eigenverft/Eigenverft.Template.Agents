@@ -1,6 +1,6 @@
 ---
 name: auto-execute-worktree-naming
-description: "Apply automatically when preparing to name or create a linked Git worktree."
+description: Apply automatically when preparing to name or create a linked Git worktree.
 ---
 
 # Worktree Naming and Placement

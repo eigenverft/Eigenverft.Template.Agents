@@ -490,23 +490,47 @@ function Split-FrontmatterAndBody {
     }
 }
 
+function Get-DescriptionFormatError {
+    param([string]$Value)
+
+    $trimmed = $Value.Trim()
+    if ($Value -match '[\r\n]') {
+        return "Description must be a single-line plain YAML string."
+    }
+    if ($trimmed.StartsWith('"') -or $trimmed.StartsWith("'")) {
+        return "Description must use plain text without outer quotation marks."
+    }
+    if ($trimmed -match ':(?:[ \t]|$)|[ \t]#') {
+        return "Description must be safe as plain YAML; rephrase colon-space or whitespace-hash sequences, for example with a semicolon."
+    }
+    return $null
+}
+
 function Set-FrontmatterStringValue {
     param([string]$FrontmatterText, [string]$Key, [string]$Value)
 
-    $quoted = Get-YamlQuotedValue -Value $Value
+    if ($Key -eq "description") {
+        $formatError = Get-DescriptionFormatError -Value $Value
+        if ($null -ne $formatError) {
+            throw $formatError
+        }
+        $serializedValue = $Value.Trim()
+    } else {
+        $serializedValue = Get-YamlQuotedValue -Value $Value
+    }
     $lines = $FrontmatterText -split "`r?`n"
     $found = $false
     for ($i = 0; $i -lt $lines.Count; $i++) {
         $line = $lines[$i]
         if ($line -match '^\S' -and $line -match "^$Key\s*:") {
-            $lines[$i] = "${Key}: $quoted"
+            $lines[$i] = "${Key}: $serializedValue"
             $found = $true
             break
         }
     }
 
     if (-not $found) {
-        $lines += "${Key}: $quoted"
+        $lines += "${Key}: $serializedValue"
     }
 
     return [string]::Join("`n", $lines)
@@ -729,6 +753,11 @@ function Test-SkillValidity {
     $descriptionValue = ([string]$frontmatter["description"]).Trim()
     if ([string]::IsNullOrWhiteSpace($descriptionValue)) {
         return [pscustomobject]@{ Valid = $false; Message = "Description must not be empty" }
+    }
+    $rawDescription = [regex]::Match($frontmatterText, '(?m)^description[ \t]*:[ \t]*(.*)$').Groups[1].Value.Trim()
+    $formatError = Get-DescriptionFormatError -Value $rawDescription
+    if ($null -ne $formatError) {
+        return [pscustomobject]@{ Valid = $false; Message = $formatError }
     }
     if ($descriptionValue.Contains("<") -or $descriptionValue.Contains(">")) {
         return [pscustomobject]@{ Valid = $false; Message = "Description cannot contain angle brackets (< or >)" }

@@ -1,6 +1,6 @@
 ---
 name: auto-execute-product-workhistory-and-documentation
-description: "Apply automatically when working in a software product repository, including exploration, planning, implementation, review, debugging, testing, proofs, benchmarks, maintenance, and documentation. Read this skill at task start; no documentation request, behavior change, passing result, or final acceptance required. Consult relevant docs; for writable work, maintain local work history and self-contained English audience docs. Read-only means reading and reporting only. Respect the user's scope."
+description: Apply automatically when working in a software product repository, including exploration, planning, implementation, review, debugging, testing, proofs, benchmarks, maintenance, and documentation. Read this skill at task start; no documentation request, behavior change, passing result, or final acceptance required. Consult relevant docs; for writable work, maintain local work history and self-contained English audience docs. Read-only means reading and reporting only. Respect the user's scope.
 ---
 
 # Auto Execute Product Work History and Documentation

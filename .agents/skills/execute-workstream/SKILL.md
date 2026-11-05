@@ -1,6 +1,6 @@
 ---
 name: execute-workstream
-description: "Use when the user requests an explicitly invoked, resumable Git workstream via $execute-workstream, with an issue-backed, remotely published and locally cleaned-up change step for a supplied task or compatible skill. Subsequent in-context tasks may continue the active stream. Not for ordinary development, standalone read-only reviews, general Git operations or automatic activation."
+description: Use when the user requests an explicitly invoked, resumable Git workstream via $execute-workstream, with an issue-backed, remotely published and locally cleaned-up change step for a supplied task or compatible skill. Subsequent in-context tasks may continue the active stream. Not for ordinary development, standalone read-only reviews, general Git operations or automatic activation.
 ---
 
 # Execute Workstream

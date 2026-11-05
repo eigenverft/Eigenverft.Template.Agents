@@ -13,6 +13,8 @@
 - `SKILL.md` is the only required package file; supporting resources are added only when needed.
 - Frontmatter uses only allowed keys.
 - Description states purpose and clear trigger conditions.
+- Write `description` as a single plain YAML line without outer quotation marks. Keep internal quotation marks when useful and rephrase colon-space or whitespace-hash sequences to preserve the complete string.
+- Use the exact description opening for the name family: `Apply automatically when ` for `auto-execute-*`; `Use when the user requests ` for `execute-*`; `Use for a read-only review when ` for `review-*`, `analyze-*`, and `view-*`.
 - Body sections define behavior, scope boundaries, and outputs.
 - No placeholder text remains.
 
