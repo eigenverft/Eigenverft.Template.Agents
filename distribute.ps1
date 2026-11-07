@@ -1,8 +1,9 @@
-# Overlays agent instruction files from Eigenverft.Template.Agents into sibling repos.
+# Overlays skills from Eigenverft.Template.Agents into sibling repos by default.
+# -All includes the previous full scope: .gitattributes, AGENTS.md, .agents/**, and AGENTS/**.
 # Copy-only by default: paths removed or renamed in the template intentionally remain in
 # target repositories, so local additional, project-specific, or older skills can coexist.
-# -EnforceCurrentAgentStandard applies the current template standard by replacing each
-# available target's complete .agents tree, removing local extras and obsolete content.
+# -All -EnforceCurrentAgentStandard applies the current template standard by replacing
+# each available target's complete .agents tree, removing local extras and obsolete content.
 # Distribution creates or updates paths present in the current template; matching relative
 # paths are overwritten only when their content differs.
 # You run this script; it does not commit.
@@ -12,8 +13,14 @@
 param(
     [string]$WorkspaceRoot,
 
+    [switch]$All,
+
     [switch]$EnforceCurrentAgentStandard
 )
+
+if ($EnforceCurrentAgentStandard -and -not $All) {
+    throw '-EnforceCurrentAgentStandard requires -All because it replaces the complete .agents tree.'
+}
 
 if ([string]::IsNullOrWhiteSpace($WorkspaceRoot)) {
     $WorkspaceRoot = Split-Path -Path $PSScriptRoot -Parent
@@ -103,21 +110,23 @@ function Copy-GitTemplateSnapshot {
 
     .PARAMETER Whitelist
     Glob patterns selecting repository-relative files from the cloned template.
+    Defaults to skills and their packaged resources under .agents/skills/.
 
     .PARAMETER EnforceCurrentAgentStandard
     Applies the current template standard by removing and recreating the complete .agents tree
     in each available destination before distribution. Local extras and obsolete content are removed.
+    Requires a whitelist covering the complete .agents tree, such as .agents/**.
 
     .EXAMPLE
     Copy-GitTemplateSnapshot -RepositoryUrl $templateUrl -DestinationPaths $destinations
 
-    Overlays all files selected by the default whitelist onto the available destinations.
+    Overlays skills and their packaged resources onto the available destinations.
 
     .EXAMPLE
     $parameters = @{
         RepositoryUrl               = $templateUrl
         DestinationPaths            = $destinations
-        Whitelist                   = $whitelist
+        Whitelist                   = @('.gitattributes', 'AGENTS.md', '.agents/**', 'AGENTS/**')
         EnforceCurrentAgentStandard = $true
         WhatIf                      = $true
     }
@@ -139,10 +148,17 @@ function Copy-GitTemplateSnapshot {
         [Parameter(Mandatory)]
         [string[]]$DestinationPaths,
 
-        [string[]]$Whitelist = @('*'),
+        [string[]]$Whitelist = @('.agents/skills/**'),
 
         [switch]$EnforceCurrentAgentStandard
     )
+
+    $hasCompleteAgentsScope = @(
+        $Whitelist | Where-Object { $_.Replace('\', '/') -in @('.agents/**', '**') }
+    ).Count -gt 0
+    if ($EnforceCurrentAgentStandard -and -not $hasCompleteAgentsScope) {
+        throw 'Replacing the complete .agents tree requires a whitelist covering .agents/**.'
+    }
 
     # Converts one whitelist glob into an anchored regular expression.
     function local:_Convert-GlobToRegex {
@@ -419,7 +435,12 @@ function Copy-GitTemplateSnapshot {
 }
 
 $templateUrl = 'https://github.com/eigenverft/Eigenverft.Template.Agents.git'
-$whitelist   = @( '.gitattributes', 'AGENTS.md', '.agents/**', 'AGENTS/**' )
+if ($All) {
+    $whitelist = @('.gitattributes', 'AGENTS.md', '.agents/**', 'AGENTS/**')
+}
+else {
+    $whitelist = @('.agents/skills/**')
+}
 
 # Projects that should receive the template overlay when they exist locally.
 $destinationNames = @(
