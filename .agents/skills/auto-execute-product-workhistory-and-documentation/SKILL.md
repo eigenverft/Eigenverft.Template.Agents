@@ -64,6 +64,22 @@ Use these **five broad audiences** as the default vocabulary. Classify readers b
 - An additional audience needs a demonstrated reader need that cannot coherently fit the existing perspectives. Vision is primarily a topic within `management`, not a sixth audience; other audiences may need its relevant context to understand their subject.
 - Coverage is a cumulative product goal. Each ordinary task must fulfill Section 6 within its investigated subject, not establish a complete baseline for every audience. A missing overview or unrelated chapter does not prevent a useful first contribution.
 
+### Discover Reader Questions
+
+Develop documentation needs from the audience responsibilities above and the product's actual relationships. Use these questions to explore the task's subject, extending them as the evidence reveals further material reader needs:
+
+- **Purpose and domain:** What needs does the product address, what do its concepts mean, which rules and invariants apply, and what distinguishes actual capabilities from desired outcomes?
+- **Actors and authority:** Who acts, supplies information, relies on results, approves, or repairs? Include relevant automated actors and affected people, and explain identity, authentication, authorization, delegation, tenancy, and trust boundaries where they matter.
+- **Architecture and contracts:** How are responsibilities divided, why were important design choices made, and what do interfaces, integrations, events, commands, file formats, errors, and version combinations mean to their consumers?
+- **Information and state:** Where does information originate, change, persist, or propagate? Explain authoritative sources, ownership, consistency, privacy, retention, export, deletion, and recovery where relevant.
+- **Runtime behavior:** How do ordering, concurrency, background work, retries, cancellation, expiry, and partial or uncertain effects change the meaning of an operation? Distinguish accepted work from completed work.
+- **Development and delivery:** Which sources, generated inputs, tools, versions, dependencies, infrastructure, and licensing conditions support building, testing, debugging, packaging, and releasing? How do publication, deployment, startup, readiness, and actual adoption differ?
+- **Operation and continuity:** Which configuration governs, who operates and supports the system, how is its actual state observed and diagnosed, and what do updates, migrations, rollback, restoration, or retirement preserve or change?
+- **Conditions and limits:** Which platform, network, offline, resource, capacity, quota, cost, accessibility, language, unit, or time assumptions materially affect use or development?
+- **Evidence and decisions:** Which claims are supported by which observations, tests, or measurements, and where do those results stop? Which risks, dependencies, goals, priorities, or trade-offs matter to the reader's assessment or decisions?
+
+Follow relevant actors, boundaries, information or state changes, dependencies, and handoffs to discover further questions. Continue where a relationship changes what readers need to understand, assess, or do within the selected subject. Explain actual capabilities and material limits while preserving the status of requirements, proposals, and unresolved questions under Section 3.
+
 ## 3. Documentation Layout and First Content
 
 Maintain audience documentation in the standard `docs/<product>/<audience>/` structure or an **established equivalent** as defined below. When creating a structure, use this ownership layout:
@@ -156,6 +172,8 @@ Use implementation, tests, configuration, and task evidence already examined to 
 The documentation subject is the behavior, interface, workflow, configuration, or decision the task establishes, changes, or needs to verify, together with material prerequisites, constraints, and consequences needed to explain it. Reading a surrounding component does not make all of its contents documentation work. Do not expand into neighboring topics merely because the investigation encountered them.
 
 Include the product-related development, delivery, and operational setup established or used in the task in this subject and check it for reusable knowledge, such as repository and remote arrangements, tooling and relevant versions, and supporting infrastructure. Apply the existing writing triggers for `developer` and `operations` according to the readers' responsibilities.
+
+Assess task-relevant explanations from their intended readers' starting conditions, using documentation and evidence from the actual workflow. Identify material prerequisites already supplied by the current environment, including tool availability, repository state, and access. Explain the role, location, configuration, and access requirements of the infrastructure actually used, including internal or external services and on-premises, enterprise, or cloud environments. Distinguish development, delivery, and runtime dependencies, and keep the depth appropriate to the reader's responsibility and interface. Distinguish required, pinned, and observed versions.
 
 Before completing writable work, documentation must be changed when any of these conditions holds within that subject:
 
