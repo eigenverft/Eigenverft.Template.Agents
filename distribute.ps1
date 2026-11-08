@@ -2,13 +2,13 @@
 # -All includes the previous full scope: .gitattributes, AGENTS.md, .agents/**, and AGENTS/**.
 # Copy-only by default: paths removed or renamed in the template intentionally remain in
 # target repositories, so local additional, project-specific, or older skills can coexist.
-# -All -EnforceCurrentAgentStandard applies the current template standard by replacing
-# each available target's complete .agents tree, removing local extras and obsolete content.
+# -EnforceCurrentAgentStandard replaces the selected agent tree: .agents/skills by default,
+# or the complete .agents tree with -All. Local extras and obsolete content in that tree are removed.
 # Distribution creates or updates paths present in the current template; matching relative
 # paths are overwritten only when their content differs.
 # You run this script; it does not commit.
 
-# SupportsShouldProcess is justified because strict rollouts recursively replace target .agents trees.
+# SupportsShouldProcess is justified because strict rollouts recursively replace target agent trees.
 [CmdletBinding(SupportsShouldProcess)]
 param(
     [string]$WorkspaceRoot,
@@ -17,10 +17,6 @@ param(
 
     [switch]$EnforceCurrentAgentStandard
 )
-
-if ($EnforceCurrentAgentStandard -and -not $All) {
-    throw '-EnforceCurrentAgentStandard requires -All because it replaces the complete .agents tree.'
-}
 
 if ([string]::IsNullOrWhiteSpace($WorkspaceRoot)) {
     $WorkspaceRoot = Split-Path -Path $PSScriptRoot -Parent
@@ -89,7 +85,7 @@ function Test-FileContentEqual {
     return $sourceHash -eq $destinationHash
 }
 
-# SupportsShouldProcess is justified because this function can recursively replace target .agents trees.
+# SupportsShouldProcess is justified because this function can recursively replace target agent trees.
 function Copy-GitTemplateSnapshot {
     <#
     .SYNOPSIS
@@ -98,7 +94,8 @@ function Copy-GitTemplateSnapshot {
     .DESCRIPTION
     Creates a shallow temporary clone of an HTTPS Git repository, selects files through a
     whitelist, and overlays changed files onto each available destination. An optional strict
-    rollout removes and recreates each destination's complete .agents tree before copying.
+    rollout removes and recreates the selected agent tree before copying: .agents/skills for
+    the default whitelist, or .agents when the whitelist covers the complete agent tree.
     ShouldProcess protects all destination mutations while still allowing WhatIf to inspect
     the remote snapshot and report the planned operation.
 
@@ -113,9 +110,9 @@ function Copy-GitTemplateSnapshot {
     Defaults to skills and their packaged resources under .agents/skills/.
 
     .PARAMETER EnforceCurrentAgentStandard
-    Applies the current template standard by removing and recreating the complete .agents tree
-    in each available destination before distribution. Local extras and obsolete content are removed.
-    Requires a whitelist covering the complete .agents tree, such as .agents/**.
+    Applies the current template standard by removing and recreating the selected agent tree
+    in each available destination before distribution. Local extras and obsolete content in that
+    tree are removed. Requires a whitelist covering .agents/skills/** or the complete .agents tree.
 
     .EXAMPLE
     Copy-GitTemplateSnapshot -RepositoryUrl $templateUrl -DestinationPaths $destinations
@@ -156,9 +153,13 @@ function Copy-GitTemplateSnapshot {
     $hasCompleteAgentsScope = @(
         $Whitelist | Where-Object { $_.Replace('\', '/') -in @('.agents/**', '**') }
     ).Count -gt 0
-    if ($EnforceCurrentAgentStandard -and -not $hasCompleteAgentsScope) {
-        throw 'Replacing the complete .agents tree requires a whitelist covering .agents/**.'
+    $hasCompleteSkillsScope = $hasCompleteAgentsScope -or @(
+        $Whitelist | Where-Object { $_.Replace('\', '/') -eq '.agents/skills/**' }
+    ).Count -gt 0
+    if ($EnforceCurrentAgentStandard -and -not $hasCompleteSkillsScope) {
+        throw 'Replacing an agent tree requires a whitelist covering .agents/skills/** or .agents/**.'
     }
+    $agentStandardRelativePath = if ($hasCompleteAgentsScope) { '.agents' } else { '.agents/skills' }
 
     # Converts one whitelist glob into an anchored regular expression.
     function local:_Convert-GlobToRegex {
@@ -281,11 +282,11 @@ function Copy-GitTemplateSnapshot {
 
         $sourceAgentsFiles = @(
             $sourceFiles |
-                Where-Object { $_.RelativePath -ilike '.agents/*' }
+                Where-Object { $_.RelativePath -ilike "$agentStandardRelativePath/*" }
         )
 
         if ($EnforceCurrentAgentStandard -and $sourceAgentsFiles.Count -eq 0) {
-            throw 'Enforcing the current agent standard requires at least one whitelisted .agents file in the template.'
+            throw "Enforcing the current agent standard requires at least one whitelisted file in $agentStandardRelativePath."
         }
 
         foreach ($destinationPath in $destinations) {
@@ -309,7 +310,7 @@ function Copy-GitTemplateSnapshot {
 
             try {
                 $action = if ($EnforceCurrentAgentStandard) {
-                    'Remove the complete .agents tree and distribute the current template snapshot'
+                    "Remove the complete $agentStandardRelativePath tree and distribute the current template snapshot"
                 }
                 else {
                     'Overlay the current template snapshot'
@@ -336,14 +337,14 @@ function Copy-GitTemplateSnapshot {
                     $resolvedDestinationPath = (Resolve-Path -LiteralPath $destinationPath -ErrorAction Stop).Path
                     $destinationPrefix = $resolvedDestinationPath.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
                     $targetAgentsPath = [System.IO.Path]::GetFullPath(
-                        (Join-Path $resolvedDestinationPath '.agents')
+                        (Join-Path $resolvedDestinationPath $agentStandardRelativePath)
                     )
 
                     if (-not $targetAgentsPath.StartsWith(
                         $destinationPrefix,
                         [System.StringComparison]::OrdinalIgnoreCase
                     )) {
-                        throw "Resolved .agents replacement path escaped its destination: $targetAgentsPath"
+                        throw "Resolved agent replacement path escaped its destination: $targetAgentsPath"
                     }
 
                     if (Test-Path -LiteralPath $targetAgentsPath) {
@@ -351,7 +352,7 @@ function Copy-GitTemplateSnapshot {
                             Get-ChildItem -LiteralPath $targetAgentsPath -Recurse -File -Force -ErrorAction Stop
                         ).Count
 
-                        Write-Host ("Removing existing .agents tree -> {0}" -f $targetAgentsPath)
+                        Write-Host ("Removing existing {0} tree -> {1}" -f $agentStandardRelativePath, $targetAgentsPath)
                         Remove-Item -LiteralPath $targetAgentsPath -Recurse -Force -ErrorAction Stop
                     }
 
@@ -388,7 +389,7 @@ function Copy-GitTemplateSnapshot {
                     Write-Host ("Distributed {0} changed files -> {1}" -f $changedFiles.Count, $destinationPath)
                     $details = 'Template changes successfully distributed'
                     if ($EnforceCurrentAgentStandard) {
-                        $details = 'Current agent standard applied; .agents was recreated from the current template'
+                        $details = "Current agent standard applied; $agentStandardRelativePath was recreated from the current template"
                     }
 
                     [void]$results.Add([pscustomobject][ordered]@{
