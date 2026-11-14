@@ -463,7 +463,6 @@ $destinationNames = @(
     'Eigenverft.Manifested.Sandbox'
     'Eigenverft.NetLib.Infrastructure'
     'Eigenverft.NetLib.SerilogThemes'
-    'Eigenverft.NetLib.SqliteHotBackup'
     'Eigenverft.Routed.RequestFilters'
     'Eigenverft.Service.CentralLogging'
     'Eigenverft.Web.ControlPlaneMcp'
