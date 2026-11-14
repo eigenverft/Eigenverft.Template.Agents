@@ -7,10 +7,38 @@ description: Apply automatically when working with repository-local issue direct
 
 Apply these rules when creating, updating, closing, or deferring repository-local issue files within the authorized task.
 
-- **Directory structure.** Keep the issue root as a container for subdirectories only. Store open issues in `open/`, completed issues in `done/`, and issues explicitly deferred by the user in `deferred/`. Use other subdirectories only when explicitly requested.
-- **Open issues.** Store open issue files in the issue directory's `open/` subdirectory.
-- **Completed issues.** Once an issue's work is complete, move the same file from `open/` to `done/` under the same issue directory, preserving its filename and history.
-- **Deferred issues.** When the user explicitly asks to defer or postpone an issue, move the same file to `deferred/` under the same issue directory, preserving its filename and history. Record the deferral in the issue, including the reason when provided.
+## Identify the Product
+
+A product is primarily an **independently delivered and consumed software offering**. A project, solution, executable, package, deployment, or directory is evidence, not a sufficient definition by itself.
+
+1. Check existing product documentation and issue areas as evidence. Reuse a fitting established product identity rather than creating a synonym.
+2. If the boundary is missing, use the current task, publication and delivery configuration, exposed interfaces, and actual consumption. Investigate only enough to establish the affected offering.
+3. Treat internal or inseparable components as part of the offering they implement.
+4. Treat separately published and independently consumed deliverables as separate products when warranted.
+5. Group technical outputs that together deliver one offering. A separate deployment does not automatically establish a separate product.
+6. Consider all affected products when an implementation is shared. If ownership remains ambiguous, use a justified established target or identify the unresolved boundary; do not invent one.
+
+A repository can contain several products, and a product can have several technical outputs. Product-related development, delivery, and operational work belongs with the products it supports; repository-wide implementation does not by itself establish a separate product.
+
+For work affecting several products, shape product-specific issues around actual needs, intended outcomes, and relevant effects. The same implementation may serve several issues; keep common decisions and dependencies consistent while adapting context to each product. Create or refine issues where actual product work needs tracking, rather than for incidental effects.
+
+## Directory Structure and Lifecycle
+
+Use this structure:
+
+```text
+Issues/
+  <product>/
+    open/
+    done/
+    deferred/
+```
+
+Keep `Issues/` as a container for product directories and each product's issue directory as a container for status directories. Create directories with real issue content. Use status subdirectories other than `open/`, `done/`, and `deferred/` only when explicitly requested.
+
+- **Open issues.** Store open issue files in the product's `open/` subdirectory.
+- **Completed issues.** Once an issue's work is complete, move the same file from `open/` to `done/` under the same product directory, preserving its filename and history.
+- **Deferred issues.** When the user explicitly asks to defer or postpone an issue, move the same file to `deferred/` under the same product directory, preserving its filename and history. Record the deferral in the issue, including the reason when provided.
 - **Status commit and push.** When commits are authorized, prefer a focused commit containing the issue move and its completion or deferral update. Push it to the task branch when publication is authorized and a suitable writable remote is available.
 
 ## Compact Issue Format
