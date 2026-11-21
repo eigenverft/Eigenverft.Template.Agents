@@ -9,6 +9,16 @@ Read the brief, inspect the supplied inputs and establish how the result will be
 
 Choose the route below whose first input matches the job. Combine routes where the output of one becomes the input to another. A scanned housing can be the fixed host for a fitted cover. A sculpt can be the detailed master for a lighter display mesh. For each major component, identify its shape, placement, connection and first construction operation. Keep low-impact assumptions reversible. Obtain missing measurements when they govern a critical fit.
 
+## Verify the main forms before any detail work
+
+**Every modeling route requires this check before detail work begins.** Inspect the blockout or the existing geometry in context. For an edit, check the relationships the change can affect.
+
+1. Check proportions at three scales against the brief and available references. Inspect length, width and depth within the part, its size and spacing relative to surrounding forms, and the silhouette of the whole model. Where dimensions or mating surfaces govern the shape, measure them in the relevant section or assembly.
+2. Where appearance matters, identify the masses that give the subject its character. View the whole model at its intended size from the defining angle and one that reveals depth. In each view, compare what actually draws the eye with the emphasis intended for that view.
+3. When a consequential shape decision is open, build and compare contrasting rough versions before choosing one to refine. Vary the undecided relationship while holding known dimensions and interfaces fixed. For a measured reconstruction, explore only the geometry the evidence leaves unresolved.
+
+**Proceed to detail only when the observed shape and required fit support the brief.** If a check fails, stop detailing, correct the mass, placement or controlling dimension, and repeat the failed comparison. If evidence is missing, obtain the view, section or measurement needed to decide. Repeat the affected checks whenever a later edit changes a main form.
+
 ## Choose where to edit
 
 Use the selected region to locate the requested result. Before choosing an edit, inspect it in the whole model, in the view, pose or assembly condition that matters. Identify what the brief fixes and which proportions, placements or shared dimensions can change. When the local form is already right, trace the silhouette, gap or interference to the other geometry that defines it. The effective edit may be several parts away or in a dimension that positions multiple parts.
