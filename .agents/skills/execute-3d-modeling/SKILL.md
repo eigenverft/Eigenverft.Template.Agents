@@ -33,6 +33,8 @@ Orbit the assembled model through a full turn and look from above and below. Ins
 
 Ground the decision in the views you actually saw. Open the viewport captures or rendered previews when working through scripts. Reference the inspected images of this revision in the acceptance note. State what the working view established and what each complementary direction let you verify about the same feature that was ambiguous before. A single labeled sheet can show the views together. If a view misses the feature, reframe and inspect it. If visual inspection is unavailable, mark the change visually unverified and pause work that depends on accepting it.
 
+If one view improves and another gets worse, compare the candidate with the last accepted model in both views using matching angles and framing. Before accepting the trade-off, state what improved, what was lost and which priority in the brief justifies that loss. Keep the candidate provisional if the loss breaks a requirement or the brief gives no basis for accepting it. After a correction, recheck both views against the same baseline to confirm that the gain remains and reassess any remaining loss.
+
 If a redesign appears to supersede geometry from an earlier trial, try suppressing that geometry before refining the new part. Leave it out of the accepted variant if the comparison shows that its role is covered and the intended form, fit and function hold without it.
 
 ## Reconstruct from drawings or line art
