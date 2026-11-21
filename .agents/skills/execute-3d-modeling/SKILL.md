@@ -3,11 +3,21 @@ name: execute-3d-modeling
 description: Use when the user requests building, reconstructing, converting or modifying a 3D model. Choose a workflow for the inputs and intended use, inspect each shape change from multiple angles before building on it, and verify the delivered asset.
 ---
 
-# Model a 3D object
+# Build or edit 3D models
 
 Read the brief, inspect the supplied inputs and establish how the result will be used. A printable part, deforming mesh and editable family each need different evidence. Establish units, orientation, a reliable scale landmark and protected interfaces. For an edit, reopen the maintained source and observe the current result. Use the requested application and formats. Where the choice is open, choose an available modeler that supports the required edits and can produce the deliverable.
 
 Choose the route below whose first input matches the job. Combine routes where the output of one becomes the input to another. A scanned housing can be the fixed host for a fitted cover. A sculpt can be the detailed master for a lighter display mesh. For each major component, identify its shape, placement, connection and first construction operation. Keep low-impact assumptions reversible. Obtain missing measurements when they govern a critical fit.
+
+## Interpret 2D artwork in depth
+
+Read the artwork at the scope of the brief. For a local edit, use surrounding geometry to judge how the changed region continues or connects. For a set, distinguish views of the same piece from different members or arrangements. Use shared landmarks or interfaces to compare like features while preserving intended variation.
+
+Before turning a stroke into geometry, ask what could have produced it. A curve drawn across a surface can suggest how it bulges or turns in depth even when the outer silhouette is ambiguous. Model a permanent ridge or seam only when the reference or brief supports one. Where a contour ends against another, look for its continuation before joining the parts.
+
+When plausible readings would change the construction, look for evidence that distinguishes them. A closed outline could enclose a surface marking, a recess or a through-hole. Look for an inner wall, a floor or background visible through it. Familiar construction can suggest a reading. If the artwork leaves depth, a connection or the reverse side open, keep the choice reversible and identify consequential assumptions. Inspect their effects from another angle in the blockout or existing model. Verify critical hidden geometry against an independent reference or measurement.
+
+If views of the same geometry disagree, first align pose and perspective using landmarks that stay fixed relative to the region under comparison. On a smooth form, the point that defines its silhouette can shift as the viewpoint changes. Stylized drawings can also deliberately exaggerate different features in each view. Where the geometry must stay consistent across views, preserve the relationships they share and use the brief's priorities to resolve any remaining conflict.
 
 ## Verify the main forms before any detail work
 
@@ -23,15 +33,21 @@ Choose the route below whose first input matches the job. Combine routes where t
 
 Use the selected region to locate the requested result. Before choosing an edit, inspect it in the whole model, in the view, pose or assembly condition that matters. Identify what the brief fixes and which proportions, placements or shared dimensions can change. When the local form is already right, trace the silhouette, gap or interference to the other geometry that defines it. The effective edit may be several parts away or in a dimension that positions multiple parts.
 
-**Stop local refinement as soon as a correction leaves the same discrepancy effectively unchanged, shifts it elsewhere or passes a check by undoing the requested form.** Keep the last useful state as a baseline. Before another fine edit, test an alternative outside the selected region wherever the brief allows it. Change a relevant proportion, part placement or controlling dimension by enough to see or measure its effect, then compare with the baseline in the same view or assembly condition. Resume fine work only when the comparison shows which change advances the requested form while preserving the required fit or other constraints. If every viable change would alter a protected feature, identify the conflicting requirements before continuing.
+If a hanging or mounted part sits awkwardly against a neighbor, identify which region carries it. Where the brief allows, keep the part's shape fixed and try changing where it hangs or how it is angled on its support. Compare the gap and silhouette in the full model. If the support and the neighboring region can move relative to each other, check a pose that reveals which one the part follows.
+
+**Stop local refinement when an edit leaves the main discrepancy unresolved with little or no improvement, moves the problem elsewhere or undoes the requested form.** Keep the last useful state as a baseline. If placement is the issue, test a meaningful change to the support, neighboring part or controlling dimension wherever the brief allows it.
+
+When the construction itself is in doubt, identify the decision that would change the result. A different cross-section, a different division of volume between neighboring parts, or a different support can each produce a distinct silhouette or fit. Build the plausible approaches as separate rough studies before refining any of them. Start from the requirements and fixed interfaces. Rebuild the affected component or block out the group together when their shapes depend on one another. Take each study far enough to expose the difference that matters.
+
+Compare the studies with each other and with the baseline in the same assembly, views and relevant poses. Choose the approach that best serves the brief among those that meet the required constraints. If the choice hinges on an uncertain clearance or contour, check it directly before adding detail. If all studies miss the target, use what the comparison revealed to reconsider the construction. If every viable approach conflicts with a protected feature, identify that conflict before continuing.
 
 ## Inspect each shape change before building on it
 
-**After each change to shape or placement, inspect the result before the next modeling decision.** Treat the operations that produce one intended change as a single edit. Inspect the current geometry even when the working view looks correct and the dimensional checks pass.
+**After each change to shape or placement, inspect the result before the next modeling decision.** Treat the operations that produce one intended change as a single edit. Before accepting the revision, locate the exact detail your judgment depends on, such as an edge, transition or gap, in an inspected view of that revision. This check applies even when the working view looks correct and the dimensional checks pass.
 
 Orbit the assembled model and inspect the change up close from complementary directions. Let the shape and fit questions determine the angles and how many you need. A front view might establish the outline, a side view the projection, a rear view the attachment, or an oblique view whether two contours only appear to touch. Count near-duplicate views as one. Continue until you can point to a view that resolves each relevant question about the edit.
 
-If surrounding geometry obscures the feature or makes its outline hard to distinguish, temporarily hide the obstructing parts. Keep the neighbors needed to judge the relationship visible. Inspect the exposed feature, using a section if the interface is still concealed. Restore the original visibility. Recheck how the change fits its neighbors and inspect the whole model at its intended viewing size from the angles that reveal its silhouette and proportions. Reuse the revealing angles and framing across variants and after corrections so the same observations can be checked again.
+If surrounding geometry obscures that detail or makes its outline hard to distinguish, temporarily hide the obstructing parts. Keep the neighbors needed to judge the relationship visible. Inspect the exposed detail, using a section if the interface is still concealed. Across variants and after corrections, repeat the revealing angles and framing. If the check required hidden parts or a section, reproduce those settings on each affected revision and inspect the detail again. Then restore the original visibility, recheck how the change fits its neighbors and inspect the whole model at its intended viewing size from the angles that reveal its silhouette and proportions.
 
 Ground the decision in the views you actually saw. Open the viewport captures or rendered previews when working through scripts. Reference the inspected images of this revision in the acceptance note. State what the working view established and what each complementary direction let you verify about the same feature that was ambiguous before. A single labeled sheet can show the views together. If a view misses the feature, reframe and inspect it. If visual inspection is unavailable, mark the change visually unverified and pause work that depends on accepting it.
 
