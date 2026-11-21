@@ -9,6 +9,12 @@ Read the brief, inspect the supplied inputs and establish how the result will be
 
 Choose the route below whose first input matches the job. Combine routes where the output of one becomes the input to another. A scanned housing can be the fixed host for a fitted cover. A sculpt can be the detailed master for a lighter display mesh. For each major component, identify its shape, placement, connection and first construction operation. Keep low-impact assumptions reversible. Obtain missing measurements when they govern a critical fit.
 
+## Choose where to edit
+
+Use the selected region to locate the requested result. Before choosing an edit, inspect it in the whole model, in the view, pose or assembly condition that matters. Identify what the brief fixes and which proportions, placements or shared dimensions can change. When the local form is already right, trace the silhouette, gap or interference to the other geometry that defines it. The effective edit may be several parts away or in a dimension that positions multiple parts.
+
+**Stop local refinement as soon as a correction leaves the same discrepancy effectively unchanged, shifts it elsewhere or passes a check by undoing the requested form.** Keep the last useful state as a baseline. Before another fine edit, test an alternative outside the selected region wherever the brief allows it. Change a relevant proportion, part placement or controlling dimension by enough to see or measure its effect, then compare with the baseline in the same view or assembly condition. Resume fine work only when the comparison shows which change advances the requested form while preserving the required fit or other constraints. If every viable change would alter a protected feature, identify the conflicting requirements before continuing.
+
 ## Reconstruct from drawings or line art
 
 Use this route when supplied views define edges, openings and repeated design elements.
@@ -22,7 +28,7 @@ Use this route when supplied views define edges, openings and repeated design el
 Use this route for a character, sculpture or illustrated object whose identity rests on masses, gesture and negative space.
 
 1. Block the main masses with a coarse cage or sculpt. Place landmarks at changes in direction and establish gaps between forms. Compare the neutral model at its intended size in the defining view and a second view that exposes depth.
-2. Change the mass or its section when the silhouette fails. Use subdivision for smooth, editable curvature or sculpt finer transitions where direct surface editing is more effective. Keep the accepted coarse form available while refining.
+2. When a silhouette misses the reference, compare the main masses, their spacing and the negative space between them. Adjust the proportion, placement or section that accounts for the mismatch and check the whole silhouette again. Use subdivision for smooth, editable curvature or sculpt finer transitions where direct surface editing is more effective. Keep the accepted coarse form available while refining.
 3. For deformation, build or adjust topology around the regions that compress, stretch and twist. Bind a representative region to its controls, pose it through the required range and repair pinching or lost volume before carrying fine detail onto the finished mesh. For static display, check the surface under moving light. Verify the delivered silhouette and, where requested, a representative exported pose.
 
 ## Build a hard-surface visual asset for its destination
@@ -71,4 +77,4 @@ Use this route for a fitted insert, internal passage, cover or added feature whe
 
 ## Close the job
 
-If a check fails, record the part, viewing or assembly condition and observed discrepancy. Change the profile, surface or operation that controls it, then repeat the same check and a second condition that could reveal a trade-off. For a subjective choice, a controlled independent comparison can help when authorized. Keep the editable source. Open the actual requested output in its destination or a compatible reader. If only that file fails, check conversion settings, axes, simplification and missing dependencies before changing an already verified shape. Deliver the requested files with the checks performed and any material assumption or unverified condition.
+If a check fails, record the part, viewing or assembly condition and observed discrepancy. Apply the edit-selection and stopping rules above. Verify the requested form and the corrected condition together, then check a second view, pose or section that could reveal a trade-off. For a subjective choice, a controlled independent comparison can help when authorized. Keep the editable source. Open the actual requested output in its destination or a compatible reader. If only that file fails, check conversion settings, axes, simplification and missing dependencies before changing an already verified shape. Deliver the requested files with the checks performed and any material assumption or unverified condition.
