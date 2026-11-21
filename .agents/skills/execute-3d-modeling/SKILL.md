@@ -15,6 +15,12 @@ Use the selected region to locate the requested result. Before choosing an edit,
 
 **Stop local refinement as soon as a correction leaves the same discrepancy effectively unchanged, shifts it elsewhere or passes a check by undoing the requested form.** Keep the last useful state as a baseline. Before another fine edit, test an alternative outside the selected region wherever the brief allows it. Change a relevant proportion, part placement or controlling dimension by enough to see or measure its effect, then compare with the baseline in the same view or assembly condition. Resume fine work only when the comparison shows which change advances the requested form while preserving the required fit or other constraints. If every viable change would alter a protected feature, identify the conflicting requirements before continuing.
 
+## Inspect a variant before accepting it
+
+Before accepting a trial or redesigned part, inspect the changed area up close in its assembled position. Orbit through a full turn and view it from above and below. Pause at angles that reveal depth, gaps, overlaps or transitions into surrounding forms. Use a section view if surrounding geometry hides the interface.
+
+Then frame the whole model at its intended viewing size. Check the silhouette and proportions from several of those angles to judge how the change fits the overall form. When comparing variants, use the same set of views and framing for each.
+
 ## Reconstruct from drawings or line art
 
 Use this route when supplied views define edges, openings and repeated design elements.
