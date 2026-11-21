@@ -1,6 +1,6 @@
 ---
 name: execute-3d-modeling
-description: Use when the user requests building, reconstructing, converting or modifying a 3D model. Select a workflow for the available inputs and intended use, construct and inspect the geometry, and verify the delivered asset.
+description: Use when the user requests building, reconstructing, converting or modifying a 3D model. Choose a workflow for the inputs and intended use, inspect each shape change from multiple angles before building on it, and verify the delivered asset.
 ---
 
 # Model a 3D object
@@ -25,11 +25,15 @@ Use the selected region to locate the requested result. Before choosing an edit,
 
 **Stop local refinement as soon as a correction leaves the same discrepancy effectively unchanged, shifts it elsewhere or passes a check by undoing the requested form.** Keep the last useful state as a baseline. Before another fine edit, test an alternative outside the selected region wherever the brief allows it. Change a relevant proportion, part placement or controlling dimension by enough to see or measure its effect, then compare with the baseline in the same view or assembly condition. Resume fine work only when the comparison shows which change advances the requested form while preserving the required fit or other constraints. If every viable change would alter a protected feature, identify the conflicting requirements before continuing.
 
-## Inspect a variant before accepting it
+## Inspect each shape change before building on it
 
-Before accepting a trial or redesigned part, inspect the changed area up close in its assembled position. Orbit through a full turn and view it from above and below. Pause at angles that reveal depth, gaps, overlaps or transitions into surrounding forms. Use a section view if surrounding geometry hides the interface.
+**After each change to shape or placement, inspect the result before the next modeling decision.** Treat the operations that produce one intended change as a single edit. Inspect the current geometry even when the working view looks correct and the dimensional checks pass.
 
-Then frame the whole model at its intended viewing size. Check the silhouette and proportions from several of those angles to judge how the change fits the overall form. When comparing variants, use the same set of views and framing for each.
+Orbit the assembled model through a full turn and look from above and below. Examine the changed area up close in the working view and from a substantially different direction that exposes depth, overlap or clearance. If the interface is hidden, add a section through it. Then inspect the whole model at its intended viewing size from several of those angles to judge its silhouette and proportions. Use matching angles and framing across variants.
+
+Ground the decision in the views you actually saw. Open the viewport captures or rendered previews when working through scripts. Reference the inspected images of this revision in the acceptance note, with one concrete observation from the working angle and one from a second angle about the same feature. A single labeled sheet can show both. If a view misses the feature, reframe and inspect it. If visual inspection is unavailable, mark the change visually unverified and pause work that depends on accepting it.
+
+If a redesign appears to supersede geometry from an earlier trial, try suppressing that geometry before refining the new part. Leave it out of the accepted variant if the comparison shows that its role is covered and the intended form, fit and function hold without it.
 
 ## Reconstruct from drawings or line art
 
