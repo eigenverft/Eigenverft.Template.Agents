@@ -1,6 +1,8 @@
 # Component plan from artwork
 
-Create one A3 portrait modeling sheet (297 × 420 mm) for the region shown in the supplied artwork crops. With one crop, use its viewpoint for the assembled reference view. With several crops of the same subject and variant, choose the one that shows the region most clearly for that view. Use the others to resolve depth, overlaps, thickness and mounting points. Match corresponding features across views, allowing for changes in pose and perspective. Use neighboring forms to locate the region and keep the drawings focused on the region itself. Infer hidden geometry only where the supplied views leave it open.
+Create one A3 portrait modeling sheet (297 × 420 mm) for the region specified in the modeling instructions. With one crop, use its viewpoint for the assembled reference view. With several crops of the same subject and variant, choose the one that shows the region most clearly for that view. Use the others to resolve depth, overlaps, thickness and mounting points. Match corresponding features across views, allowing for changes in pose and perspective. Infer hidden geometry only where the supplied views leave it open.
+
+The crop boundary can cut across neighboring forms. Show context-only neighbors in assembled views wherever they clarify contact, clearance or scale. Reserve item numbers, exploded components and individual drawings for the parts the modeling instructions include in this pass.
 
 Reserve roughly the right third of the sheet for individual component drawings. Use the remaining width for two matching sets of assembly views, color above and line work below. Use short English labels throughout.
 
