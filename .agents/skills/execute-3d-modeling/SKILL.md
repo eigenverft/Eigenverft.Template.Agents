@@ -25,13 +25,15 @@ If views of the same geometry disagree, first align pose and perspective using l
 
 1. Check proportions at three scales against the brief and available references. Inspect length, width and depth within the part, its size and spacing relative to surrounding forms, and the silhouette of the whole model. Where dimensions or mating surfaces govern the shape, measure them in the relevant section or assembly.
 2. Where appearance matters, identify the masses that give the subject its character. View the whole model at its intended size from the defining angle and from directions that reveal how the masses sit in depth. In each view, compare what actually draws the eye with the emphasis intended for that view.
-3. When a consequential shape decision is open, build and compare contrasting rough versions before choosing one to refine. Preserve specified dimensions and interface requirements in every study. For a measured reconstruction, explore only the geometry the evidence leaves unresolved.
+3. When a consequential shape decision is open, build and compare contrasting rough versions before choosing one to refine. If the next local edit would carry the same correction farther along a main volume or silhouette, identify which forms are meant to create it. Where the brief leaves their construction open, compare the proposed edit with a rough study that reshapes those forms or changes where they meet. Preserve specified dimensions and interface requirements in every study. For a measured reconstruction, explore only the geometry the evidence leaves unresolved.
 
 **Proceed to detail only when the observed shape and required fit support the brief.** If a check fails, stop detailing, correct the mass, placement or controlling dimension, and repeat the failed comparison. If evidence is missing, obtain the view, section or measurement needed to decide. Repeat the affected checks whenever a later edit changes a main form.
 
 ## Choose where to edit
 
 Use the selected region to locate the requested result. Before choosing an edit, inspect it in the whole model, in the view, pose or assembly condition that matters. Identify what the brief fixes and which proportions, placements or shared dimensions can change. When the local form is already right, trace the silhouette, gap or interference to the other geometry that defines it. The effective edit may be several parts away or in a dimension that positions multiple parts.
+
+When a part's shape or placement depends on a mechanism, or an edit could obstruct its action, check the mechanism before choosing what to reshape, even if the visible form already matches. In the rough assembly, follow a change at the input far enough to see whether it produces the intended effect. If the current mechanism forces a compromise in form or action and the brief leaves the operating principle open, keep the target form in one study and test a different principle that could resolve the conflict.
 
 If a hanging or mounted part sits awkwardly against a neighbor, identify which region carries it. Where the brief allows, keep the part's shape fixed and try changing where it hangs or how it is angled on its support. Compare the gap and silhouette in the full model. If the support and the neighboring region can move relative to each other, check a pose that reveals which one the part follows.
 
@@ -86,6 +88,8 @@ Start from the target viewing distance, required edits and any runtime budget. B
 ## Construct a dimensioned part or mechanical assembly
 
 Start from the drawing, mating hardware and intended manufacturing process. Set datums at the seating plane, axis or hole pattern that defines the fit.
+
+Where a mechanism’s action determines its form, identify what drives it, what stays fixed and how the parts transmit the action. In the rough assembly, trace a change at the input through those connections and check the resulting motion or effect.
 
 1. Sketch and constrain the functional section. Extrude a constant section, revolve an axial profile, sweep a channel or loft between changing sections. Dimension mating features from the chosen datums. Derive related dimensions from their common driver.
 2. Create the main body, cavities and seats. Assemble interacting bodies in position and reserve their insertion or motion paths. Add rounds, ribs and other finishing features after confirming the necessary wall and clearance.
