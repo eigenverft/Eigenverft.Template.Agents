@@ -4,6 +4,8 @@ Create one A3 portrait modeling sheet (297 × 420 mm) for the region specified i
 
 The crop boundary can cut across neighboring forms. Show context-only neighbors in assembled views wherever they clarify contact, clearance or scale. Reserve item numbers, exploded components and individual drawings for the parts the modeling instructions include in this pass.
 
+If the design depends on an existing structural framework that must remain unchanged, use the artwork for the intended appearance and the supplied 3D model view for the framework's actual shape, position and attachment locations. Preserve the entire designated framework, including portions outside the crop or hidden for clarity. Show how the new forms fit it. Develop those forms together within the target region and propose their component count and grouping unless the brief already specifies them.
+
 Reserve roughly the right third of the sheet for individual component drawings. Use the remaining width for two matching sets of assembly views, color above and line work below. Use short English labels throughout.
 
 ## Establish the component breakdown
