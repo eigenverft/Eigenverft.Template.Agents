@@ -9,6 +9,8 @@ Read the brief, inspect the supplied inputs and establish how the result will be
 
 Choose the route below whose first input matches the job. Combine routes where the output of one becomes the input to another. A scanned housing can be the fixed host for a fitted cover. A sculpt can be the detailed master for a lighter display mesh. For each major component, identify its shape, placement, connection and first construction operation. Keep low-impact assumptions reversible. Obtain missing measurements when they govern a critical fit.
 
+When building or changing a form, look for geometric relationships that govern its shape or placement, such as a shared axis, a local mirror plane, or repeated spacing. Use each relationship to predict where another feature should lie, how it should face, or how a surface should continue. Check that prediction against the brief, available references or surrounding geometry, and use what holds to guide the construction. Apply the relationship only to the properties it explains. Preserve visible differences. Where a counterpart is hidden, use the supported structure to make a plausible, reversible choice about what continues there.
+
 ## Interpret 2D artwork in depth
 
 Read the artwork at the scope of the brief. For a local edit, use surrounding geometry to judge how the changed region continues or connects. For a set, distinguish views of the same piece from different members or arrangements. Use shared landmarks or interfaces to compare like features while preserving intended variation.
