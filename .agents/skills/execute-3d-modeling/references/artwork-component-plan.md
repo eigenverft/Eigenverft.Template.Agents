@@ -6,6 +6,8 @@ Use **Common instructions** and the section for the sheet being generated in thi
 
 Create a single A3 portrait modeling sheet for the specified region. Use short English labels. Use every supplied artwork crop of this subject and variant to resolve form, depth, overlaps, thickness and attachment locations. Allow for changes in pose and perspective. Infer hidden geometry only where the artwork leaves it open. Preserve the visible feature count and arrangement, including any local substitution specified in the modeling instructions.
 
+Show markings and finish changes on their host surfaces in color views. Omit lines that indicate only a change in appearance from the form drawings and keep those features out of **Key Components**. Keep visible geometric steps and joints in the form drawings, including where they coincide with changes in color or finish.
+
 The crop can include part of a neighbor. Show it as context where it clarifies contact, clearance or scale. Reserve component numbers for the parts included in this pass. If the design depends on an existing structural framework that must remain unchanged, use the supplied model view for its actual shape, position and mounting surfaces. Preserve the entire designated framework and show how the new forms fit it.
 
 ## Sheet 1 · Assembly
@@ -29,7 +31,7 @@ Use the colors and materials of the artwork. Arrange four panels in two rows. Fo
 
 Repeat the four panels in the same order, at the same angles and framing. Preserve the proportions, gaps, component numbers and exploded positions. Draw dark blue lines on white. Build each silhouette from many connected straight strokes. Follow long runs with long strokes and describe bends with shorter strokes that change direction gradually. Preserve shallow crowns, tapers and changes of slope. Use the same treatment for defining openings, overlaps and major surface turns.
 
-Give the outline more weight than the interior lines. Leave broad surfaces open so their shape reads clearly. Omit fasteners, small holes, fine seams, textures and hatching. The straight segments describe the underlying curvature. Keep the surface free of triangulation lines.
+Give the outline more weight than the interior lines. Leave broad surfaces open so their shape reads clearly. Omit fasteners, small holes, textures and hatching. The straight segments describe the underlying curvature. Keep the surface free of triangulation lines.
 
 Before returning the sheet, follow each component from the assembled view through both explosions. Check its number, leader endpoint, attachments and seat. Make sure each line drawing describes the same form from the same direction as its color counterpart.
 
